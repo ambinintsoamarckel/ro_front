@@ -1,98 +1,78 @@
-import { useState, useRef, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useState } from "react";
+import { X } from 'lucide-react';
 
-const TaskScheduler = () => {
-  const [tasks, setTasks] = useState([{ name: "", duration: "" }]);
-  const tableRef = useRef<HTMLTableElement>(null);
-  const inputRefs = useRef<(HTMLInputElement | null)[][]>([]);
+const Modal = ({ isModalOpen, setIsModalOpen, taskId, setDependencyForTask }) => {
+  const [dependencyType, setDependencyType] = useState('successeur'); // Par défaut "successeur"
 
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      const focusedElement = document.activeElement as HTMLInputElement;
-      if (!focusedElement || !tableRef.current?.contains(focusedElement)) return;
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+  };
 
-      let rowIndex = -1;
-      let colIndex = -1;
-
-      inputRefs.current.forEach((row, r) => {
-        row.forEach((input, c) => {
-          if (input === focusedElement) {
-            rowIndex = r;
-            colIndex = c;
-          }
-        });
-      });
-
-      if (rowIndex === -1 || colIndex === -1) return;
-
-      switch (event.key) {
-        case "ArrowRight":
-          if (colIndex < tasks.length - 1) {
-            inputRefs.current[rowIndex][colIndex + 1]?.focus();
-          }
-          break;
-        case "ArrowLeft":
-          if (colIndex > 0) {
-            inputRefs.current[rowIndex][colIndex - 1]?.focus();
-          }
-          break;
-        case "ArrowDown":
-          if (rowIndex < 1) {
-            inputRefs.current[rowIndex + 1][colIndex]?.focus();
-          }
-          break;
-        case "ArrowUp":
-          if (rowIndex > 0) {
-            inputRefs.current[rowIndex - 1][colIndex]?.focus();
-          }
-          break;
-        default:
-          break;
-      }
-    };
-
-    document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [tasks]);
+  const handleSave = () => {
+    // Enregistrer la dépendance pour la tâche en question
+    setDependencyForTask(taskId, dependencyType); 
+    setIsModalOpen(false); // Fermer la modal après avoir enregistré
+  };
 
   return (
-    <div>
-      <table ref={tableRef} className="border-collapse w-full">
-        <thead>
-          <tr>
-            <th>Tâches</th>
-            {tasks.map((_, index) => (
-              <th key={index}>
-                <input
-                  ref={(el) => {
-                    if (!inputRefs.current[0]) inputRefs.current[0] = [];
-                    inputRefs.current[0][index] = el;
-                  }}
-                  className="border p-2 text-center"
-                />
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Durée</td>
-            {tasks.map((_, index) => (
-              <td key={index}>
-                <input
-                  ref={(el) => {
-                    if (!inputRefs.current[1]) inputRefs.current[1] = [];
-                    inputRefs.current[1][index] = el;
-                  }}
-                  type="number"
-                  className="border p-2 text-center"
-                />
-              </td>
-            ))}
-          </tr>
-        </tbody>
-      </table>
-    </div>
+    <AnimatePresence>
+      {isModalOpen && (
+        <div className="fixed inset-0 flex items-center justify-center z-50">
+          {/* Overlay amélioré */}
+          <motion.div
+            className="fixed inset-0 bg-gray-500/20 backdrop-blur-sm"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          />
+
+          {/* Modal Content */}
+          <motion.div
+            className="bg-white p-6 rounded-lg shadow-lg w-96 relative z-50"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.2 }}
+          >
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-bold">Ajouter une dépendance</h2>
+              <button
+                onClick={() => setIsModalOpen(false)}
+                className="text-black hover:text-red-500 transition-colors duration-200"
+              >
+                <X size={24} />
+              </button>
+            </div>
+            <hr className="w-full my-4 border-gray-300" />
+            <p className="mb-2 text-xs sm:text-xs text-gray-500">Sélectionnez la tâche et son type :</p>
+            <div className="relative">
+              <select
+                value={dependencyType}
+                onChange={(e) => setDependencyType(e.target.value)}
+                className="flex-1 p-2 rounded-lg w-full mt-3 mb-5 focus:ring-2 focus:ring-blue-300 focus:border-blue-300 transition duration-200"
+              >
+                <option value="successeur" className="text-lg p-3 text-gray-700 font-medium text-left bg-white hover:bg-blue-100 hover:text-blue-700">
+                  Successeur
+                </option>
+                <option value="antérieur" className="text-lg p-3 text-gray-700 font-medium text-left bg-white hover:bg-blue-100 hover:text-blue-700">
+                  Antérieur
+                </option>
+              </select>
+            </div>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={handleSave}
+              className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-700 w-full relative z-20"
+            >
+              Valider
+            </motion.button>
+          </motion.div>
+        </div>
+      )}
+    </AnimatePresence>
   );
 };
 
-export default TaskScheduler;
+export default Modal;

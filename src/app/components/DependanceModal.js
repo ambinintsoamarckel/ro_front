@@ -1,7 +1,21 @@
 import { motion, AnimatePresence } from "framer-motion";
+import { useState } from "react";
 import { X } from 'lucide-react';
 
+
+
 const Modal = ({ isModalOpen, setIsModalOpen, dependencyType, setDependencyType }) => {
+  const [selectedOption, setSelectedOption] = useState(dependencyType);
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+  };
+
+  const handleSave = () => {
+    setDependencyType(selectedOption);
+    setIsModalOpen(false); // Fermer la modal après avoir enregistré le type de dépendance
+  };
+
   return (
     <AnimatePresence>
       {isModalOpen && (
@@ -56,7 +70,7 @@ const Modal = ({ isModalOpen, setIsModalOpen, dependencyType, setDependencyType 
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              onClick={() => setIsModalOpen(false)}
+              onClick={handleSave}
               className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-700 w-full relative z-20"
             >
               Valider
