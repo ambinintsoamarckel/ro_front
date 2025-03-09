@@ -1,0 +1,98 @@
+import { useState, useRef, useEffect } from "react";
+
+const TaskScheduler = () => {
+  const [tasks, setTasks] = useState([{ name: "", duration: "" }]);
+  const tableRef = useRef<HTMLTableElement>(null);
+  const inputRefs = useRef<(HTMLInputElement | null)[][]>([]);
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      const focusedElement = document.activeElement as HTMLInputElement;
+      if (!focusedElement || !tableRef.current?.contains(focusedElement)) return;
+
+      let rowIndex = -1;
+      let colIndex = -1;
+
+      inputRefs.current.forEach((row, r) => {
+        row.forEach((input, c) => {
+          if (input === focusedElement) {
+            rowIndex = r;
+            colIndex = c;
+          }
+        });
+      });
+
+      if (rowIndex === -1 || colIndex === -1) return;
+
+      switch (event.key) {
+        case "ArrowRight":
+          if (colIndex < tasks.length - 1) {
+            inputRefs.current[rowIndex][colIndex + 1]?.focus();
+          }
+          break;
+        case "ArrowLeft":
+          if (colIndex > 0) {
+            inputRefs.current[rowIndex][colIndex - 1]?.focus();
+          }
+          break;
+        case "ArrowDown":
+          if (rowIndex < 1) {
+            inputRefs.current[rowIndex + 1][colIndex]?.focus();
+          }
+          break;
+        case "ArrowUp":
+          if (rowIndex > 0) {
+            inputRefs.current[rowIndex - 1][colIndex]?.focus();
+          }
+          break;
+        default:
+          break;
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [tasks]);
+
+  return (
+    <div>
+      <table ref={tableRef} className="border-collapse w-full">
+        <thead>
+          <tr>
+            <th>Tâches</th>
+            {tasks.map((_, index) => (
+              <th key={index}>
+                <input
+                  ref={(el) => {
+                    if (!inputRefs.current[0]) inputRefs.current[0] = [];
+                    inputRefs.current[0][index] = el;
+                  }}
+                  className="border p-2 text-center"
+                />
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Durée</td>
+            {tasks.map((_, index) => (
+              <td key={index}>
+                <input
+                  ref={(el) => {
+                    if (!inputRefs.current[1]) inputRefs.current[1] = [];
+                    inputRefs.current[1][index] = el;
+                  }}
+                  type="number"
+                  className="border p-2 text-center"
+                />
+              </td>
+            ))}
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  );
+};
+
+export default TaskScheduler;

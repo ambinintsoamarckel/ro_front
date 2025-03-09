@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { Plus, Minus } from "lucide-react";
-import { Dialog } from "@headlessui/react";
+import { motion, AnimatePresence } from "framer-motion";
 //import TaskInitializerModal from "./TaskInitializerModal";
 import DependanceModal from "./DependanceModal";
 
@@ -63,7 +63,7 @@ const TaskScheduler = () => {
     setIsModalOpen(true);
   };
 
-  const saveTasks = async () => {
+  const handleSaveAndOpenModal = async () => {
     try {
       const response = await fetch("http://localhost:3001/api/tasks", {
         method: "POST",
@@ -72,6 +72,7 @@ const TaskScheduler = () => {
       });
       if (response.ok) {
         alert("Tâches enregistrées !");
+        setIsModalOpen(true); // Ouvre la modal après succès
       } else {
         alert("Erreur lors de l'enregistrement.");
       }
@@ -82,8 +83,6 @@ const TaskScheduler = () => {
 
   return (
     <div className="w-11/12 max-w-6xl mx-auto bg-white p-8 shadow-md rounded-lg mt-10">
-
-      <div className={`relative w-11/12 max-w-6xl mx-auto bg-white p-8 shadow-md rounded-lg mt-10 transition-all duration-300 ${isModalOpen ? "blur-sm" : ""}`}>
 
         <div className="text-center mb-5">
           <h1 className="text-3xl font-bold mb-5">Ordonnancement des Tâches</h1>
@@ -110,8 +109,8 @@ const TaskScheduler = () => {
         </div>
       ) : (
         <div className="relative">
-          <div className="overflow-x-scroll  shadow-md mt-5">
-            <table ref={tableRef} className="min-w-full text-center border-collapse shadow-lg  overflow-hidden mt-5">
+          <div className="overflow-x-scroll scrollbar-hidden shadow-md mt-5">
+            <table ref={tableRef} className="min-w-full text-center border-collapse shadow-lg  overflow-hidden mt-5 mb-5">
               <thead>
                 <tr className="bg-orange-100 text-gray-800 text-xl font-semibold">
                   <th className="p-3 border border-orange-200">Tâches</th>
@@ -122,7 +121,7 @@ const TaskScheduler = () => {
                         value={task.name}
                         onChange={(e) => handleNameChange(index, e.target.value)}
                         placeholder={`Tâche ${index + 1}`}
-                        className="w-full p-3 text-center bg-transparent text-gray-900 placeholder-gray-400 outline-none border-b border-transparent focus:border-gray-600 transition-all"
+                        className="w-full p-3 text-center bg-transparent text-gray-900 placeholder-gray-400 outline-none border-b border-transparent focus:border-gray-600 transition-all "
                       />
                     </th>
                   ))}
@@ -135,7 +134,7 @@ const TaskScheduler = () => {
                         type="number"
                         value={task.duration}
                         onChange={(e) => handleDurationChange(index, e.target.value)}
-                        className="w-16 text-center bg-transparent text-gray-900 outline-none border-b border-transparent focus:border-gray-600 transition-all"
+                        className="w-full text-center bg-transparent text-gray-900 outline-none border-b border-transparent focus:border-gray-600 transition-all"
                         min="1"
                       />
                     </td>
@@ -171,30 +170,21 @@ const TaskScheduler = () => {
             </div>
           </div>
 
-          <div className="flex justify-center mt-4 gap-4">
-            <button
-              onClick={saveTasks}
+          <div className="flex justify-end mt-4">
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={handleSaveAndOpenModal}
               disabled={!allTasksValid}
-              className={`px-4 py-2 rounded text-white ${
-                allTasksValid ? "bg-green-500 hover:bg-green-700" : "bg-gray-300 cursor-not-allowed"
-              }`}
-            >
-              Enregistrer les tâches
-            </button>
-
-            <button
-              onClick={() => openModal(tasks[0])}
-              disabled={!allTasksValid}
-              className={`px-4 py-2 rounded text-white ${
-                allTasksValid ? "bg-blue-500 hover:bg-blue-700" : "bg-gray-300 cursor-not-allowed"
+              className={`px-4 py-2 rounded-lg text-white mt-5 ${
+                allTasksValid ? "bg-green-500 hover:bg-green-700" : "bg-gray-400 cursor-not-allowed"
               }`}
             >
               Ajouter dépendance
-            </button>
+            </motion.button>
           </div>
         </div>
       )}
-      </div>
       <DependanceModal
         isModalOpen={isModalOpen}
         setIsModalOpen={setIsModalOpen}
