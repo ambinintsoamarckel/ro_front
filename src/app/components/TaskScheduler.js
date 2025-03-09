@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Plus, Minus } from "lucide-react";
 import { Dialog } from "@headlessui/react";
+//import TaskInitializerModal from "./TaskInitializerModal";
 
 const TaskScheduler = () => {
   const [taskCount, setTaskCount] = useState(1);
@@ -77,10 +78,11 @@ const TaskScheduler = () => {
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto bg-white p-6 shadow-md rounded-lg mt-6">
-      <h1 className="text-2xl font-bold mb-4 text-center">
-        Ordonnancement des Tâches
-      </h1>
+    <div className="w-11/12 max-w-6xl mx-auto bg-white p-8 shadow-md rounded-lg mt-10">
+
+      <div className="text-center mb-5">
+        <h1 className="text-3xl font-bold mb-5">Ordonnancement des Tâches</h1>
+      </div>
 
       {!initialized ? (
         <div className="mb-4 flex justify-center items-center gap-4">
@@ -88,7 +90,7 @@ const TaskScheduler = () => {
           <input
             type="number"
             value={taskCount}
-            onChange={(e) => setTaskCount(Math.max(1, parseInt(e.target.value) || 1))}
+            onChange={(e) => setTaskCount(Math.max(1, parseInt(e.target.value) ))}
             className="border p-2 rounded w-20 text-center"
           />
           <button
@@ -100,32 +102,32 @@ const TaskScheduler = () => {
         </div>
       ) : (
         <div className="relative">
-          <div className="overflow-x-scroll border border-gray-300 shadow-md">
-            <table ref={tableRef} className="min-w-full text-center">
+          <div className="overflow-x-scroll  shadow-md mt-5">
+            <table ref={tableRef} className="min-w-full text-center border-collapse shadow-lg  overflow-hidden mt-5">
               <thead>
-                <tr className="bg-gray-200">
-                  <th className="border p-2 font-bold">Tâches</th>
+                <tr className="bg-orange-100 text-gray-800 text-xl font-semibold">
+                  <th className="p-3 border border-orange-200">Tâches</th>
                   {tasks.map((task, index) => (
-                    <th key={index} className="border p-2">
+                    <th key={index} className="p-3">
                       <input
                         type="text"
                         value={task.name}
                         onChange={(e) => handleNameChange(index, e.target.value)}
                         placeholder={`Tâche ${index + 1}`}
-                        className="w-full border p-1 text-center"
+                        className="w-full p-3 text-center bg-transparent text-gray-900 placeholder-gray-400 outline-none border-b border-transparent focus:border-gray-600 transition-all"
                       />
                     </th>
                   ))}
                 </tr>
-                <tr className="bg-gray-100">
-                  <th className="border p-2 font-bold">Durée</th>
+                <tr className={`bg-white border-t border-gray-300 text-xl`}>
+                  <th className="p-3 font-bold text-gray-700">Durée</th>
                   {tasks.map((task, index) => (
-                    <td key={index} className="border p-2">
+                    <td key={index} className="p-3 border border-orange-200">
                       <input
                         type="number"
                         value={task.duration}
                         onChange={(e) => handleDurationChange(index, e.target.value)}
-                        className="w-16 border rounded text-center"
+                        className="w-16 text-center bg-transparent text-gray-900 outline-none border-b border-transparent focus:border-gray-600 transition-all"
                         min="1"
                       />
                     </td>
@@ -142,21 +144,21 @@ const TaskScheduler = () => {
             <div className="relative h-full group">
               <button
                 onClick={addColumn}
-                className="absolute top-0 right-0 w-8 h-8 bg-blue-500 text-white rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity"
+                className="absolute top-0 right-0 w-8 h-8 text-blue-500 rounded-full shadow-md border border-blue-500 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-blue-500 hover:text-white"
               >
-                <Plus size={16} className="mx-auto" />
+                <Plus size={20} className="mx-auto" />
               </button>
 
               <button
                 onClick={removeColumn}
                 disabled={tasks.length === 1}
-                className={`absolute bottom-0 right-0 w-8 h-8 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity ${
+                className={`absolute bottom-0 right-0 w-8 h-8 rounded-full shadow-md border opacity-0 group-hover:opacity-100 transition-opacity ${
                   tasks.length === 1
-                    ? "bg-gray-300 cursor-not-allowed"
-                    : "bg-red-500 text-white hover:bg-red-700"
+                    ? "border-gray-300 text-gray-300 cursor-not-allowed"
+                    : "border-red-500 text-red-500 hover:bg-red-500 hover:text-white"
                 }`}
               >
-                <Minus size={16} className="mx-auto" />
+                <Minus size={20} className="mx-auto" />
               </button>
             </div>
           </div>
