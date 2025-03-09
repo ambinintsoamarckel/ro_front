@@ -2,9 +2,11 @@ import { useState, useRef, useEffect } from "react";
 import { Plus, Minus } from "lucide-react";
 import { Dialog } from "@headlessui/react";
 //import TaskInitializerModal from "./TaskInitializerModal";
+import DependanceModal from "./DependanceModal";
+
 
 const TaskScheduler = () => {
-  const [taskCount, setTaskCount] = useState(1);
+  const [taskCount, setTaskCount] = useState("");
   const [tasks, setTasks] = useState([{ name: "", duration: "" }]);
   const [initialized, setInitialized] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -13,6 +15,7 @@ const TaskScheduler = () => {
 
   const tableRef = useRef(null);
   const [tableHeight, setTableHeight] = useState(0);
+  const isValid = taskCount !== "" && parseInt(taskCount) >= 3;
 
   useEffect(() => {
     if (tableRef.current) {
@@ -80,22 +83,27 @@ const TaskScheduler = () => {
   return (
     <div className="w-11/12 max-w-6xl mx-auto bg-white p-8 shadow-md rounded-lg mt-10">
 
-      <div className="text-center mb-5">
-        <h1 className="text-3xl font-bold mb-5">Ordonnancement des Tâches</h1>
-      </div>
+      <div className={`relative w-11/12 max-w-6xl mx-auto bg-white p-8 shadow-md rounded-lg mt-10 transition-all duration-300 ${isModalOpen ? "blur-sm" : ""}`}>
 
-      {!initialized ? (
+        <div className="text-center mb-5">
+          <h1 className="text-3xl font-bold mb-5">Ordonnancement des Tâches</h1>
+        </div>
+        
+        {!initialized ? (
         <div className="mb-4 flex justify-center items-center gap-4">
           <label className="font-semibold">Nombre initial de tâches :</label>
           <input
             type="number"
             value={taskCount}
-            onChange={(e) => setTaskCount(Math.max(1, parseInt(e.target.value) ))}
+            onChange={(e) => setTaskCount(Math.max(3, parseInt(e.target.value) || 3))}
             className="border p-2 rounded w-20 text-center"
+            min="3" 
+            required
           />
           <button
             onClick={initializeTasks}
             className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-700"
+            disabled={!isValid} // Désactive si l'input est vide ou < 3
           >
             Valider
           </button>
@@ -186,27 +194,14 @@ const TaskScheduler = () => {
           </div>
         </div>
       )}
+      </div>
+      <DependanceModal
+        isModalOpen={isModalOpen}
+        setIsModalOpen={setIsModalOpen}
+        dependencyType={dependencyType}
+        setDependencyType={setDependencyType}
+      />
 
-      <Dialog open={isModalOpen} onClose={() => setIsModalOpen(false)} className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-        <div className="bg-white p-6 rounded-lg shadow-lg w-96">
-          <h2 className="text-lg font-bold mb-4">Ajouter une dépendance</h2>
-          <p className="mb-2">Sélectionnez la tâche et son type :</p>
-          <select
-            value={dependencyType}
-            onChange={(e) => setDependencyType(e.target.value)}
-            className="border p-2 rounded w-full mb-4"
-          >
-            <option value="successeur">Successeur</option>
-            <option value="antérieur">Antérieur</option>
-          </select>
-          <button
-            onClick={() => setIsModalOpen(false)}
-            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700 w-full"
-          >
-            Valider
-          </button>
-        </div>
-      </Dialog>
     </div>
   );
 };
