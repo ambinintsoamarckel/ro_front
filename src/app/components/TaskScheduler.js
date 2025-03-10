@@ -11,7 +11,8 @@ const TaskScheduler = () => {
   const [initialized, setInitialized] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState(null);
-  const [dependencyType, setDependencyType] = useState("successeur");
+  const [dependencyType, setDependencyType] = useState("");
+  const [showDependencyRow, setShowDependencyRow] = useState(false);
 
   const tableRef = useRef(null);
   const [tableHeight, setTableHeight] = useState(0);
@@ -81,6 +82,13 @@ const TaskScheduler = () => {
     }
   };
 
+  const handleDependencyValidation = (type) => {
+    setDependencyType(type);
+    setShowDependencyRow(true); // Afficher la ligne après validation
+    setIsModalOpen(false);
+  };
+  
+
   return (
     <div className="w-11/12 max-w-6xl mx-auto bg-white p-8 shadow-md rounded-lg mt-10">
 
@@ -140,6 +148,17 @@ const TaskScheduler = () => {
                     </td>
                   ))}
                 </tr>
+                {showDependencyRow && (
+                <tr className="bg-gray-50 border-t border-gray-300 text-xl">
+                  <th className="p-3 font-bold text-gray-700">Tâches {dependencyType}</th>
+                  {tasks.map((task, index) => (
+                    <td key={index} className="p-3 border border-orange-200">
+                      {/* Ici, tu peux ajouter un champ de saisie ou une valeur en lecture seule */}
+                    </td>
+                  ))}
+                </tr>
+              )}
+
               </thead>
             </table>
           </div>
@@ -169,27 +188,29 @@ const TaskScheduler = () => {
               </button>
             </div>
           </div>
+          {!showDependencyRow && (
+            <div className="flex justify-end mt-4">
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={handleSaveAndOpenModal}
+                disabled={!allTasksValid}
+                className={`px-4 py-2 rounded-lg text-white mt-5 ${
+                  allTasksValid ? "bg-green-500 hover:bg-green-700" : "bg-gray-400 cursor-not-allowed"
+                }`}
+              >
+                Ajouter dépendance
+              </motion.button>
+            </div>
+          )}
 
-          <div className="flex justify-end mt-4">
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={handleSaveAndOpenModal}
-              disabled={!allTasksValid}
-              className={`px-4 py-2 rounded-lg text-white mt-5 ${
-                allTasksValid ? "bg-green-500 hover:bg-green-700" : "bg-gray-400 cursor-not-allowed"
-              }`}
-            >
-              Ajouter dépendance
-            </motion.button>
-          </div>
         </div>
       )}
       <DependanceModal
         isModalOpen={isModalOpen}
         setIsModalOpen={setIsModalOpen}
         dependencyType={dependencyType}
-        setDependencyType={setDependencyType}
+        setDependencyType={handleDependencyValidation} 
       />
 
     </div>

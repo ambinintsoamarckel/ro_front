@@ -1,11 +1,17 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { X } from 'lucide-react';
 
 
 
 const Modal = ({ isModalOpen, setIsModalOpen, dependencyType, setDependencyType }) => {
   const [selectedOption, setSelectedOption] = useState(dependencyType);
+
+  useEffect(() => {
+    if (isModalOpen) {
+      setSelectedOption(dependencyType); // Remet à jour lors de l'ouverture
+    }
+  }, [isModalOpen, dependencyType]);
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
@@ -49,8 +55,8 @@ const Modal = ({ isModalOpen, setIsModalOpen, dependencyType, setDependencyType 
             <p className="mb-2 text-xs sm:text-xs text-gray-500">Sélectionnez la tâche et son type :</p>
             <div className="relative">
               <select
-                value={dependencyType}
-                onChange={(e) => setDependencyType(e.target.value)}
+                value={selectedOption}
+                onChange={(e) => setSelectedOption(e.target.value)}
                 className="flex-1 p-2 rounded-lg w-full mt-3 mb-5 focus:ring-2 focus:ring-blue-300 focus:border-blue-300 transition duration-200"
               >
                 <option 
