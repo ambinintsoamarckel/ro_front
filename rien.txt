@@ -1,0 +1,14 @@
+<select
+  value={selectedOption}
+  onChange={(e) => setSelectedOption(e.target.value)}
+  className={`flex-1 p-2 rounded-lg w-full mt-3 mb-5 transition duration-200 border-2
+    ${
+      selectedOption === "successeur" || selectedOption === "antérieur" || isModalOpen
+        ? "border-blue-500"
+        : "border-gray-300"
+    } focus:ring-2 focus:ring-blue-300 focus:border-blue-300`}
+>
+  <option value="">Sélectionner une option</option>
+  <option value="successeur">Successeur</option>
+  <option value="antérieur">Antérieur</option>
+</select>

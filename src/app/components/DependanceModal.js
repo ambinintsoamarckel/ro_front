@@ -18,9 +18,10 @@ const Modal = ({ isModalOpen, setIsModalOpen, dependencyType, setDependencyType 
   };
 
   const handleSave = () => {
-    setDependencyType(selectedOption);
-    setIsModalOpen(false); // Fermer la modal après avoir enregistré le type de dépendance
-  };
+    console.log("Choix enregistré :", selectedOption);
+    setDependencyType(selectedOption); // Mise à jour de la valeur dans TaskScheduler
+    setIsModalOpen(false);
+  };  
 
   return (
     <AnimatePresence>
@@ -57,8 +58,17 @@ const Modal = ({ isModalOpen, setIsModalOpen, dependencyType, setDependencyType 
               <select
                 value={selectedOption}
                 onChange={(e) => setSelectedOption(e.target.value)}
-                className="flex-1 p-2 rounded-lg w-full mt-3 mb-5 focus:ring-2 focus:ring-blue-300 focus:border-blue-300 transition duration-200"
+                className={`flex-1 p-2 rounded-lg w-full mt-3 mb-5 transition duration-200 border-2 outline-none
+                  ${
+                    selectedOption === "successeur" || selectedOption === "antérieur"
+                      ? "border-blue-500"
+                      : "border-gray-300"
+                  } focus:ring-2 focus:ring-blue-300 focus:border-blue-300`}
               >
+                <option 
+                  className="text-lg p-3 text-gray-700 font-medium text-left bg-white hover:bg-blue-100 hover:text-blue-700"
+                >
+                </option>
                 <option 
                   value="successeur"
                   className="text-lg p-3 text-gray-700 font-medium text-left bg-white hover:bg-blue-100 hover:text-blue-700"
@@ -77,7 +87,12 @@ const Modal = ({ isModalOpen, setIsModalOpen, dependencyType, setDependencyType 
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={handleSave}
-              className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-700 w-full relative z-20"
+              disabled={selectedOption !== "successeur" && selectedOption !== "antérieur"}
+              className={`px-4 py-2 rounded-lg w-full relative z-20 transition-colors duration-200 ${
+                selectedOption === "successeur" || selectedOption === "antérieur"
+                  ? "bg-blue-500 text-white hover:bg-blue-700"
+                  : "bg-gray-300 text-gray-500 cursor-not-allowed"
+              }`}
             >
               Valider
             </motion.button>

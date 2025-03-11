@@ -83,6 +83,7 @@ const TaskScheduler = () => {
   };
 
   const handleDependencyValidation = (type) => {
+    console.log("Type reçu :", type); // Vérification
     setDependencyType(type);
     setShowDependencyRow(true); // Afficher la ligne après validation
     setIsModalOpen(false);
@@ -134,8 +135,8 @@ const TaskScheduler = () => {
                     </th>
                   ))}
                 </tr>
-                <tr className={`bg-white border-t border-gray-300 text-xl`}>
-                  <th className="p-3 font-bold text-gray-700">Durée</th>
+                <tr className={`bg-white  text-xl`}>
+                  <th className="p-3 font-bold border-orange-200 text-gray-700">Durée</th>
                   {tasks.map((task, index) => (
                     <td key={index} className="p-3 border border-orange-200">
                       <input
@@ -149,8 +150,8 @@ const TaskScheduler = () => {
                   ))}
                 </tr>
                 {showDependencyRow && (
-                <tr className="bg-gray-50 border-t border-gray-300 text-xl">
-                  <th className="p-3 font-bold text-gray-700">Tâches {dependencyType}</th>
+                <tr className="bg-gray-50 border-orange-200 text-xl">
+                  <th className="p-3 font-bold  text-gray-700">Tâches {dependencyType}</th>
                   {tasks.map((task, index) => (
                     <td key={index} className="p-3 border border-orange-200">
                       {/* Ici, tu peux ajouter un champ de saisie ou une valeur en lecture seule */}
