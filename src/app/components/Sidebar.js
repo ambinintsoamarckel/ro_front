@@ -1,8 +1,16 @@
 import { useState } from "react";
+import TaskInitializerModal from "./TaskInitializerModal";
 import { Menu, X, BadgePlus, User, Settings , HeartIcon} from "lucide-react";
 
 const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [taskCount, setTaskCount] = useState(1);
+
+  const initializeTasks = () => {
+    console.log("Initialisation avec", taskCount, "tâches");
+  };
+
 
   return (
     <div className="flex">
@@ -28,7 +36,10 @@ const Sidebar = () => {
         </button>
         
         <ul>
-          <li className="flex items-center p-3 hover:bg-gray-700 text-xl rounded mt-10 mb-5">
+          <li 
+            className="flex items-center p-3 hover:bg-gray-700 text-xl rounded mt-10 mb-5"
+            onClick={() => setIsModalOpen(true)}
+          >
             <BadgePlus className="mr-2" size={25} /> Nouveau projet
           </li>
           <li className="flex items-center p-3 hover:bg-gray-700 text-xl rounded mt-10 mb-5">
@@ -42,6 +53,15 @@ const Sidebar = () => {
           </li>
         </ul>
       </div>
+      <TaskInitializerModal
+  isOpen={isModalOpen}
+  onClose={() => setIsModalOpen(false)}
+  onInitialize={(count) => {
+    initializeTasks(count);
+    setIsModalOpen(false);
+  }}
+/>
+
     </div>
   );
 };

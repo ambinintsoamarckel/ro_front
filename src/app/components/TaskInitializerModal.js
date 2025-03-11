@@ -1,41 +1,44 @@
-import { useState, useEffect } from "react";
-import { Dialog } from "@headlessui/react";
+import { useState } from "react";
+import { motion } from "framer-motion";
 
-const TaskInitializerModal = ({ taskCount, setTaskCount, initializeTasks }) => {
-  const [isOpen, setIsOpen] = useState(true);
-
-  useEffect(() => {
-    setIsOpen(true);
-  }, []);
-
-  const handleValidate = () => {
-    initializeTasks();
-    setIsOpen(false);
-  };
+const TaskInitializerModal = ({ isOpen, onClose, onInitialize }) => {
+  const [taskCount, setTaskCount] = useState(3);
+  const isValid = taskCount !== "" && parseInt(taskCount) >= 3;
 
   return (
-    <div> 
-      <Dialog open={isOpen} onClose={() => {}} className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-        <div className="bg-white p-6 rounded-lg shadow-lg w-96">
-          <h2 className="text-lg font-bold mb-4">Nombre initial de tâches</h2>
-          <div className="flex justify-center items-center gap-4 mb-4">
-            <label className="font-semibold">Tâches :</label>
-            <input
-              type="number"
-              value={taskCount}
-              onChange={(e) => setTaskCount(Math.max(1, parseInt(e.target.value) || 1))}
-              className="border p-2 rounded w-20 text-center"
-            />
+    isOpen && (
+      <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+        <div className="bg-white p-6 rounded-lg shadow-md w-96">
+          <h2 className="text-xl font-semibold mb-4">Initialiser les tâches</h2>
+          <label className="font-semibold">Nombre initial de tâches :</label>
+          <input
+            type="number"
+            value={taskCount}
+            onChange={(e) => setTaskCount(Math.max(3, parseInt(e.target.value) || 3))}
+            className="border p-2 rounded w-full text-center mt-2"
+            min="3"
+            required
+          />
+          <div className="flex justify-end mt-4 gap-2">
+            <button
+              onClick={onClose}
+              className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
+            >
+              Annuler
+            </button>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => onInitialize(taskCount)}
+              disabled={!isValid}
+              className={`px-4 py-2 rounded text-white ${isValid ? "bg-green-500 hover:bg-green-700" : "bg-gray-400 cursor-not-allowed"}`}
+            >
+              Valider
+            </motion.button>
           </div>
-          <button
-            onClick={handleValidate}
-            className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-700 w-full"
-          >
-            Valider
-          </button>
         </div>
-      </Dialog>
-    </div>
+      </div>
+    )
   );
 };
 
