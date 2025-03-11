@@ -1,14 +1,46 @@
-<select
-  value={selectedOption}
-  onChange={(e) => setSelectedOption(e.target.value)}
-  className={`flex-1 p-2 rounded-lg w-full mt-3 mb-5 transition duration-200 border-2
-    ${
-      selectedOption === "successeur" || selectedOption === "antérieur" || isModalOpen
-        ? "border-blue-500"
-        : "border-gray-300"
-    } focus:ring-2 focus:ring-blue-300 focus:border-blue-300`}
->
-  <option value="">Sélectionner une option</option>
-  <option value="successeur">Successeur</option>
-  <option value="antérieur">Antérieur</option>
-</select>
+import { useState } from "react";
+import { Menu, X, Home, User, Settings } from "lucide-react";
+
+const Sidebar = () => {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <div>
+      {/* Bouton Menu placé en haut à gauche */}
+      <button 
+        onClick={() => setIsOpen(!isOpen)} 
+        className="fixed top-4 left-4 p-2 text-white bg-blue-600 rounded z-50"
+      >
+        {isOpen ? <X /> : <Menu />}
+      </button>
+
+      {/* Sidebar */}
+      <div
+        className={`fixed top-0 left-0 h-full bg-gray-800 text-white w-64 p-4 
+        transform ${isOpen ? "translate-x-0" : "-translate-x-full"} 
+        transition-transform duration-300 ease-in-out z-40`}
+      >
+        <button 
+          onClick={() => setIsOpen(false)} 
+          className="absolute top-4 right-4 text-white p-2"
+        >
+          <X />
+        </button>
+        
+        <ul className="mt-12">
+          <li className="flex items-center p-3 hover:bg-gray-700 rounded">
+            <Home className="mr-2" /> Accueil
+          </li>
+          <li className="flex items-center p-3 hover:bg-gray-700 rounded">
+            <User className="mr-2" /> Profil
+          </li>
+          <li className="flex items-center p-3 hover:bg-gray-700 rounded">
+            <Settings className="mr-2" /> Paramètres
+          </li>
+        </ul>
+      </div>
+    </div>
+  );
+};
+
+export default Sidebar;

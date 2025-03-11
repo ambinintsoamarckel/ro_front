@@ -9,7 +9,7 @@ const Sidebar = () => {
       {/* Bouton pour ouvrir le sidebar */}
       <button 
         onClick={() => setIsOpen(!isOpen)} 
-        className="p-2 m-2 text-white bg-blue-600 rounded"
+        className="fixed top-4 left-4 p-2 text-white rounded z-50"
       >
         {isOpen ? <X /> : <Menu />}
       </button>
