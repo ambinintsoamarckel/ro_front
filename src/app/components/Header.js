@@ -19,7 +19,7 @@ const Header = () => {
             height={50} 
             className="w-12 h-12 object-contain"
           />
-          <h1 className="text-2xl font-bold">Ordonnancement des Tâches</h1>
+          <h1 className="text-3xl font-bold">Ordonnancement des Tâches</h1>
         </div>
 
         {/* Menu Desktop */}

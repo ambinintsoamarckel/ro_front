@@ -92,10 +92,6 @@ const TaskScheduler = () => {
 
   return (
     <div className="w-11/12 max-w-6xl mx-auto bg-white p-8 shadow-md rounded-lg mt-10">
-
-        <div className="text-center mb-5">
-          <h1 className="text-3xl font-bold mb-5">Ordonnancement des Tâches</h1>
-        </div>
         
         {!initialized ? (
         <div className="mb-4 flex justify-center items-center gap-4">
