@@ -1,68 +1,29 @@
-import { useState } from "react";
-import { Menu, X, BadgePlus, User, Settings, HeartIcon } from "lucide-react";
-import TaskInitializerModal from "./TaskInitializerModal"; // Import du modal
-
-const Sidebar = () => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [taskCount, setTaskCount] = useState(1);
-
-  const initializeTasks = () => {
-    console.log("Initialisation avec", taskCount, "tâches");
-  };
-
-  return (
-    <div className="flex">
-      {/* Bouton pour ouvrir le sidebar */}
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="fixed top-4 left-4 p-2 text-white rounded z-50"
-      >
-        {isOpen ? <X /> : <Menu size={30} />}
-      </button>
-
-      {/* Sidebar */}
-      <div
-        className={`fixed top-0 left-0 h-full bg-gray-800 text-white w-64 p-4 
-        transform ${isOpen ? "translate-x-0" : "-translate-x-full"} 
-        transition-transform duration-300 ease-in-out`}
-      >
-        <button onClick={() => setIsOpen(false)} className="text-white p-2 mb-4">
-          <X />
-        </button>
-
-        <ul>
-          <li
-            className="flex items-center p-3 hover:bg-gray-700 text-xl rounded cursor-pointer"
-            onClick={() => setIsModalOpen(true)}
-          >
-            <BadgePlus className="mr-2" size={25} /> Nouveau projet
-          </li>
-          <li className="flex items-center p-3 hover:bg-gray-700 text-xl rounded cursor-pointer">
-            <User className="mr-2" size={25} /> Mon projet
-          </li>
-          <li className="flex items-center p-3 hover:bg-gray-700 text-xl rounded cursor-pointer">
-            <HeartIcon className="mr-2" size={25} /> Favoris
-          </li>
-          <li className="flex items-center p-3 hover:bg-gray-700 text-xl rounded cursor-pointer">
-            <Settings className="mr-2" /> Paramètres
-          </li>
-        </ul>
-      </div>
-
-      {/* Modal pour Nouveau Projet */}
-      {isModalOpen && (
-        <TaskInitializerModal
-          taskCount={taskCount}
-          setTaskCount={setTaskCount}
-          initializeTasks={() => {
-            initializeTasks();
-            setIsModalOpen(false);
-          }}
-        />
-      )}
-    </div>
-  );
-};
-
-export default Sidebar;
+ <div className="bg-white p-6 rounded-lg shadow-md w-96">
+            <h2 className="text-xl font-semibold mb-4">Initialiser les tâches</h2>
+            <label className="font-semibold">Nombre initial de tâches :</label>
+            <input
+              type="number"
+              value={taskCount}
+              onChange={(e) => setTaskCount(Math.max(3, parseInt(e.target.value) || 3))}
+              className="border p-2 rounded w-full text-center mt-2"
+              min="3"
+              required
+            />
+            <div className="flex justify-end mt-4 gap-2">
+              <button
+                onClick={onClose}
+                className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
+              >
+                Annuler
+              </button>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => onInitialize(taskCount)}
+                disabled={!isValid}
+                className={`px-4 py-2 rounded text-white ${isValid ? "bg-green-500 hover:bg-green-700" : "bg-gray-400 cursor-not-allowed"}`}
+              >
+                Valider
+              </motion.button>
+            </div>
+          </div>

@@ -27,7 +27,7 @@ const Modal = ({ isModalOpen, setIsModalOpen, dependencyType, setDependencyType 
     <AnimatePresence>
       {isModalOpen && (
         <div className="fixed inset-0 flex items-center justify-center z-50">
-          {/* Overlay amélioré */}
+
           <motion.div
             className="fixed inset-0 bg-gray-500/20 backdrop-blur-sm"
             initial={{ opacity: 0 }}
