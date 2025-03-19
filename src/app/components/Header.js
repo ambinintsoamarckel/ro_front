@@ -1,12 +1,36 @@
 "use client";
 
 import { useState } from "react";
-import { Menu, X } from "lucide-react";
+import { Menu, X ,Power} from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
 
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
+
+  const handleLogout = async () => {
+    try {
+      const response = await fetch('http://localhost:3001/logout', { // Mets bien l'URL de ton backend
+        method: 'POST',
+        credentials: 'include', // Important pour inclure les cookies/session
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.ok) {
+        // Redirection ou autre action après déconnexion
+        window.location.href = '/login'; // Redirection vers la page d'accueil par exemple
+      } else {
+        const data = await response.json();
+        alert(data.message || 'Erreur lors du logout');
+      }
+    } catch (error) {
+      console.error('Logout failed:', error);
+      alert('Erreur de connexion au serveur');
+    }
+  };
 
   return (
     <header className="bg-gray-800 text-white fixed top-0 left-0 w-full shadow-md">
@@ -29,6 +53,14 @@ const Header = () => {
           <Link href="/" className="hover:underline">Accueil</Link>
           <Link href="/profil" className="hover:underline">Profil</Link>
           <Link href="/parametres" className="hover:underline">Paramètres</Link>
+          <motion.button
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={handleLogout}
+            className={`p-2 rounded-full shadow-md transition duration-300 bg-[#EDB640] text-white`}
+          >
+            <Power size={20} />
+          </motion.button>
         </nav>
 
         {/* Bouton Menu Mobile */}
