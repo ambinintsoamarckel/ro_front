@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from "react";
 import TaskInitializerModal from "./TaskInitializerModal";
 import { Menu, X, BadgePlus, User, Settings , HeartIcon} from "lucide-react";
