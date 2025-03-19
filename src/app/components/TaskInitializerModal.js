@@ -6,6 +6,15 @@ const TaskInitializerModal = ({ isOpen, onClose, onInitialize }) => {
   const [taskCount, setTaskCount] = useState(3);
   const isValid = taskCount !== "" && parseInt(taskCount) >= 3;
 
+  const initializeTasks = () => {
+    const initialTasks = Array.from({ length: taskCount }, () => ({
+      name: "",
+      duration: "",
+    }));
+    setTasks(initialTasks);
+    setInitialized(true);
+  };
+
   return (
     <AnimatePresence>
       {isOpen && (

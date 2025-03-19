@@ -16,7 +16,7 @@ const Layout = ({ children }) => {
       </div>
 
       {/* Contenu principal */}
-      <main className="mt-16 p-4"><TaskScheduler/></main>
+      <main className="ml-[250px] mt-[60px] p-4"><TaskScheduler/></main>
     </div>
   );
 };

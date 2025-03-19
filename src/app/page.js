@@ -1,8 +1,5 @@
-"use client";
-
-//import TaskScheduler from "@/app/components/TaskScheduler";
-import TaskScheduler from "@/app/components/Layout";
+import { redirect } from "next/navigation";
 
 export default function Home() {
-  return <TaskScheduler />;
+  redirect("/login");
 }
