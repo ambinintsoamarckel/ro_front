@@ -7,7 +7,7 @@ const Page = () => {
 
   return (
     <Layout setInitialTaskCount={setInitialTaskCount}>
-      <TaskScheduler initialTaskCount={initialTaskCount} />
+{/*       <TaskScheduler initialTaskCount={initialTaskCount} /> */}
     </Layout>
   );
 };

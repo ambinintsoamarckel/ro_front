@@ -5,7 +5,7 @@ import { Plus, Minus } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import DependanceModal from "./DependanceModal";
 
-const TaskScheduler = ({ initialTaskCount , currentProject}) => {
+const Tache = ({ initialTaskCount , currentProject}) => {
   //const [taskCount, setTaskCount] = useState("");
   const [tasks, setTasks] = useState([{ name: "", duration: "" , projectId: currentProject.id}]);
   const [initialized, setInitialized] = useState(false);
@@ -26,15 +26,39 @@ const TaskScheduler = ({ initialTaskCount , currentProject}) => {
     }
   }, [tasks]);
 
-  useEffect(() => {
+/*   useEffect(() => {
     const initialTasks = Array.from({ length: initialTaskCount ? initialTaskCount : 3 }, () => ({
       name: "",
       duration: "",
       projectId: currentProject.id
     }));
     setTasks(initialTasks);
-  }, [initialTaskCount]);
-
+  }, [initialTaskCount]); */
+  useEffect(() => {
+    if (currentProject?.id) {
+      fetch(`http://localhost:3001/tasks/project/${currentProject.id}`)
+        .then((response) => {
+          if (!response.ok) {
+            if (response.status === 404) {
+              // Si le serveur renvoie 404, on initialise avec 3 tâches vides
+              return [];
+            }
+            throw new Error(`Erreur ${response.status}`);
+          }
+          return response.json();
+        })
+        .then((data) => {
+          if (data.length === 0) {
+            setTasks(Array.from({ length: 3 }, () => ({ name: "", duration: "", projectId: currentProject.id })));
+          } else {
+            setTasks(data);
+          }
+        })
+        .catch((error) => console.error("Erreur lors de la récupération des tâches :", error));
+    }
+  }, [currentProject]);
+  
+  
 
   const handleInitializeTasks = (taskCount) => {
     const initialTasks = Array.from({ length: taskCount }, () => ({
@@ -208,4 +232,4 @@ const TaskScheduler = ({ initialTaskCount , currentProject}) => {
   );
 };
 
-export default TaskScheduler;
+export default Tache;
