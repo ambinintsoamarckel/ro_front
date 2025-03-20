@@ -3,22 +3,21 @@
 import { useState, useRef, useEffect } from "react";
 import { Plus, Minus } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-//import TaskInitializerModal from "./TaskInitializerModal";
 import DependanceModal from "./DependanceModal";
 
-
-const TaskScheduler = () => {
-  const [taskCount, setTaskCount] = useState("");
+const TaskScheduler = ({ initialTaskCount }) => {
+  //const [taskCount, setTaskCount] = useState("");
   const [tasks, setTasks] = useState([{ name: "", duration: "" }]);
   const [initialized, setInitialized] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState(null);
   const [dependencyType, setDependencyType] = useState("");
   const [showDependencyRow, setShowDependencyRow] = useState(false);
+  const [isDependencyModalOpen, setIsDependencyModalOpen] = useState(false);
 
   const tableRef = useRef(null);
   const [tableHeight, setTableHeight] = useState(0);
-  const isValid = taskCount !== "" && parseInt(taskCount) >= 3;
+  //const isValid = taskCount !== "" && parseInt(taskCount) >= 3;
 
   useEffect(() => {
     if (tableRef.current) {
@@ -26,13 +25,23 @@ const TaskScheduler = () => {
     }
   }, [tasks]);
 
-  const initializeTasks = () => {
+  useEffect(() => {
+    const initialTasks = Array.from({ length: initialTaskCount }, () => ({
+      name: "",
+      duration: "",
+    }));
+    setTasks(initialTasks);
+  }, [initialTaskCount]);
+
+
+  const handleInitializeTasks = (taskCount) => {
     const initialTasks = Array.from({ length: taskCount }, () => ({
       name: "",
       duration: "",
     }));
     setTasks(initialTasks);
     setInitialized(true);
+    setIsModalOpen(false);
   };
 
   const addColumn = () => {
@@ -94,27 +103,6 @@ const TaskScheduler = () => {
 
   return (
     <div className="w-11/12 max-w-6xl mx-auto bg-white p-8 shadow-md rounded-lg mt-10">
-        
-        {!initialized ? (
-        <div className="mb-4 flex justify-center items-center gap-4">
-          <label className="font-semibold">Nombre initial de tâches :</label>
-          <input
-            type="number"
-            value={taskCount}
-            onChange={(e) => setTaskCount(Math.max(3, parseInt(e.target.value) || 3))}
-            className="border p-2 rounded w-20 text-center"
-            min="3" 
-            required
-          />
-          <button
-            onClick={initializeTasks}
-            className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-700"
-            disabled={!isValid} // Désactive si l'input est vide ou < 3
-          >
-            Valider
-          </button>
-        </div>
-      ) : (
         <div className="relative">
           <div className="overflow-x-scroll scrollbar-hidden shadow-md mt-5">
             <table ref={tableRef} className="min-w-full text-center border-collapse shadow-lg  overflow-hidden mt-5 mb-5">
@@ -204,10 +192,10 @@ const TaskScheduler = () => {
           )}
 
         </div>
-      )}
+
       <DependanceModal
-        isModalOpen={isModalOpen}
-        setIsModalOpen={setIsModalOpen}
+        isModalOpen={isDependencyModalOpen}
+        setIsModalOpen={setIsDependencyModalOpen}
         dependencyType={dependencyType}
         setDependencyType={handleDependencyValidation} 
       />

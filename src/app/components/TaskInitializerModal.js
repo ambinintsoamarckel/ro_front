@@ -6,15 +6,6 @@ const TaskInitializerModal = ({ isOpen, onClose, onInitialize }) => {
   const [taskCount, setTaskCount] = useState(3);
   const isValid = taskCount !== "" && parseInt(taskCount) >= 3;
 
-  const initializeTasks = () => {
-    const initialTasks = Array.from({ length: taskCount }, () => ({
-      name: "",
-      duration: "",
-    }));
-    setTasks(initialTasks);
-    setInitialized(true);
-  };
-
   return (
     <AnimatePresence>
       {isOpen && (
@@ -47,8 +38,8 @@ const TaskInitializerModal = ({ isOpen, onClose, onInitialize }) => {
                 type="number"
                 value={taskCount}
                 onChange={(e) => setTaskCount(Math.max(3, parseInt(e.target.value) || 3))}
-                className="border p-2 rounded w-full text-center mt-2"
-                min="3"
+                className="border p-2 rounded w-20 text-center"
+                min="3" 
                 required
               />
               <div className="flex justify-end mt-4 gap-2">

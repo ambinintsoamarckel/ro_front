@@ -1,13 +1,14 @@
 import Header from "./Header";
 import Sidebar from "./Sidebar";
-import TaskScheduler from "./TaskScheduler";
+//import TaskScheduler from "./TaskScheduler";
 
-const Layout = ({ children }) => {
+const Layout = ({ children , setInitialTaskCount }) => {
   return (
     <div className="relative ">
       {/* Sidebar au-dessus du header */}
       <div className="absolute top-0 left-0 z-50">
-        <Sidebar />
+       <Sidebar setInitialTaskCount={setInitialTaskCount} />
+
       </div>
 
       {/* Header (en dessous du sidebar) */}
@@ -16,7 +17,9 @@ const Layout = ({ children }) => {
       </div>
 
       {/* Contenu principal */}
-      <main className="ml-[250px] mt-[60px] p-4"><TaskScheduler/></main>
+      <main className="ml-[250px] mt-[60px] p-4">
+        {children} 
+      </main>
     </div>
   );
 };

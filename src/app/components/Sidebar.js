@@ -4,13 +4,14 @@ import { useState } from "react";
 import TaskInitializerModal from "./TaskInitializerModal";
 import { Menu, X, BadgePlus, User, Settings , HeartIcon} from "lucide-react";
 
-const Sidebar = () => {
+const Sidebar = ({ setInitialTaskCount }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [taskCount, setTaskCount] = useState(1);
+  //const [taskCount, setTaskCount] = useState(1);
 
-  const initializeTasks = () => {
-    console.log("Initialisation avec", taskCount, "tâches");
+  const initializeTasks = (count) => {
+    console.log("Initialisation avec", count, "tâches");
+    setInitialTaskCount(count);
   };
 
 

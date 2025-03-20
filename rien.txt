@@ -1,0 +1,24 @@
+const Sidebar = ({ setInitialTaskCount }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const initializeTasks = (count) => {
+    console.log("Initialisation avec", count, "tâches");
+    setInitialTaskCount(count); // Passe le count au Dashboard
+  };
+
+  return (
+    <div className="flex">
+      {/* ... (bouton menu et sidebar) ... */}
+      
+      <TaskInitializerModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onInitialize={(count) => {
+          initializeTasks(count);
+          setIsModalOpen(false);
+        }}
+      />
+    </div>
+  );
+};
