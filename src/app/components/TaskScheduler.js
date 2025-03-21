@@ -170,43 +170,40 @@ const TaskScheduler = ({ initialTaskCount , currentProject}) => {
                   ))}
                 </tr>
                 {showDependencyRow && (
-  <tr className="bg-gray-50 border-orange-200 text-xl">
-    <th className="p-3 font-bold  text-gray-700">Tâches {dependencyType}</th>
-    {fetchedTasks.map((task, index) => (
-      <td
-        key={index}
-        className="p-3 border border-orange-200 cursor-pointer hover:bg-gray-100 transition"
-        onClick={() => openTaskModal(index)}
-      >
-       {dependencyType === "antérieur" && task.dependencies.length > 0 ? (
-          <div className="space-y-1">
-            {task.dependencies.map((dep, depIndex) => {
-              const dependentTask = fetchedTasks.find(t => t.id === dep.dependsOnId);
-              return (
-                <div key={depIndex} className="text-gray-800">
-                  {dependentTask ? dependentTask.name : "Tâche inconnue"}
-                </div>
-              );
-            })}
-          </div>
-        ) : dependencyType === "successeur" && task.successors.length > 0 ? (
-          <div className="space-y-1">
-            {task.successors.map((succ, succIndex) => {
-              const successorTask = fetchedTasks.find(t => t.id === succ.taskId);
-              return (
-                <div key={succIndex} className="text-gray-800">
-                  {successorTask ? successorTask.name : "Tâche inconnue"}
-                </div>
-              );
-            })}
-          </div>
-        ) : (
-          <div className="text-gray-400 italic">Aucune</div>
-        )}
-      </td>
-    ))}
-  </tr>
-)}
+                  <tr className="bg-gray-50 border-orange-200 text-xl">
+                    <th className="p-3 font-bold  text-gray-700">Tâches {dependencyType}</th>
+                    {fetchedTasks.map((task, index) => (
+                      <td
+                        key={index}
+                        className="p-3 border border-orange-200 cursor-pointer hover:bg-gray-100 transition"
+                        onClick={() => openTaskModal(index)}
+                      >
+                      {dependencyType === "antérieur" && task.dependencies.length > 0 ? (
+                      <div className="text-gray-800">
+                        {task.dependencies
+                          .map(dep => {
+                            const dependentTask = fetchedTasks.find(t => t.id === dep.dependsOnId);
+                            return dependentTask ? dependentTask.name : "Tâche inconnue";
+                          })
+                          .join(", ")}
+                      </div>
+                    ) : dependencyType === "successeur" && task.successors.length > 0 ? (
+                      <div className="text-gray-800">
+                        {task.successors
+                          .map(succ => {
+                            const successorTask = fetchedTasks.find(t => t.id === succ.taskId);
+                            return successorTask ? successorTask.name : "Tâche inconnue";
+                          })
+                          .join(", ")}
+                      </div>
+                    ) : (
+                      <div className="text-gray-400 italic">-</div>
+                    )}
+
+                      </td>
+                    ))}
+                  </tr>
+                )}
 
               </thead>
             </table>
