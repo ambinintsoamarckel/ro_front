@@ -1,13 +1,12 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import ReactFlow, {
   MiniMap,
-  Controls,
   Background,
   applyNodeChanges,
   applyEdgeChanges,
-  Panel
+  useReactFlow,
 } from "reactflow";
 import dagre from "dagre";
 import "reactflow/dist/style.css";
@@ -42,56 +41,149 @@ const getLayoutedElements = (nodes, edges, direction = 'LR') => {
         x: nodeWithPosition.x - 40, // Centrer le nœud (largeur/2)
         y: nodeWithPosition.y - 40, // Centrer le nœud (hauteur/2)
       },
+      draggable: true,
     };
   });
   
   return { nodes: layoutedNodes, edges };
 };
 
+// Fonction pour calculer la largeur nécessaire du graphe
+const calculateGraphWidth = (nodes) => {
+  if (!nodes || nodes.length === 0) return 1000; // Valeur par défaut
+  
+  // Trouver le nœud le plus à droite
+  const rightmostNode = nodes.reduce((max, node) => {
+    return (node.position.x > max.position.x) ? node : max;
+  }, nodes[0]);
+  
+  // Ajouter une marge de 200px à la position x du nœud le plus à droite
+  return rightmostNode.position.x + 200;
+};
+
+// Composant pour un nœud spécial (début/fin)
+const SpecialNode = ({ label, isStart }) => {
+  const color = isStart ? "#4CAF50" : "#F44336"; // Vert pour début, Rouge pour fin
+  
+  return (
+    <div
+      style={{
+        width: "100%",
+        height: "100%",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        position: "relative"
+      }}
+    >
+      <div
+        style={{
+          position: "absolute",
+          width: "80px",
+          height: "80px",
+          borderRadius: "50%",
+          backgroundColor: "white",
+          border: `3px solid ${color}`,
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          boxShadow: "0 1px 4px rgba(0, 0, 0, 0.2)"
+        }}
+      >
+        <div
+          style={{
+            fontSize: "16px",
+            fontWeight: "bold",
+            color: color
+          }}
+        >
+          {label}
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const CPMGraph = ({ projectId }) => {
   const [nodes, setNodes] = useState([]);
   const [edges, setEdges] = useState([]);
-  const [direction, setDirection] = useState('LR'); // LR = gauche à droite, TB = haut en bas
-
-  // Fonction pour changer la direction du graphe
-  const changeDirection = () => {
-    setDirection(direction === 'LR' ? 'TB' : 'LR');
-  };
-
-  // Effet pour appliquer le nouveau layout quand direction change
-  useEffect(() => {
-    if (nodes.length > 0 && edges.length > 0) {
-      const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(
-        nodes,
-        edges,
-        direction
-      );
-      setNodes([...layoutedNodes]);
-      setEdges([...layoutedEdges]);
-    }
-  }, [direction]);
+  const [graphWidth, setGraphWidth] = useState(1000); // État pour stocker la largeur calculée
+  const flowContainerRef = useRef(null);
+  const direction = 'LR';
 
   useEffect(() => {
     fetch(`http://localhost:3001/critical-path/${projectId}`)
       .then((res) => res.json())
       .then((data) => {
-      // Création des nœuds avec une configuration corrigée
-      const formattedNodes = data.map((task) => ({
-        id: task.id.toString(),
-        position: { x: 0, y: 0 }, // position temporaire
-        data: { label: <TaskNode task={task} /> },
-        style: {
-          background: "transparent", // Fond complètement transparent
-          border: "none", // Pas de bordure pour le conteneur
-          width: 100,  // Un peu plus grand pour donner de l'espace au cercle
-          height: 100,
-        },
-        sourcePosition: direction === 'LR' ? 'right' : 'bottom',
-        targetPosition: direction === 'LR' ? 'left' : 'top',
-      }));
+        // Identifier les tâches qui n'ont pas de prédécesseurs (tâches de début)
+        const startTaskIds = new Set(data.map(task => task.id.toString()));
+        data.forEach(task => {
+          task.successors.forEach(successor => {
+            startTaskIds.delete(successor.toString());
+          });
+        });
+        
+        // Identifier les tâches qui n'ont pas de successeurs (tâches de fin)
+        const endTaskIds = new Set();
+        data.forEach(task => {
+          if (task.successors.length === 0) {
+            endTaskIds.add(task.id.toString());
+          }
+        });
 
-        // Créer les arêtes
-        const formattedEdges = data.flatMap((task) =>
+        // Création du nœud de début
+        const startNode = {
+          id: 'start',
+          position: { x: 0, y: 0 },
+          data: { label: <SpecialNode label="Début" isStart={true} /> },
+          style: {
+            background: "transparent",
+            border: "none",
+            width: 100,
+            height: 100,
+          },
+          sourcePosition: 'right',
+          targetPosition: 'left',
+          draggable: true,
+        };
+        
+        // Création du nœud de fin
+        const endNode = {
+          id: 'end',
+          position: { x: 0, y: 0 },
+          data: { label: <SpecialNode label="Fin" isStart={false} /> },
+          style: {
+            background: "transparent",
+            border: "none",
+            width: 100,
+            height: 100,
+          },
+          sourcePosition: 'right',
+          targetPosition: 'left',
+          draggable: true,
+        };
+
+        // Création des nœuds de tâches
+        const taskNodes = data.map((task) => ({
+          id: task.id.toString(),
+          position: { x: 0, y: 0 },
+          data: { label: <TaskNode task={task} /> },
+          style: {
+            background: "transparent",
+            border: "none",
+            width: 100,
+            height: 100,
+          },
+          sourcePosition: 'right',
+          targetPosition: 'left',
+          draggable: true,
+        }));
+        
+        // Combinaison de tous les nœuds
+        const formattedNodes = [startNode, ...taskNodes, endNode];
+
+        // Créer les arêtes entre les tâches
+        const taskEdges = data.flatMap((task) =>
           task.successors.map((successor) => ({
             id: `e${task.id}-${successor}`,
             source: task.id.toString(),
@@ -105,6 +197,33 @@ const CPMGraph = ({ projectId }) => {
             },
           }))
         );
+        
+        // Créer les arêtes depuis le nœud de début vers les premières tâches
+        const startEdges = Array.from(startTaskIds).map(taskId => ({
+          id: `estart-${taskId}`,
+          source: 'start',
+          target: taskId,
+          animated: true,
+          style: {
+            stroke: "green",
+            strokeWidth: 2,
+          },
+        }));
+        
+        // Créer les arêtes depuis les dernières tâches vers le nœud de fin
+        const endEdges = Array.from(endTaskIds).map(taskId => ({
+          id: `e${taskId}-end`,
+          source: taskId,
+          target: 'end',
+          animated: true,
+          style: {
+            stroke: "red",
+            strokeWidth: 2,
+          },
+        }));
+        
+        // Combinaison de toutes les arêtes
+        const formattedEdges = [...startEdges, ...taskEdges, ...endEdges];
 
         // Appliquer le layout automatique
         const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(
@@ -115,13 +234,24 @@ const CPMGraph = ({ projectId }) => {
 
         setNodes(layoutedNodes);
         setEdges(layoutedEdges);
+        
+        // Calculer et définir la largeur nécessaire du graphe
+        const calculatedWidth = calculateGraphWidth(layoutedNodes);
+        setGraphWidth(calculatedWidth);
       })
       .catch((error) => console.error("Erreur chargement des tâches :", error));
-  }, [projectId, direction]);
+  }, [projectId]);
 
   const onNodesChange = useCallback(
-    (changes) => setNodes((nds) => applyNodeChanges(changes, nds)),
-    []
+    (changes) => {
+      const updatedNodes = applyNodeChanges(changes, nodes);
+      setNodes(updatedNodes);
+      
+      // Recalculer la largeur du graphe après chaque changement de nœud
+      const newWidth = calculateGraphWidth(updatedNodes);
+      setGraphWidth(newWidth);
+    },
+    [nodes]
   );
 
   const onEdgesChange = useCallback(
@@ -129,41 +259,67 @@ const CPMGraph = ({ projectId }) => {
     []
   );
 
+  const containerStyle = {
+    width: "100%",
+    height: "600px",
+    border: "1px solid #ccc",
+    borderRadius: "8px",
+    boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+    overflow: "auto",
+    display: "block"
+  };
+
+  // Style du conteneur interne pour centrer le graphe verticalement
+  const innerContainerStyle = {
+    width: `${graphWidth}px`, // Largeur dynamique basée sur le contenu
+    height: "100%",
+    display: "flex",
+    alignItems: "center", // Centrage vertical
+    justifyContent: "flex-start", // Alignement à gauche
+    minHeight: "100%"
+  };
+
+  // Style spécifique pour ReactFlow
+  const reactFlowStyle = {
+    width: "100%",
+    height: "80%", // Hauteur réduite pour centrer verticalement
+  };
+
   return (
-    <div className="w-full h-[600px] border border-gray-300 shadow-lg rounded-lg">
-      <ReactFlow
-        nodes={nodes}
-        edges={edges}
-        onNodesChange={onNodesChange}
-        onEdgesChange={onEdgesChange}
-        fitView
-        minZoom={0.5}
-        maxZoom={2}
-      >
-        <Panel position="top-right">
-          <button 
-            onClick={changeDirection} 
-            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-          >
-            {direction === 'LR' ? 'Afficher vertical' : 'Afficher horizontal'}
-          </button>
-        </Panel>
-        <MiniMap 
-          nodeStrokeColor={(n) => {
-            return n.data.critical ? 'red' : 'black';
-          }}
-          nodeColor={(n) => {
-            return '#D3D3D3';
-          }}
-        />
-        <Controls />
-        <Background variant="dots" gap={12} size={1} />
-      </ReactFlow>
+    <div style={containerStyle} ref={flowContainerRef}>
+      <div style={innerContainerStyle}>
+        <ReactFlow
+          nodes={nodes}
+          edges={edges}
+          onNodesChange={onNodesChange}
+          onEdgesChange={onEdgesChange}
+          fitView={false}
+          zoomOnScroll={false}
+          zoomOnPinch={false}
+          zoomOnDoubleClick={false}
+          panOnScroll={false}
+          panOnDrag={false}
+          preventScrolling={false}
+          nodesDraggable={true}
+          elementsSelectable={true}
+          style={reactFlowStyle}
+        >
+          <MiniMap 
+            nodeStrokeColor={(n) => {
+              if (n.id === 'start') return 'green';
+              if (n.id === 'end') return 'red';
+              return n.data.critical ? 'red' : 'black';
+            }}
+            nodeColor={() => '#FFFFFF'}
+          />
+          <Background variant="dots" gap={12} size={1} />
+        </ReactFlow>
+      </div>
     </div>
   );
 };
 
-// Composant personnalisé pour un nœud circulaire proprement implémenté
+// Composant personnalisé pour un nœud circulaire
 const TaskNode = ({ task }) => {
   // Déterminer si la tâche est critique
   const isCritical = task.slack === 0;
@@ -185,7 +341,7 @@ const TaskNode = ({ task }) => {
           width: "80px",
           height: "80px",
           borderRadius: "50%",
-          backgroundColor: "white", // Fond blanc au lieu de gris
+          backgroundColor: "white",
           border: `2px solid ${isCritical ? "red" : "black"}`,
           display: "flex",
           flexDirection: "column",
