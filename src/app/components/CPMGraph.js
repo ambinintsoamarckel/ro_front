@@ -17,11 +17,11 @@ dagreGraph.setDefaultEdgeLabel(() => ({}));
 
 const getLayoutedElements = (nodes, edges, direction = 'LR') => {
   // Configuration de base pour le graphe dagre
-  dagreGraph.setGraph({ rankdir: direction, nodesep: 100, ranksep: 150 });
+  dagreGraph.setGraph({ rankdir: direction, nodesep: 120, ranksep: 180 });
   
   // Ajouter les nœuds au graphe dagre
   nodes.forEach((node) => {
-    dagreGraph.setNode(node.id, { width: 80, height: 80 });
+    dagreGraph.setNode(node.id, { width: 100, height: 100 });
   });
   
   // Ajouter les arêtes au graphe dagre
@@ -38,8 +38,8 @@ const getLayoutedElements = (nodes, edges, direction = 'LR') => {
     return {
       ...node,
       position: {
-        x: nodeWithPosition.x - 40, // Centrer le nœud (largeur/2)
-        y: nodeWithPosition.y - 40, // Centrer le nœud (hauteur/2)
+        x: nodeWithPosition.x - 50,
+        y: nodeWithPosition.y - 50,
       },
       draggable: true,
     };
@@ -50,15 +50,28 @@ const getLayoutedElements = (nodes, edges, direction = 'LR') => {
 
 // Fonction pour calculer la largeur nécessaire du graphe
 const calculateGraphWidth = (nodes) => {
-  if (!nodes || nodes.length === 0) return 1000; // Valeur par défaut
+  if (!nodes || nodes.length === 0) return 1200;
   
   // Trouver le nœud le plus à droite
   const rightmostNode = nodes.reduce((max, node) => {
     return (node.position.x > max.position.x) ? node : max;
   }, nodes[0]);
   
-  // Ajouter une marge de 200px à la position x du nœud le plus à droite
-  return rightmostNode.position.x + 200;
+  // Ajouter une marge de 300px à la position x du nœud le plus à droite
+  return rightmostNode.position.x + 300;
+};
+
+// Fonction pour calculer la hauteur nécessaire du graphe
+const calculateGraphHeight = (nodes) => {
+  if (!nodes || nodes.length === 0) return 800;
+  
+  // Trouver le nœud le plus bas
+  const bottomNode = nodes.reduce((max, node) => {
+    return (node.position.y > max.position.y) ? node : max;
+  }, nodes[0]);
+  
+  // Ajouter une marge de 200px à la position y du nœud le plus bas
+  return bottomNode.position.y + 200;
 };
 
 // Composant pour un nœud spécial (début/fin)
@@ -79,20 +92,20 @@ const SpecialNode = ({ label, isStart }) => {
       <div
         style={{
           position: "absolute",
-          width: "80px",
-          height: "80px",
+          width: "100px",
+          height: "100px",
           borderRadius: "50%",
           backgroundColor: "white",
-          border: `3px solid ${color}`,
+          border: `4px solid ${color}`,
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
-          boxShadow: "0 1px 4px rgba(0, 0, 0, 0.2)"
+          boxShadow: "0 2px 8px rgba(0, 0, 0, 0.3)"
         }}
       >
         <div
           style={{
-            fontSize: "16px",
+            fontSize: "20px",
             fontWeight: "bold",
             color: color
           }}
@@ -107,7 +120,8 @@ const SpecialNode = ({ label, isStart }) => {
 const CPMGraph = ({ projectId }) => {
   const [nodes, setNodes] = useState([]);
   const [edges, setEdges] = useState([]);
-  const [graphWidth, setGraphWidth] = useState(1000); // État pour stocker la largeur calculée
+  const [graphWidth, setGraphWidth] = useState(1200);
+  const [graphHeight, setGraphHeight] = useState(800);
   const flowContainerRef = useRef(null);
   const direction = 'LR';
 
@@ -139,8 +153,8 @@ const CPMGraph = ({ projectId }) => {
           style: {
             background: "transparent",
             border: "none",
-            width: 100,
-            height: 100,
+            width: 120,
+            height: 120,
           },
           sourcePosition: 'right',
           targetPosition: 'left',
@@ -155,8 +169,8 @@ const CPMGraph = ({ projectId }) => {
           style: {
             background: "transparent",
             border: "none",
-            width: 100,
-            height: 100,
+            width: 120,
+            height: 120,
           },
           sourcePosition: 'right',
           targetPosition: 'left',
@@ -171,8 +185,8 @@ const CPMGraph = ({ projectId }) => {
           style: {
             background: "transparent",
             border: "none",
-            width: 100,
-            height: 100,
+            width: 120,
+            height: 120,
           },
           sourcePosition: 'right',
           targetPosition: 'left',
@@ -190,10 +204,10 @@ const CPMGraph = ({ projectId }) => {
             target: successor.toString(),
             animated: task.critical,
             label: task.duration.toString() + "j",
-            labelStyle: { fontSize: "12px", fill: task.critical ? "red" : "black" },
+            labelStyle: { fontSize: "14px", fill: task.critical ? "red" : "black" },
             style: {
               stroke: task.critical ? "red" : "black",
-              strokeWidth: task.critical ? 3 : 2,
+              strokeWidth: task.critical ? 4 : 2,
             },
           }))
         );
@@ -206,7 +220,7 @@ const CPMGraph = ({ projectId }) => {
           animated: true,
           style: {
             stroke: "green",
-            strokeWidth: 2,
+            strokeWidth: 3,
           },
         }));
         
@@ -218,7 +232,7 @@ const CPMGraph = ({ projectId }) => {
           animated: true,
           style: {
             stroke: "red",
-            strokeWidth: 2,
+            strokeWidth: 3,
           },
         }));
         
@@ -235,9 +249,11 @@ const CPMGraph = ({ projectId }) => {
         setNodes(layoutedNodes);
         setEdges(layoutedEdges);
         
-        // Calculer et définir la largeur nécessaire du graphe
+        // Calculer et définir la largeur et hauteur nécessaires du graphe
         const calculatedWidth = calculateGraphWidth(layoutedNodes);
+        const calculatedHeight = calculateGraphHeight(layoutedNodes);
         setGraphWidth(calculatedWidth);
+        setGraphHeight(Math.max(calculatedHeight, 800)); // Minimum de 800px de hauteur
       })
       .catch((error) => console.error("Erreur chargement des tâches :", error));
   }, [projectId]);
@@ -247,9 +263,11 @@ const CPMGraph = ({ projectId }) => {
       const updatedNodes = applyNodeChanges(changes, nodes);
       setNodes(updatedNodes);
       
-      // Recalculer la largeur du graphe après chaque changement de nœud
+      // Recalculer la largeur et hauteur du graphe après chaque changement de nœud
       const newWidth = calculateGraphWidth(updatedNodes);
+      const newHeight = calculateGraphHeight(updatedNodes);
       setGraphWidth(newWidth);
+      setGraphHeight(Math.max(newHeight, 800));
     },
     [nodes]
   );
@@ -259,30 +277,30 @@ const CPMGraph = ({ projectId }) => {
     []
   );
 
+  // Style du conteneur principal avec des barres de défilement explicites
   const containerStyle = {
     width: "100%",
-    height: "600px",
+    height: "80vh",
     border: "1px solid #ccc",
     borderRadius: "8px",
-    boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-    overflow: "auto",
-    display: "block"
+    boxShadow: "0 4px 10px rgba(0, 0, 0, 0.15)",
+    overflowX: "scroll", // Barre de défilement horizontale explicite
+    overflowY: "scroll", // Barre de défilement verticale explicite
+    margin: "20px 0",
+    position: "relative"
   };
 
-  // Style du conteneur interne pour centrer le graphe verticalement
+  // Style du conteneur interne qui définit la taille réelle du graphe
   const innerContainerStyle = {
-    width: `${graphWidth}px`, // Largeur dynamique basée sur le contenu
-    height: "100%",
-    display: "flex",
-    alignItems: "center", // Centrage vertical
-    justifyContent: "flex-start", // Alignement à gauche
-    minHeight: "100%"
+    width: `${graphWidth}px`,
+    height: `${graphHeight}px`,
+    position: "relative" // Nécessaire pour que le contenu s'affiche correctement
   };
 
-  // Style spécifique pour ReactFlow
+  // Style spécifique pour ReactFlow avec dimensions complètes
   const reactFlowStyle = {
     width: "100%",
-    height: "80%", // Hauteur réduite pour centrer verticalement
+    height: "100%"
   };
 
   return (
@@ -294,25 +312,18 @@ const CPMGraph = ({ projectId }) => {
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
           fitView={false}
-          zoomOnScroll={false}
-          zoomOnPinch={false}
-          zoomOnDoubleClick={false}
-          panOnScroll={false}
-          panOnDrag={false}
-          preventScrolling={false}
-          nodesDraggable={true}
+          zoomOnScroll={false} // Désactivé pour permettre le défilement normal
+          zoomOnPinch={false} // Désactivé
+          zoomOnDoubleClick={false} // Désactivé
+          panOnScroll={false} // Désactivé pour permettre le défilement normal
+          panOnDrag={false} // Désactivé pour le graphe, mais les nœuds restent déplaçables
+          preventScrolling={false} // Permettre le défilement normal
+          nodesDraggable={true} // Les nœuds peuvent être déplacés
           elementsSelectable={true}
           style={reactFlowStyle}
         >
-          <MiniMap 
-            nodeStrokeColor={(n) => {
-              if (n.id === 'start') return 'green';
-              if (n.id === 'end') return 'red';
-              return n.data.critical ? 'red' : 'black';
-            }}
-            nodeColor={() => '#FFFFFF'}
-          />
-          <Background variant="dots" gap={12} size={1} />
+          <Background variant="dots" gap={15} size={1.5} />
+          {/* MiniMap supprimée */}
         </ReactFlow>
       </div>
     </div>
@@ -338,16 +349,16 @@ const TaskNode = ({ task }) => {
       <div
         style={{
           position: "absolute",
-          width: "80px",
-          height: "80px",
+          width: "100px",
+          height: "100px",
           borderRadius: "50%",
           backgroundColor: "white",
-          border: `2px solid ${isCritical ? "red" : "black"}`,
+          border: `${isCritical ? "3px" : "2px"} solid ${isCritical ? "red" : "black"}`,
           display: "flex",
           flexDirection: "column",
           justifyContent: "center",
           alignItems: "center",
-          boxShadow: "0 1px 4px rgba(0, 0, 0, 0.2)"
+          boxShadow: "0 2px 8px rgba(0, 0, 0, 0.2)"
         }}
       >
         {/* Slack à l'intérieur du cercle, en haut */}
@@ -355,14 +366,15 @@ const TaskNode = ({ task }) => {
           style={{
             backgroundColor: "#4CAF50",
             color: "#fff",
-            padding: "2px 5px",
+            padding: "3px 6px",
             borderRadius: "5px",
-            fontSize: "12px",
+            fontSize: "14px",
             position: "absolute",
-            top: "5px",
+            top: "8px",
             left: "50%",
             transform: "translateX(-50%)",
-            zIndex: 2
+            zIndex: 2,
+            fontWeight: "bold"
           }}
         >
           {task.slack}
@@ -373,23 +385,23 @@ const TaskNode = ({ task }) => {
           style={{
             display: "flex",
             justifyContent: "space-between",
-            width: "60%",
+            width: "70%",
             position: "absolute",
-            top: "25%",
+            top: "30%",
           }}
         >
-          <span style={{ color: "red", fontSize: "12px" }}>{task.earlyStart}</span>
-          <span style={{ color: "black", fontSize: "12px" }}>{task.lateStart}</span>
+          <span style={{ color: "red", fontSize: "14px", fontWeight: "bold" }}>{task.earlyStart}</span>
+          <span style={{ color: "black", fontSize: "14px", fontWeight: "bold" }}>{task.lateStart}</span>
         </div>
 
         {/* Trait vertical au milieu */}
         <div
           style={{
             width: "1px",
-            height: "15px",
+            height: "18px",
             backgroundColor: "black",
             position: "absolute",
-            top: "25%",
+            top: "30%",
             left: "50%",
             transform: "translateX(-50%)",
           }}
@@ -398,12 +410,12 @@ const TaskNode = ({ task }) => {
         {/* Trait horizontal (séparation) */}
         <div
           style={{
-            width: "70%",
+            width: "75%",
             height: "1px",
             backgroundColor: "black",
             position: "absolute",
             top: "50%",
-            left: "15%"
+            left: "12.5%"
           }}
         ></div>
 
@@ -411,10 +423,13 @@ const TaskNode = ({ task }) => {
         <div
           style={{
             position: "absolute",
-            bottom: "15%",
-            fontSize: "14px",
+            bottom: "18%",
+            fontSize: "16px",
             fontWeight: "bold",
-            textAlign: "center"
+            textAlign: "center",
+            maxWidth: "80%",
+            overflow: "hidden",
+            textOverflow: "ellipsis"
           }}
         >
           {task.name}
