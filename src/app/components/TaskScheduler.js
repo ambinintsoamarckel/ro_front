@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { Plus, Minus } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import DependanceModal from "./DependanceModal";
+import TaskDetailsModal from "./TaskDetailsModal";
 
 const TaskScheduler = ({ initialTaskCount , currentProject}) => {
   //const [taskCount, setTaskCount] = useState("");
@@ -15,11 +16,28 @@ const TaskScheduler = ({ initialTaskCount , currentProject}) => {
   const [showDependencyRow, setShowDependencyRow] = useState(false);
   const [isDependencyModalOpen, setIsDependencyModalOpen] = useState(false);
   const [projectTitle, setProjectTitle] = useState("");
+  const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
+  const [selectedTaskIndex, setSelectedTaskIndex] = useState(null);
+  const [fetchedTasks, setFetchedTasks] = useState([]);
 
   const tableRef = useRef(null);
   const [tableHeight, setTableHeight] = useState(0);
   //const isValid = taskCount !== "" && parseInt(taskCount) >= 3;
 
+  const fetchTasksFromBackend = async () => {
+    try {
+      const response = await fetch(`http://localhost:3001/tasks/project/${currentProject.id}`);
+      if (response.ok) {
+        const data = await response.json();
+        setFetchedTasks(data);
+      } else {
+        console.error("Erreur de récupération des tâches.");
+      }
+    } catch (error) {
+      console.error("Erreur API :", error);
+    }
+  };
+  
   useEffect(() => {
     if (tableRef.current) {
       setTableHeight(tableRef.current.offsetHeight);
@@ -35,6 +53,10 @@ const TaskScheduler = ({ initialTaskCount , currentProject}) => {
     setTasks(initialTasks);
   }, [initialTaskCount]);
 
+  const openTaskModal = (index) => {
+    setSelectedTaskIndex(index);
+    setIsTaskModalOpen(true);
+  };  
 
   const handleInitializeTasks = (taskCount) => {
     const initialTasks = Array.from({ length: taskCount }, () => ({
@@ -78,6 +100,11 @@ const TaskScheduler = ({ initialTaskCount , currentProject}) => {
     setIsModalOpen(true);
   };
 
+  const openDependencyModal = () => {
+    setIsDependencyModalOpen(true);
+  };
+  
+
   const handleSaveAndOpenModal = async () => {
     try {
       const response = await fetch("http://localhost:3001/tasks", {
@@ -86,8 +113,11 @@ const TaskScheduler = ({ initialTaskCount , currentProject}) => {
         body: JSON.stringify({ tasks }),
       });
       if (response.ok) {
+        const data = await response.json();
         alert("Tâches enregistrées !");
-        setIsModalOpen(true); // Ouvre la modal après succès
+        setIsDependencyModalOpen(true);
+        setTasks(data);// Ouvre la modal après succès
+        await fetchTasksFromBackend(); 
       } else {
         alert("Erreur lors de l'enregistrement.");
       }
@@ -140,15 +170,40 @@ const TaskScheduler = ({ initialTaskCount , currentProject}) => {
                   ))}
                 </tr>
                 {showDependencyRow && (
-                <tr className="bg-gray-50 border-orange-200 text-xl">
-                  <th className="p-3 font-bold  text-gray-700">Tâches {dependencyType}</th>
-                  {tasks.map((task, index) => (
-                    <td key={index} className="p-3 border border-orange-200">
-                      {/* Ici, tu peux ajouter un champ de saisie ou une valeur en lecture seule */}
-                    </td>
-                  ))}
-                </tr>
-              )}
+                  <tr className="bg-gray-50 border-orange-200 text-xl">
+                    <th className="p-3 font-bold  text-gray-700">Tâches {dependencyType}</th>
+                    {fetchedTasks.map((task, index) => (
+                      <td
+                        key={index}
+                        className="p-3 border border-orange-200 cursor-pointer hover:bg-gray-100 transition"
+                        onClick={() => openTaskModal(index)}
+                      >
+                      {dependencyType === "antérieur" && task.dependencies.length > 0 ? (
+                      <div className="text-gray-800">
+                        {task.dependencies
+                          .map(dep => {
+                            const dependentTask = fetchedTasks.find(t => t.id === dep.dependsOnId);
+                            return dependentTask ? dependentTask.name : "Tâche inconnue";
+                          })
+                          .join(", ")}
+                      </div>
+                    ) : dependencyType === "successeur" && task.successors.length > 0 ? (
+                      <div className="text-gray-800">
+                        {task.successors
+                          .map(succ => {
+                            const successorTask = fetchedTasks.find(t => t.id === succ.taskId);
+                            return successorTask ? successorTask.name : "Tâche inconnue";
+                          })
+                          .join(", ")}
+                      </div>
+                    ) : (
+                      <div className="text-gray-400 italic">-</div>
+                    )}
+
+                      </td>
+                    ))}
+                  </tr>
+                )}
 
               </thead>
             </table>
@@ -203,6 +258,15 @@ const TaskScheduler = ({ initialTaskCount , currentProject}) => {
         dependencyType={dependencyType}
         setDependencyType={handleDependencyValidation} 
       />
+<TaskDetailsModal
+  isOpen={isTaskModalOpen}
+  onClose={() => {setIsTaskModalOpen(false);fetchTasksFromBackend();}}
+  task={tasks[selectedTaskIndex]}
+  allTasks={tasks}
+  dependencyType={dependencyType}
+/>
+
+
 
     </div>
   );
