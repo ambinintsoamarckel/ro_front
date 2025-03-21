@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { Plus, Minus } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import DependanceModal from "./DependanceModal";
+import TaskDetailsModal from "./TaskDetailsModal";
 
 const TaskScheduler = ({ initialTaskCount , currentProject}) => {
   //const [taskCount, setTaskCount] = useState("");
@@ -15,6 +16,9 @@ const TaskScheduler = ({ initialTaskCount , currentProject}) => {
   const [showDependencyRow, setShowDependencyRow] = useState(false);
   const [isDependencyModalOpen, setIsDependencyModalOpen] = useState(false);
   const [projectTitle, setProjectTitle] = useState("");
+  const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
+  const [selectedTaskIndex, setSelectedTaskIndex] = useState(null);
+
 
   const tableRef = useRef(null);
   const [tableHeight, setTableHeight] = useState(0);
@@ -35,6 +39,10 @@ const TaskScheduler = ({ initialTaskCount , currentProject}) => {
     setTasks(initialTasks);
   }, [initialTaskCount]);
 
+  const openTaskModal = (index) => {
+    setSelectedTaskIndex(index);
+    setIsTaskModalOpen(true);
+  };  
 
   const handleInitializeTasks = (taskCount) => {
     const initialTasks = Array.from({ length: taskCount }, () => ({
@@ -78,6 +86,11 @@ const TaskScheduler = ({ initialTaskCount , currentProject}) => {
     setIsModalOpen(true);
   };
 
+  const openDependencyModal = () => {
+    setIsDependencyModalOpen(true);
+  };
+  
+
   const handleSaveAndOpenModal = async () => {
     try {
       const response = await fetch("http://localhost:3001/tasks", {
@@ -87,7 +100,7 @@ const TaskScheduler = ({ initialTaskCount , currentProject}) => {
       });
       if (response.ok) {
         alert("Tâches enregistrées !");
-        setIsModalOpen(true); // Ouvre la modal après succès
+        setIsDependencyModalOpen(true);// Ouvre la modal après succès
       } else {
         alert("Erreur lors de l'enregistrement.");
       }
@@ -143,7 +156,11 @@ const TaskScheduler = ({ initialTaskCount , currentProject}) => {
                 <tr className="bg-gray-50 border-orange-200 text-xl">
                   <th className="p-3 font-bold  text-gray-700">Tâches {dependencyType}</th>
                   {tasks.map((task, index) => (
-                    <td key={index} className="p-3 border border-orange-200">
+                    <td
+                      key={index}
+                      className="p-3 border border-orange-200 cursor-pointer hover:bg-gray-100 transition"
+                      onClick={() => openTaskModal(index)}
+                    >
                       {/* Ici, tu peux ajouter un champ de saisie ou une valeur en lecture seule */}
                     </td>
                   ))}
@@ -203,6 +220,14 @@ const TaskScheduler = ({ initialTaskCount , currentProject}) => {
         dependencyType={dependencyType}
         setDependencyType={handleDependencyValidation} 
       />
+     <TaskDetailsModal
+  isOpen={isTaskModalOpen}
+  onClose={() => setIsTaskModalOpen(false)}
+  task={tasks[selectedTaskIndex]}
+  allTasks={tasks}
+/>
+
+
 
     </div>
   );
