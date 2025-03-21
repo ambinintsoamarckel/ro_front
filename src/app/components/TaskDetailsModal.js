@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Trash2 } from 'lucide-react';
 
-const TaskDetailsModal = ({ isOpen, onClose, task, allTasks }) => {
+const TaskDetailsModal = ({ isOpen, onClose, task, allTasks, dependencyType }) => {
   const [selectedTaskIndices, setSelectedTaskIndices] = useState([]);
   const [addedTasks, setAddedTasks] = useState([]);
 
@@ -11,6 +11,7 @@ const TaskDetailsModal = ({ isOpen, onClose, task, allTasks }) => {
     if (isOpen) {
       setSelectedTaskIndices([]);
       setAddedTasks([]);
+      console.log(task);
     }
   }, [isOpen]);
 
@@ -32,7 +33,40 @@ const TaskDetailsModal = ({ isOpen, onClose, task, allTasks }) => {
     setAddedTasks(prev => prev.filter((_, i) => i !== indexToRemove));
   };
   
-
+  const handleValidate = async () => {
+    if (addedTasks.length === 0) return;
+  
+    const taskId = task?.id;  // Vérifie ici
+    const dependencyIds = addedTasks.map(t => t.id);
+  
+    console.log("taskId:", taskId);  // <-- AJOUT
+    console.log("dependencyIds:", dependencyIds);  // <-- AJOUT
+  
+    const payload = dependencyType === "successeur"
+      ? { taskId, successorIds: dependencyIds }
+      : { taskId, dependsOnIds: dependencyIds };
+  
+    console.log("Payload envoyé :", payload);  // <-- AJOUT
+  
+    try {
+      const response = await fetch('http://localhost:3001/dependencies', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+  
+      const result = await response.json();
+      if (!response.ok) {
+        alert(`Erreur: ${result.error}`);
+      } else {
+        alert("Dépendances ajoutées avec succès !");
+        onClose();
+      }
+    } catch (err) {
+      alert(`Erreur réseau : ${err.message}`);
+    }
+  };  
+  
   if (!isOpen) return null;
 
   // Exclure la tâche actuelle ET celles déjà ajoutées
@@ -54,7 +88,7 @@ const otherTasks = allTasks
           exit={{ opacity: 0 }}
         />
         <motion.div
-          className="bg-white p-6 rounded-lg shadow-lg w-96 relative z-50"
+          className="bg-white p-6 rounded-lg shadow-lg w-[700px] relative z-50"
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -20 }}
@@ -73,9 +107,9 @@ const otherTasks = allTasks
           <hr className="w-full my-4 border-gray-300" />
 
           {/* Conteneur des cartes en flex-row */}
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-row gap-4">
             {/* Carte Nom de la tâche + Checkbox */}
-            <div className="border p-4 rounded-lg shadow">
+            <div className="border p-4 rounded-lg shadow basis-[48%] min-w-[320px]">
               <h3 className="font-medium text-gray-700 mb-2">Sélectionner des tâches à lier</h3>
               <div className="max-h-40 overflow-y-auto space-y-2">
                 {otherTasks.length === 0 ? (
@@ -111,7 +145,7 @@ const otherTasks = allTasks
             </div>
 
             {/* Carte Tâches sélectionnées */}
-            <div className="border p-4 rounded-lg shadow">
+            <div className="border p-4 rounded-lg shadow basis-[48%] min-w-[320px]">
               <h3 className="font-medium text-gray-700 mb-2">Tâches sélectionnées</h3>
               {addedTasks.length === 0 ? (
                 <p className="text-gray-500">Aucune tâche sélectionnée</p>
@@ -141,12 +175,17 @@ const otherTasks = allTasks
               Annuler
             </button>
             <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="px-4 py-2 rounded text-white bg-green-500 hover:bg-green-700"
-            >
-              Valider
-            </motion.button>
+  whileHover={{ scale: 1.05 }}
+  whileTap={{ scale: 0.95 }}
+  onClick={handleValidate}
+  disabled={addedTasks.length === 0}
+  className={`px-4 py-2 rounded text-white ${
+    addedTasks.length > 0 ? "bg-green-500 hover:bg-green-700" : "bg-gray-300 cursor-not-allowed"
+  }`}
+>
+  Valider
+</motion.button>
+
           </div>
         </motion.div>
       </div>

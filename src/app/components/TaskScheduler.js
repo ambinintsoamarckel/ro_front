@@ -18,12 +18,26 @@ const TaskScheduler = ({ initialTaskCount , currentProject}) => {
   const [projectTitle, setProjectTitle] = useState("");
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
   const [selectedTaskIndex, setSelectedTaskIndex] = useState(null);
-
+  const [fetchedTasks, setFetchedTasks] = useState([]);
 
   const tableRef = useRef(null);
   const [tableHeight, setTableHeight] = useState(0);
   //const isValid = taskCount !== "" && parseInt(taskCount) >= 3;
 
+  const fetchTasksFromBackend = async () => {
+    try {
+      const response = await fetch(`http://localhost:3001/tasks/project/${currentProject.id}`);
+      if (response.ok) {
+        const data = await response.json();
+        setFetchedTasks(data);
+      } else {
+        console.error("Erreur de récupération des tâches.");
+      }
+    } catch (error) {
+      console.error("Erreur API :", error);
+    }
+  };
+  
   useEffect(() => {
     if (tableRef.current) {
       setTableHeight(tableRef.current.offsetHeight);
@@ -99,8 +113,11 @@ const TaskScheduler = ({ initialTaskCount , currentProject}) => {
         body: JSON.stringify({ tasks }),
       });
       if (response.ok) {
+        const data = await response.json();
         alert("Tâches enregistrées !");
-        setIsDependencyModalOpen(true);// Ouvre la modal après succès
+        setIsDependencyModalOpen(true);
+        setTasks(data);// Ouvre la modal après succès
+        await fetchTasksFromBackend(); 
       } else {
         alert("Erreur lors de l'enregistrement.");
       }
@@ -153,19 +170,43 @@ const TaskScheduler = ({ initialTaskCount , currentProject}) => {
                   ))}
                 </tr>
                 {showDependencyRow && (
-                <tr className="bg-gray-50 border-orange-200 text-xl">
-                  <th className="p-3 font-bold  text-gray-700">Tâches {dependencyType}</th>
-                  {tasks.map((task, index) => (
-                    <td
-                      key={index}
-                      className="p-3 border border-orange-200 cursor-pointer hover:bg-gray-100 transition"
-                      onClick={() => openTaskModal(index)}
-                    >
-                      {/* Ici, tu peux ajouter un champ de saisie ou une valeur en lecture seule */}
-                    </td>
-                  ))}
-                </tr>
-              )}
+  <tr className="bg-gray-50 border-orange-200 text-xl">
+    <th className="p-3 font-bold  text-gray-700">Tâches {dependencyType}</th>
+    {fetchedTasks.map((task, index) => (
+      <td
+        key={index}
+        className="p-3 border border-orange-200 cursor-pointer hover:bg-gray-100 transition"
+        onClick={() => openTaskModal(index)}
+      >
+       {dependencyType === "antérieur" && task.dependencies.length > 0 ? (
+          <div className="space-y-1">
+            {task.dependencies.map((dep, depIndex) => {
+              const dependentTask = fetchedTasks.find(t => t.id === dep.dependsOnId);
+              return (
+                <div key={depIndex} className="text-gray-800">
+                  {dependentTask ? dependentTask.name : "Tâche inconnue"}
+                </div>
+              );
+            })}
+          </div>
+        ) : dependencyType === "successeur" && task.successors.length > 0 ? (
+          <div className="space-y-1">
+            {task.successors.map((succ, succIndex) => {
+              const successorTask = fetchedTasks.find(t => t.id === succ.taskId);
+              return (
+                <div key={succIndex} className="text-gray-800">
+                  {successorTask ? successorTask.name : "Tâche inconnue"}
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="text-gray-400 italic">Aucune</div>
+        )}
+      </td>
+    ))}
+  </tr>
+)}
 
               </thead>
             </table>
@@ -220,11 +261,12 @@ const TaskScheduler = ({ initialTaskCount , currentProject}) => {
         dependencyType={dependencyType}
         setDependencyType={handleDependencyValidation} 
       />
-     <TaskDetailsModal
+<TaskDetailsModal
   isOpen={isTaskModalOpen}
-  onClose={() => setIsTaskModalOpen(false)}
+  onClose={() => {setIsTaskModalOpen(false);fetchTasksFromBackend();}}
   task={tasks[selectedTaskIndex]}
   allTasks={tasks}
+  dependencyType={dependencyType}
 />
 
 
