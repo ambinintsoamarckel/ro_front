@@ -48,30 +48,54 @@ const getLayoutedElements = (nodes, edges, direction = 'LR') => {
   return { nodes: layoutedNodes, edges };
 };
 
-// Fonction pour calculer la largeur nécessaire du graphe
+// Fonction améliorée pour calculer la largeur nécessaire du graphe
 const calculateGraphWidth = (nodes) => {
   if (!nodes || nodes.length === 0) return 1200;
+  
+  // Définir une marge minimale à gauche pour le graphe
+  const leftMargin = 100;
+  
+  // Trouver la position x minimale (le nœud le plus à gauche)
+  const leftmostNode = nodes.reduce((min, node) => {
+    return (node.position.x < min.position.x) ? node : min;
+  }, nodes[0]);
   
   // Trouver le nœud le plus à droite
   const rightmostNode = nodes.reduce((max, node) => {
     return (node.position.x > max.position.x) ? node : max;
   }, nodes[0]);
   
-  // Ajouter une marge de 300px à la position x du nœud le plus à droite
-  return rightmostNode.position.x + 300;
+  // Calculer la largeur totale nécessaire avec marges à gauche et à droite
+  const totalWidth = Math.max(0, leftmostNode.position.x) + 
+                     (rightmostNode.position.x - leftmostNode.position.x) + 
+                     300; // marge droite
+  
+  return Math.max(1200, totalWidth);
 };
 
-// Fonction pour calculer la hauteur nécessaire du graphe
+// Fonction améliorée pour calculer la hauteur nécessaire du graphe
 const calculateGraphHeight = (nodes) => {
   if (!nodes || nodes.length === 0) return 800;
+  
+  // Définir une marge minimale en haut pour le graphe
+  const topMargin = 100;
+  
+  // Trouver la position y minimale (le nœud le plus haut)
+  const topmostNode = nodes.reduce((min, node) => {
+    return (node.position.y < min.position.y) ? node : min;
+  }, nodes[0]);
   
   // Trouver le nœud le plus bas
   const bottomNode = nodes.reduce((max, node) => {
     return (node.position.y > max.position.y) ? node : max;
   }, nodes[0]);
   
-  // Ajouter une marge de 200px à la position y du nœud le plus bas
-  return bottomNode.position.y + 200;
+  // Calculer la hauteur totale nécessaire avec marges en haut et en bas
+  const totalHeight = Math.max(0, topmostNode.position.y) + 
+                      (bottomNode.position.y - topmostNode.position.y) + 
+                      200; // marge bas
+  
+  return Math.max(800, totalHeight);
 };
 
 // Composant pour un nœud spécial (début/fin)
@@ -122,6 +146,7 @@ const CPMGraph = ({ projectId }) => {
   const [edges, setEdges] = useState([]);
   const [graphWidth, setGraphWidth] = useState(1200);
   const [graphHeight, setGraphHeight] = useState(800);
+  const [graphTransform, setGraphTransform] = useState({ x: 0, y: 0 });
   const flowContainerRef = useRef(null);
   const direction = 'LR';
 
@@ -263,6 +288,24 @@ const CPMGraph = ({ projectId }) => {
       const updatedNodes = applyNodeChanges(changes, nodes);
       setNodes(updatedNodes);
       
+      // Trouver les positions extrêmes pour tous les nœuds
+      if (updatedNodes.length > 0) {
+        const leftmostNode = updatedNodes.reduce((min, node) => {
+          return (node.position.x < min.position.x) ? node : min;
+        }, updatedNodes[0]);
+        
+        const topmostNode = updatedNodes.reduce((min, node) => {
+          return (node.position.y < min.position.y) ? node : min;
+        }, updatedNodes[0]);
+        
+        // Ajuster le graphTransform pour s'assurer que les nœuds ne sortent pas du viewport
+        const newTransform = {
+          x: Math.min(0, -leftmostNode.position.x + 100),
+          y: Math.min(0, -topmostNode.position.y + 100)
+        };
+        setGraphTransform(newTransform);
+      }
+      
       // Recalculer la largeur et hauteur du graphe après chaque changement de nœud
       const newWidth = calculateGraphWidth(updatedNodes);
       const newHeight = calculateGraphHeight(updatedNodes);
@@ -284,8 +327,8 @@ const CPMGraph = ({ projectId }) => {
     border: "1px solid #ccc",
     borderRadius: "8px",
     boxShadow: "0 4px 10px rgba(0, 0, 0, 0.15)",
-    overflowX: "scroll", // Barre de défilement horizontale explicite
-    overflowY: "scroll", // Barre de défilement verticale explicite
+    overflowX: "auto", // Barre de défilement horizontale explicite
+    overflowY: "auto", // Barre de défilement verticale explicite
     margin: "20px 0",
     position: "relative"
   };
@@ -294,7 +337,9 @@ const CPMGraph = ({ projectId }) => {
   const innerContainerStyle = {
     width: `${graphWidth}px`,
     height: `${graphHeight}px`,
-    position: "relative" // Nécessaire pour que le contenu s'affiche correctement
+    position: "relative", // Nécessaire pour que le contenu s'affiche correctement
+    transform: `translate(${graphTransform.x}px, ${graphTransform.y}px)`,
+    transition: "transform 0.3s ease" // Animation fluide pour le repositionnement
   };
 
   // Style spécifique pour ReactFlow avec dimensions complètes
