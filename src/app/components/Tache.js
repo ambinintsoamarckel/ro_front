@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { Plus, Minus } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import DependanceModal from "./DependanceModal";
+import CPMGraph from "./CPMGraph";
 
 const Tache = ({ initialTaskCount , currentProject}) => {
   //const [taskCount, setTaskCount] = useState("");
@@ -227,6 +228,9 @@ const Tache = ({ initialTaskCount , currentProject}) => {
         dependencyType={dependencyType}
         setDependencyType={handleDependencyValidation} 
       />
+          {/* Graphe CPM */}
+    <h2 className="text-xl font-bold mt-8 mb-4">Diagramme du chemin critique</h2>
+    <CPMGraph projectId={currentProject.id} />
 
     </div>
   );
