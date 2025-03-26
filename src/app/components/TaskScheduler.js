@@ -1,28 +1,18 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Plus, Minus } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { Plus ,Minus} from "lucide-react";
+import { motion } from "framer-motion";
 import DependanceModal from "./DependanceModal";
-import TaskDetailsModal from "./TaskDetailsModal";
+import TaskListTable from "./TaskListTable";
 
-const TaskScheduler = ({ initialTaskCount , currentProject}) => {
-  //const [taskCount, setTaskCount] = useState("");
-  const [tasks, setTasks] = useState([{ name: "", duration: "" , projectId: currentProject.id}]);
-  const [initialized, setInitialized] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedTask, setSelectedTask] = useState(null);
-  const [dependencyType, setDependencyType] = useState("");
-  const [showDependencyRow, setShowDependencyRow] = useState(false);
-  const [isDependencyModalOpen, setIsDependencyModalOpen] = useState(false);
-  const [projectTitle, setProjectTitle] = useState("");
-  const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
-  const [selectedTaskIndex, setSelectedTaskIndex] = useState(null);
+const TaskScheduler = ({ currentProject }) => {
+  const [tasks, setTasks] = useState([{ name: "", duration: "", projectId: currentProject.id }]);
   const [fetchedTasks, setFetchedTasks] = useState([]);
-
+  const [isInitialEntry, setIsInitialEntry] = useState(true);
+  const [isDependencyModalOpen, setIsDependencyModalOpen] = useState(false);
+  const [dependencyType, setDependencyType] = useState("");
   const tableRef = useRef(null);
-  const [tableHeight, setTableHeight] = useState(0);
-  //const isValid = taskCount !== "" && parseInt(taskCount) >= 3;
 
   const fetchTasksFromBackend = async () => {
     try {
@@ -37,40 +27,40 @@ const TaskScheduler = ({ initialTaskCount , currentProject}) => {
       console.error("Erreur API :", error);
     }
   };
+
+  useEffect(() => {
+    const fetchTasks = async () => {
+      if (!currentProject?.id) return; // Vérifie que currentProject existe
   
-  useEffect(() => {
-    if (tableRef.current) {
-      setTableHeight(tableRef.current.offsetHeight);
-    }
-  }, [tasks]);
-
-  useEffect(() => {
-    const initialTasks = Array.from({ length: initialTaskCount ? initialTaskCount : 3 }, () => ({
-      name: "",
-      duration: "",
-      projectId: currentProject.id
-    }));
-    setTasks(initialTasks);
-  }, [initialTaskCount]);
-
-  const openTaskModal = (index) => {
-    setSelectedTaskIndex(index);
-    setIsTaskModalOpen(true);
-  };  
-
-  const handleInitializeTasks = (taskCount) => {
-    const initialTasks = Array.from({ length: taskCount }, () => ({
-      name: "",
-      duration: "",
-      projectId: currentProject.id
-    }));
-    setTasks(initialTasks);
-    setInitialized(true);
-    setIsModalOpen(false);
-  };
+      const initialTasks = Array.from({ length: 3 }, () => ({
+        name: "",
+        duration: "",
+        projectId: currentProject.id
+      }));
+  
+      try {
+        const response = await fetch(`http://localhost:3001/tasks/project/${currentProject.id}`);
+        if (response.ok) {
+          const data = await response.json();
+          setTasks(data);
+          setIsInitialEntry(false);
+        } else {
+          setTasks(initialTasks);
+          setIsInitialEntry(true);
+        }
+      } catch (error) {
+        console.error("Erreur API :", error);
+        setTasks(initialTasks);
+        setIsInitialEntry(true);
+      }
+    };
+  
+    fetchTasks();
+  }, [currentProject]); // Dépendance sur currentProject
+  
 
   const addColumn = () => {
-    setTasks([...tasks, { name: "", duration: "" ,projectId: currentProject.id}]);
+    setTasks([...tasks, { name: "", duration: "", projectId: currentProject.id }]);
   };
 
   const removeColumn = () => {
@@ -86,24 +76,14 @@ const TaskScheduler = ({ initialTaskCount , currentProject}) => {
   };
 
   const handleDurationChange = (index, value) => {
-    if (/^\d*$/.test(value)) { // N'accepte que les chiffres
+    if (/^\d*$/.test(value)) {
       const updatedTasks = [...tasks];
-      updatedTasks[index].duration = value === "" ? "" : Math.max(1, parseInt(value, 10)); // Min 1
+      updatedTasks[index].duration = value === "" ? "" : Math.max(1, parseInt(value, 10));
       setTasks(updatedTasks);
     }
   };
 
   const allTasksValid = tasks.every((task) => task.name.trim() !== "" && task.duration >= 1);
-
-  const openModal = (task) => {
-    setSelectedTask(task);
-    setIsModalOpen(true);
-  };
-
-  const openDependencyModal = () => {
-    setIsDependencyModalOpen(true);
-  };
-  
 
   const handleSaveAndOpenModal = async () => {
     try {
@@ -114,10 +94,9 @@ const TaskScheduler = ({ initialTaskCount , currentProject}) => {
       });
       if (response.ok) {
         const data = await response.json();
-        alert("Tâches enregistrées !");
+        setIsInitialEntry(false);
         setIsDependencyModalOpen(true);
-        setTasks(data);// Ouvre la modal après succès
-        await fetchTasksFromBackend(); 
+        await fetchTasksFromBackend();
       } else {
         alert("Erreur lors de l'enregistrement.");
       }
@@ -126,20 +105,50 @@ const TaskScheduler = ({ initialTaskCount , currentProject}) => {
     }
   };
 
-  const handleDependencyValidation = (type) => {
-    console.log("Type reçu :", type); // Vérification
-    setDependencyType(type);
-    setShowDependencyRow(true); // Afficher la ligne après validation
-    setIsModalOpen(false);
+  const handleTaskUpdate = async (updatedTask) => {
+    try {
+      const response = await fetch(`http://localhost:3001/tasks/${updatedTask.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updatedTask),
+      });
+      if (response.ok) {
+        await fetchTasksFromBackend();
+      } else {
+        alert("Erreur lors de la mise à jour de la tâche.");
+      }
+    } catch (error) {
+      console.error("Erreur API :", error);
+    }
   };
-  
+
+  const handleTaskDelete = async (taskId) => {
+    try {
+      const response = await fetch(`http://localhost:3001/tasks/${taskId}`, {
+        method: "DELETE",
+      });
+      if (response.ok) {
+        await fetchTasksFromBackend();
+      } else {
+        alert("Erreur lors de la suppression de la tâche.");
+      }
+    } catch (error) {
+      console.error("Erreur API :", error);
+    }
+  };
+
+  const handleDependencyValidation = (type) => {
+    setDependencyType(type);
+    setIsDependencyModalOpen(false);
+  };
 
   return (
     <div className="w-11/12 max-w-6xl mx-auto bg-white p-8 shadow-md rounded-lg mt-10">
+      {isInitialEntry ? (
         <div className="relative">
           <div className="overflow-x-scroll scrollbar-hidden shadow-md mt-5">
-            <h1>{currentProject.name}{currentProject.description}</h1>
-            <table ref={tableRef} className="min-w-full text-center border-collapse shadow-lg  overflow-hidden mt-5 mb-5">
+            <h1>{currentProject.name}</h1>
+            <table ref={tableRef} className="min-w-full text-center border-collapse shadow-lg overflow-hidden mt-5 mb-5">
               <thead>
                 <tr className="bg-orange-100 text-gray-800 text-xl font-semibold">
                   <th className="p-3 border border-orange-200">Tâches</th>
@@ -150,12 +159,12 @@ const TaskScheduler = ({ initialTaskCount , currentProject}) => {
                         value={task.name}
                         onChange={(e) => handleNameChange(index, e.target.value)}
                         placeholder={`Tâche ${index + 1}`}
-                        className="w-full p-3 text-center bg-transparent text-gray-900 placeholder-gray-400 outline-none border-b border-transparent focus:border-gray-600 transition-all "
+                        className="w-full p-3 text-center bg-transparent text-gray-900 placeholder-gray-400 outline-none border-b border-transparent focus:border-gray-600 transition-all"
                       />
                     </th>
                   ))}
                 </tr>
-                <tr className={`bg-white  text-xl`}>
+                <tr className="bg-white text-xl">
                   <th className="p-3 font-bold border-orange-200 text-gray-700">Durée</th>
                   {tasks.map((task, index) => (
                     <td key={index} className="p-3 border border-orange-200">
@@ -169,50 +178,11 @@ const TaskScheduler = ({ initialTaskCount , currentProject}) => {
                     </td>
                   ))}
                 </tr>
-                {showDependencyRow && (
-                  <tr className="bg-gray-50 border-orange-200 text-xl">
-                    <th className="p-3 font-bold  text-gray-700">Tâches {dependencyType}</th>
-                    {fetchedTasks.map((task, index) => (
-                      <td
-                        key={index}
-                        className="p-3 border border-orange-200 cursor-pointer hover:bg-gray-100 transition"
-                        onClick={() => openTaskModal(index)}
-                      >
-                      {dependencyType === "antérieur" && task.dependencies.length > 0 ? (
-                      <div className="text-gray-800">
-                        {task.dependencies
-                          .map(dep => {
-                            const dependentTask = fetchedTasks.find(t => t.id === dep.dependsOnId);
-                            return dependentTask ? dependentTask.name : "Tâche inconnue";
-                          })
-                          .join(", ")}
-                      </div>
-                    ) : dependencyType === "successeur" && task.successors.length > 0 ? (
-                      <div className="text-gray-800">
-                        {task.successors
-                          .map(succ => {
-                            const successorTask = fetchedTasks.find(t => t.id === succ.taskId);
-                            return successorTask ? successorTask.name : "Tâche inconnue";
-                          })
-                          .join(", ")}
-                      </div>
-                    ) : (
-                      <div className="text-gray-400 italic">-</div>
-                    )}
-
-                      </td>
-                    ))}
-                  </tr>
-                )}
-
               </thead>
             </table>
           </div>
 
-          <div
-            className="absolute top-0 right-0 w-8"
-            style={{ height: tableHeight }}
-          >
+          <div className="absolute top-0 right-0 w-8">
             <div className="relative h-full group">
               <button
                 onClick={addColumn}
@@ -234,23 +204,31 @@ const TaskScheduler = ({ initialTaskCount , currentProject}) => {
               </button>
             </div>
           </div>
-          {!showDependencyRow && (
-            <div className="flex justify-end mt-4">
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={handleSaveAndOpenModal}
-                disabled={!allTasksValid}
-                className={`px-4 py-2 rounded-lg text-white mt-5 ${
-                  allTasksValid ? "bg-green-500 hover:bg-green-700" : "bg-gray-400 cursor-not-allowed"
-                }`}
-              >
-                Ajouter dépendance
-              </motion.button>
-            </div>
-          )}
 
+          <div className="flex justify-end mt-4">
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={handleSaveAndOpenModal}
+              disabled={!allTasksValid}
+              className={`px-4 py-2 rounded-lg text-white mt-5 ${
+                allTasksValid ? "bg-green-500 hover:bg-green-700" : "bg-gray-400 cursor-not-allowed"
+              }`}
+            >
+              Ajouter dépendance
+            </motion.button>
+          </div>
         </div>
+      ) : (
+        <TaskListTable 
+          tasks={fetchedTasks}
+          setTasks={setFetchedTasks} 
+          currentProject={currentProject}
+          onTaskUpdate={handleTaskUpdate}
+          onTaskDelete={handleTaskDelete}
+          dependencyType={dependencyType}
+        />
+      )}
 
       <DependanceModal
         isModalOpen={isDependencyModalOpen}
@@ -258,16 +236,6 @@ const TaskScheduler = ({ initialTaskCount , currentProject}) => {
         dependencyType={dependencyType}
         setDependencyType={handleDependencyValidation} 
       />
-<TaskDetailsModal
-  isOpen={isTaskModalOpen}
-  onClose={() => {setIsTaskModalOpen(false);fetchTasksFromBackend();}}
-  task={fetchedTasks[selectedTaskIndex]}
-  allTasks={fetchedTasks}
-  dependencyType={dependencyType}
-/>
-
-
-
     </div>
   );
 };
