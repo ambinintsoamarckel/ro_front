@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import React, {  useImperativeHandle,forwardRef, useState, useEffect, useCallback, useRef } from "react";
 import ReactFlow, {
   MiniMap,
   Background,
@@ -141,147 +141,165 @@ const SpecialNode = ({ label, isStart }) => {
   );
 };
 
-const CPMGraph = ({ projectId }) => {
+const CPMGraph  = forwardRef((props, ref) => {
+  const { projectId, onDataLoaded } = props;
   const [nodes, setNodes] = useState([]);
   const [edges, setEdges] = useState([]);
   const [graphWidth, setGraphWidth] = useState(1200);
   const [graphHeight, setGraphHeight] = useState(800);
   const [graphTransform, setGraphTransform] = useState({ x: 0, y: 0 });
+  const [isLoading, setIsLoading] = useState(true);
   const flowContainerRef = useRef(null);
   const direction = 'LR';
-
-  useEffect(() => {
+  const loadCriticalPathData = useCallback(() => {
+    setIsLoading(true);
     fetch(`http://localhost:3001/critical-path/${projectId}`)
       .then((res) => res.json())
       .then((data) => {
-        // Identifier les tâches qui n'ont pas de prédécesseurs (tâches de début)
-        const startTaskIds = new Set(data.map(task => task.id.toString()));
-        data.forEach(task => {
-          task.successors.forEach(successor => {
-            startTaskIds.delete(successor.toString());
-          });
-        });
-        
-        // Identifier les tâches qui n'ont pas de successeurs (tâches de fin)
-        const endTaskIds = new Set();
-        data.forEach(task => {
-          if (task.successors.length === 0) {
-            endTaskIds.add(task.id.toString());
-          }
-        });
+        // Votre logique existante de transformation des données...
+        // (gardez le code de transformation des données tel quel)
+             // Identifier les tâches qui n'ont pas de prédécesseurs (tâches de début)
+             const startTaskIds = new Set(data.map(task => task.id.toString()));
+             data.forEach(task => {
+               task.successors.forEach(successor => {
+                 startTaskIds.delete(successor.toString());
+               });
+             });
+             
+             // Identifier les tâches qui n'ont pas de successeurs (tâches de fin)
+             const endTaskIds = new Set();
+             data.forEach(task => {
+               if (task.successors.length === 0) {
+                 endTaskIds.add(task.id.toString());
+               }
+             });
+     
+             // Création du nœud de début
+             const startNode = {
+               id: 'start',
+               position: { x: 0, y: 0 },
+               data: { label: <SpecialNode label="Début" isStart={true} /> },
+               style: {
+                 background: "transparent",
+                 border: "none",
+                 width: 120,
+                 height: 120,
+               },
+               sourcePosition: 'right',
+               targetPosition: 'left',
+               draggable: true,
+             };
+             
+             // Création du nœud de fin
+             const endNode = {
+               id: 'end',
+               position: { x: 0, y: 0 },
+               data: { label: <SpecialNode label="Fin" isStart={false} /> },
+               style: {
+                 background: "transparent",
+                 border: "none",
+                 width: 120,
+                 height: 120,
+               },
+               sourcePosition: 'right',
+               targetPosition: 'left',
+               draggable: true,
+             };
+     
+             // Création des nœuds de tâches
+             const taskNodes = data.map((task) => ({
+               id: task.id.toString(),
+               position: { x: 0, y: 0 },
+               data: { label: <TaskNode task={task} /> },
+               style: {
+                 background: "transparent",
+                 border: "none",
+                 width: 120,
+                 height: 120,
+               },
+               sourcePosition: 'right',
+               targetPosition: 'left',
+               draggable: true,
+             }));
+             
+             // Combinaison de tous les nœuds
+             const formattedNodes = [startNode, ...taskNodes, endNode];
+     
+             // Créer les arêtes entre les tâches
+             const taskEdges = data.flatMap((task) =>
+               task.successors.map((successor) => ({
+                 id: `e${task.id}-${successor}`,
+                 source: task.id.toString(),
+                 target: successor.toString(),
+                 animated: task.critical,
+                 label: task.duration.toString() + "j",
+                 labelStyle: { fontSize: "14px", fill: task.critical ? "red" : "black" },
+                 style: {
+                   stroke: task.critical ? "red" : "black",
+                   strokeWidth: task.critical ? 4 : 2,
+                 },
+               }))
+             );
+             
+             // Créer les arêtes depuis le nœud de début vers les premières tâches
+             const startEdges = Array.from(startTaskIds).map(taskId => ({
+               id: `estart-${taskId}`,
+               source: 'start',
+               target: taskId,
+               animated: true,
+               style: {
+                 stroke: "green",
+                 strokeWidth: 3,
+               },
+             }));
+             
+             // Créer les arêtes depuis les dernières tâches vers le nœud de fin
+             const endEdges = Array.from(endTaskIds).map(taskId => ({
+               id: `e${taskId}-end`,
+               source: taskId,
+               target: 'end',
+               animated: true,
+               style: {
+                 stroke: "red",
+                 strokeWidth: 3,
+               },
+             }));
+             
+             // Combinaison de toutes les arêtes
+             const formattedEdges = [...startEdges, ...taskEdges, ...endEdges];
+     
+             // Appliquer le layout automatique
+             const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(
+               formattedNodes,
+               formattedEdges,
+               direction
+             );
 
-        // Création du nœud de début
-        const startNode = {
-          id: 'start',
-          position: { x: 0, y: 0 },
-          data: { label: <SpecialNode label="Début" isStart={true} /> },
-          style: {
-            background: "transparent",
-            border: "none",
-            width: 120,
-            height: 120,
-          },
-          sourcePosition: 'right',
-          targetPosition: 'left',
-          draggable: true,
-        };
-        
-        // Création du nœud de fin
-        const endNode = {
-          id: 'end',
-          position: { x: 0, y: 0 },
-          data: { label: <SpecialNode label="Fin" isStart={false} /> },
-          style: {
-            background: "transparent",
-            border: "none",
-            width: 120,
-            height: 120,
-          },
-          sourcePosition: 'right',
-          targetPosition: 'left',
-          draggable: true,
-        };
-
-        // Création des nœuds de tâches
-        const taskNodes = data.map((task) => ({
-          id: task.id.toString(),
-          position: { x: 0, y: 0 },
-          data: { label: <TaskNode task={task} /> },
-          style: {
-            background: "transparent",
-            border: "none",
-            width: 120,
-            height: 120,
-          },
-          sourcePosition: 'right',
-          targetPosition: 'left',
-          draggable: true,
-        }));
-        
-        // Combinaison de tous les nœuds
-        const formattedNodes = [startNode, ...taskNodes, endNode];
-
-        // Créer les arêtes entre les tâches
-        const taskEdges = data.flatMap((task) =>
-          task.successors.map((successor) => ({
-            id: `e${task.id}-${successor}`,
-            source: task.id.toString(),
-            target: successor.toString(),
-            animated: task.critical,
-            label: task.duration.toString() + "j",
-            labelStyle: { fontSize: "14px", fill: task.critical ? "red" : "black" },
-            style: {
-              stroke: task.critical ? "red" : "black",
-              strokeWidth: task.critical ? 4 : 2,
-            },
-          }))
-        );
-        
-        // Créer les arêtes depuis le nœud de début vers les premières tâches
-        const startEdges = Array.from(startTaskIds).map(taskId => ({
-          id: `estart-${taskId}`,
-          source: 'start',
-          target: taskId,
-          animated: true,
-          style: {
-            stroke: "green",
-            strokeWidth: 3,
-          },
-        }));
-        
-        // Créer les arêtes depuis les dernières tâches vers le nœud de fin
-        const endEdges = Array.from(endTaskIds).map(taskId => ({
-          id: `e${taskId}-end`,
-          source: taskId,
-          target: 'end',
-          animated: true,
-          style: {
-            stroke: "red",
-            strokeWidth: 3,
-          },
-        }));
-        
-        // Combinaison de toutes les arêtes
-        const formattedEdges = [...startEdges, ...taskEdges, ...endEdges];
-
-        // Appliquer le layout automatique
-        const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(
-          formattedNodes,
-          formattedEdges,
-          direction
-        );
-
+        // Après avoir formatté les données
         setNodes(layoutedNodes);
         setEdges(layoutedEdges);
         
-        // Calculer et définir la largeur et hauteur nécessaires du graphe
         const calculatedWidth = calculateGraphWidth(layoutedNodes);
         const calculatedHeight = calculateGraphHeight(layoutedNodes);
         setGraphWidth(calculatedWidth);
-        setGraphHeight(Math.max(calculatedHeight, 800)); // Minimum de 800px de hauteur
+        setGraphHeight(Math.max(calculatedHeight, 800));
+
+        // Appeler le callback optionnel si fourni
+        if (onDataLoaded) {
+          onDataLoaded(data);
+        }
+
+        setIsLoading(false);
       })
-      .catch((error) => console.error("Erreur chargement des tâches :", error));
+      .catch((error) => {
+        console.error("Erreur chargement des tâches :", error);
+        setIsLoading(false);
+      });
   }, [projectId]);
+  
+  useEffect(() => {
+    loadCriticalPathData();
+  }, [loadCriticalPathData]);
 
   const onNodesChange = useCallback(
     (changes) => {
@@ -347,8 +365,20 @@ const CPMGraph = ({ projectId }) => {
     width: "100%",
     height: "100%"
   };
+  // Ajout d'une propriété pour permettre un rechargement manuel
 
+
+  // Exposer la méthode de rechargement si nécessaire
+  useImperativeHandle(ref, () => ({
+    getNodes: () => nodes,
+    getEdges: () => edges,
+    reloadData: () => loadCriticalPathData()
+  }));
   return (
+    <div>
+    {isLoading ? (
+      <div>Chargement du graphe...</div>
+    ) : (
     <div style={containerStyle} ref={flowContainerRef}>
       <div style={innerContainerStyle}>
         <ReactFlow
@@ -372,8 +402,10 @@ const CPMGraph = ({ projectId }) => {
         </ReactFlow>
       </div>
     </div>
+  )}
+  </div>
   );
-};
+});
 
 // Composant personnalisé pour un nœud circulaire
 const TaskNode = ({ task }) => {

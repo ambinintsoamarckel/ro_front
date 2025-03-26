@@ -49,21 +49,7 @@ const TaskListTable = ({
   };
   
   const fetchTasksFromBackend = async () => {
-    try {
-      const response = await fetch(`http://localhost:3001/tasks/project/${currentProject.id}`);
-      if (response.ok) {
-        const data = await response.json();
-        setTasks(data);
-      } else {
-        console.error("Erreur de récupération des tâches.");
-      }
-    } catch (error) {
-      console.error("Erreur API :", error);
-    }
-  };
-  const handleEditStart = (task, index) => {
-    setEditingTaskIndex(index);
-    setEditedTask({ ...task });
+  await setTasks ();
   };
 
   const handleEditCancel = () => {
@@ -82,7 +68,10 @@ const TaskListTable = ({
       }
     }
   };
-
+  const handleEditStart = (task, index) => {
+    setEditingTaskIndex(index);
+    setEditedTask({ ...task });
+  };
   const handleDeleteConfirm = async (taskId) => {
     try {
       await onTaskDelete(taskId);

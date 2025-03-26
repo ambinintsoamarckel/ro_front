@@ -16,6 +16,7 @@ const TaskScheduler = ({ currentProject, initialTaskCount }) => {
   const tableRef = useRef(null);
   const [project ,setProject] = useState({});
   const [tableHeight, setTableHeight] = useState(0);
+  const cpmGraphRef = useRef(null);
 
   const fetchTasksFromBackend = async () => {
     try {
@@ -23,6 +24,12 @@ const TaskScheduler = ({ currentProject, initialTaskCount }) => {
       if (response.ok) {
         const data = await response.json();
         setFetchedTasks(data);
+        if (cpmGraphRef.current && typeof cpmGraphRef.current.reloadData === 'function') {
+          cpmGraphRef.current.reloadData();
+
+        }
+
+        
       } else {
         console.error("Erreur de récupération des tâches.");
       }
@@ -97,7 +104,7 @@ const TaskScheduler = ({ currentProject, initialTaskCount }) => {
     fetchTasks();
     fetch
     fetchProject(currentProject.id);
-  }, [currentProject]); // Dépendance sur currentProject
+  }, [currentProject, initialTaskCount]); // Dépendance sur currentProject
   
 
   const addColumn = () => {
@@ -285,7 +292,7 @@ const TaskScheduler = ({ currentProject, initialTaskCount }) => {
       ) : (
         <TaskListTable 
           tasks={fetchedTasks}
-          setTasks={setFetchedTasks} 
+          setTasks={fetchTasksFromBackend} 
           currentProject={project}
           setProject={setProject}
           onTaskUpdate={handleTaskUpdate}
@@ -304,7 +311,14 @@ const TaskScheduler = ({ currentProject, initialTaskCount }) => {
       />
                     {/* Graphe CPM */}
     <h2 className="text-xl font-bold mt-8 mb-4">Diagramme du chemin critique</h2>
-    <CPMGraph projectId={currentProject.id} />
+    <CPMGraph 
+        ref={cpmGraphRef}
+        projectId={currentProject.id} 
+        onDataLoaded={(data) => {
+          // Optionnel : faire quelque chose avec les données chargées
+          console.log("Données du chemin critique chargées", data);
+        }}
+      />
     </div>
 
     
