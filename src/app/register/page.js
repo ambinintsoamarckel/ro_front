@@ -79,7 +79,7 @@ export default function RegisterPage() {
                 <Lock size={20}/>
               </div>
               <input
-                type="password"
+                type={showPassword ? "text" : "password"} 
                 placeholder="Mot de passe"
                 className="block w-full pl-10 pr-12 py-3 border text-sm rounded-lg focus:ring-2 focus:outline-none transition-all duration-200 bg-gray-50 border-gray-300 text-gray-900 focus:ring-blue-500"
                 value={password}
