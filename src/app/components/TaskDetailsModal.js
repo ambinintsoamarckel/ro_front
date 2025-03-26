@@ -21,7 +21,15 @@ const TaskDetailsModal = ({ isOpen, onClose, task, allTasks, dependencyType }) =
   
         setAddedTasks(existingSuccessors);
       }
-      
+      if (dependencyType === "antérieur" && task && task.dependencies) {
+        const existingDeps = task.dependencies.map(dep => {
+          // Trouver la tâche correspondante dans allTasks
+          const matchingTask = allTasks.find(t => t.id === dep.dependsOnId);
+          return matchingTask;
+        }).filter(t => t !== undefined); // Filtrer les tâches non trouvées
+  
+        setAddedTasks(existingDeps);
+      }
       console.log(task);
     }
   }, [isOpen, task, dependencyType, allTasks]);

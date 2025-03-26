@@ -7,10 +7,11 @@ import Tache from "../components/Tache";
 const Dashboard = () => {
   const [initialTaskCount, setInitialTaskCount] = useState(null);
   const [currentProject, setCurrentProject] = useState({}); // Valeur par défaut nulle
-  const [projectPage, setProjectPage] = useState(false); // Valeur par défaut nulle
+  const [projectPage, setProjectPage] = useState(false);
+  const [projects, setProjects] = useState([]); // Valeur par défaut nulle
 
   return (
-    <Layout setInitialTaskCount={setInitialTaskCount} setCurrentProject={setCurrentProject} setProjectPage={setProjectPage}>
+    <Layout setInitialTaskCount={setInitialTaskCount} setCurrentProject={setCurrentProject} setProjectPage={setProjectPage} projects={projects} setProjects={setProjects}>
       {!projectPage && initialTaskCount && <TaskScheduler initialTaskCount={initialTaskCount} currentProject = {currentProject}/>}
       {projectPage && <Tache currentProject={currentProject}/>}
     </Layout>

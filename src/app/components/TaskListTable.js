@@ -7,16 +7,18 @@ import TaskDetailsModal from "./TaskDetailsModal";
 const TaskListTable = ({ 
   tasks,
   setTasks, 
-  currentProject, 
+  currentProject,
+  setProject, 
   onTaskUpdate, 
   onTaskDelete, 
-  dependencyType 
+
 }) => {
   const [editingTaskIndex, setEditingTaskIndex] = useState(null);
   const [editedTask, setEditedTask] = useState(null);
   const [deleteConfirmIndex, setDeleteConfirmIndex] = useState(null);
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
   const [selectedTaskIndex, setSelectedTaskIndex] = useState(null);
+  
   const fetchTasksFromBackend = async () => {
     try {
       const response = await fetch(`http://localhost:3001/tasks/project/${currentProject.id}`);
@@ -164,16 +166,16 @@ const TaskListTable = ({
                   </td>
                 ))}
               </tr>
-              {dependencyType && (
+              
                 <tr className="bg-gray-50 border-orange-200 text-xl">
-                  <th className="p-3 font-bold text-gray-700">Tâches {dependencyType}</th>
+                  <th className="p-3 font-bold text-gray-700">Tâches {currentProject.isSuccessor ? "successeur" : "antérieur" }</th>
                   {tasks.map((task, index) => (
                     <td
                       key={index}
                       className="p-3 border border-orange-200 cursor-pointer hover:bg-gray-100 transition"
                       onClick={() => openTaskModal(index)}
                     >
-                      {dependencyType === "antérieur" && task.dependencies.length > 0 ? (
+                      {!currentProject.isSuccessor && task.dependencies.length > 0 ? (
                         <div className="text-gray-800">
                           {task.dependencies
                             .map(dep => {
@@ -182,7 +184,7 @@ const TaskListTable = ({
                             })
                             .join(", ")}
                         </div>
-                      ) : dependencyType === "successeur" && task.successors.length > 0 ? (
+                      ) : currentProject.isSuccessor && task.successors.length > 0 ? (
                         <div className="text-gray-800">
                           {task.successors
                             .map(succ => {
@@ -197,7 +199,7 @@ const TaskListTable = ({
                     </td>
                   ))}
                 </tr>
-              )}
+              
             </thead>
           </table>
         </div>
@@ -206,7 +208,7 @@ const TaskListTable = ({
         onClose={() => {setIsTaskModalOpen(false);fetchTasksFromBackend();}}
         task={tasks[selectedTaskIndex]}
         allTasks={tasks}
-        dependencyType={dependencyType}
+        dependencyType={currentProject.isSuccessor ? "successeur" : "antérieur"}
       />
     </div>
   );

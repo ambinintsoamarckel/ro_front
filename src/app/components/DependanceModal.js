@@ -6,7 +6,7 @@ import { X } from 'lucide-react';
 
 
 
-const Modal = ({ isModalOpen, setIsModalOpen, dependencyType, setDependencyType }) => {
+const Modal = ({ isModalOpen, setIsModalOpen, dependencyType, setDependencyType, projectId }) => {
   const [selectedOption, setSelectedOption] = useState(dependencyType);
 
   useEffect(() => {
@@ -19,9 +19,37 @@ const Modal = ({ isModalOpen, setIsModalOpen, dependencyType, setDependencyType 
     setIsModalOpen(false);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     console.log("Choix enregistré :", selectedOption);
-    setDependencyType(selectedOption); // Mise à jour de la valeur dans TaskScheduler
+    // Mise à jour de la valeur dans TaskScheduler
+    if (selectedOption === "antérieur")
+    {
+      try {
+        const isSuccessor=false;
+        console.log(projectId);
+        const response = await fetch(`http://localhost:3001/projects/${projectId}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify({ isSuccessor}),
+        });
+  
+        if (!response.ok) {
+          throw new Error("Erreur lors de la maj du projet");
+        }
+  
+        const createdProject = await response.json();
+        console.log(createdProject);
+  
+      } catch (error) {
+        console.error(error.message);
+        alert("Erreur lors de la création du maj  projet.");
+      }
+    }
+    setDependencyType(selectedOption);
+    
     setIsModalOpen(false);
   };  
 

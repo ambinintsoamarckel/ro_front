@@ -13,6 +13,8 @@ const TaskScheduler = ({ currentProject }) => {
   const [isDependencyModalOpen, setIsDependencyModalOpen] = useState(false);
   const [dependencyType, setDependencyType] = useState("");
   const tableRef = useRef(null);
+  const [project ,setProject] = useState({});
+  const [tableHeight, setTableHeight] = useState(0);
 
   const fetchTasksFromBackend = async () => {
     try {
@@ -27,6 +29,39 @@ const TaskScheduler = ({ currentProject }) => {
       console.error("Erreur API :", error);
     }
   };
+  const fetchProject = async (projectId) => {
+    try {
+      const isSuccessor=false;
+      const response = await fetch(`http://localhost:3001/projects/${projectId}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        throw new Error("Erreur lors du get du projet");
+      }
+
+      const createdProject = await response.json();
+      console.log(createdProject);
+      setProject(createdProject);
+
+      // Appel la fonction parent avec le nom et le nombre de tâches
+   
+
+    } catch (error) {
+      console.error(error.message);
+      alert("Erreur lors de la création du projet.");
+    } 
+  }
+  
+  useEffect(() => {
+    if (tableRef.current) {
+      setTableHeight(tableRef.current.offsetHeight);
+    }
+  }, [tasks]);
 
   useEffect(() => {
     const fetchTasks = async () => {
@@ -56,6 +91,7 @@ const TaskScheduler = ({ currentProject }) => {
     };
   
     fetchTasks();
+    fetchProject(currentProject.id);
   }, [currentProject]); // Dépendance sur currentProject
   
 
@@ -137,8 +173,10 @@ const TaskScheduler = ({ currentProject }) => {
     }
   };
 
-  const handleDependencyValidation = (type) => {
+  const handleDependencyValidation = async (type) => {
     setDependencyType(type);
+    console.log("mandeha ve ");
+    await fetchProject(currentProject.id);
     setIsDependencyModalOpen(false);
   };
 
@@ -147,7 +185,7 @@ const TaskScheduler = ({ currentProject }) => {
       {isInitialEntry ? (
         <div className="relative">
           <div className="overflow-x-scroll scrollbar-hidden shadow-md mt-5">
-            <h1>{currentProject.name}</h1>
+            <h1>{project.name}</h1>
             <table ref={tableRef} className="min-w-full text-center border-collapse shadow-lg overflow-hidden mt-5 mb-5">
               <thead>
                 <tr className="bg-orange-100 text-gray-800 text-xl font-semibold">
@@ -182,7 +220,10 @@ const TaskScheduler = ({ currentProject }) => {
             </table>
           </div>
 
-          <div className="absolute top-0 right-0 w-8">
+          <div
+            className="absolute top-0 right-0 w-8"
+            style={{ height: tableHeight }}
+          >
             <div className="relative h-full group">
               <button
                 onClick={addColumn}
@@ -223,7 +264,8 @@ const TaskScheduler = ({ currentProject }) => {
         <TaskListTable 
           tasks={fetchedTasks}
           setTasks={setFetchedTasks} 
-          currentProject={currentProject}
+          currentProject={project}
+          setProject={setProject}
           onTaskUpdate={handleTaskUpdate}
           onTaskDelete={handleTaskDelete}
           dependencyType={dependencyType}
@@ -234,6 +276,7 @@ const TaskScheduler = ({ currentProject }) => {
         isModalOpen={isDependencyModalOpen}
         setIsModalOpen={setIsDependencyModalOpen}
         dependencyType={dependencyType}
+        projectId={currentProject.id}
         setDependencyType={handleDependencyValidation} 
       />
     </div>

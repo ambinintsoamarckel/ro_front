@@ -32,7 +32,7 @@ const TaskInitializerModal = ({ isOpen, onClose, onInitialize }) => {
       console.log(createdProject);
 
       // Appel la fonction parent avec le nom et le nombre de tâches
-      onInitialize( taskCount, createdProject);
+      await onInitialize( taskCount, createdProject);
 
       // Reset et close
       onClose();
