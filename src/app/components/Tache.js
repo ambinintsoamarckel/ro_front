@@ -5,75 +5,101 @@ import { Plus, Minus } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import DependanceModal from "./DependanceModal";
 import CPMGraph from "./CPMGraph";
+import TaskListTable from "./TaskListTable";
 
 const Tache = ({ initialTaskCount , currentProject}) => {
-  //const [taskCount, setTaskCount] = useState("");
-  const [tasks, setTasks] = useState([{ name: "", duration: "" , projectId: currentProject.id}]);
-  const [initialized, setInitialized] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedTask, setSelectedTask] = useState(null);
-  const [dependencyType, setDependencyType] = useState("");
-  const [showDependencyRow, setShowDependencyRow] = useState(false);
+  const [tasks, setTasks] = useState([{ name: "", duration: "", projectId: currentProject.id }]);
+  const [fetchedTasks, setFetchedTasks] = useState([]);
+  const [isInitialEntry, setIsInitialEntry] = useState(true);
   const [isDependencyModalOpen, setIsDependencyModalOpen] = useState(false);
-  const [projectTitle, setProjectTitle] = useState("");
-
+  const [dependencyType, setDependencyType] = useState("");
   const tableRef = useRef(null);
+  const [project ,setProject] = useState({});
   const [tableHeight, setTableHeight] = useState(0);
-  //const isValid = taskCount !== "" && parseInt(taskCount) >= 3;
 
+  const fetchTasksFromBackend = async () => {
+    try {
+      const response = await fetch(`http://localhost:3001/tasks/project/${currentProject.id}`);
+      if (response.ok) {
+        const data = await response.json();
+        setFetchedTasks(data);
+      } else {
+        console.error("Erreur de récupération des tâches.");
+      }
+    } catch (error) {
+      console.error("Erreur API :", error);
+    }
+  };
+  const fetchProject = async (projectId) => {
+    try {
+      const isSuccessor=false;
+      const response = await fetch(`http://localhost:3001/projects/${projectId}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        throw new Error("Erreur lors du get du projet");
+      }
+
+      const createdProject = await response.json();
+      console.log(createdProject);
+      setProject(createdProject);
+
+      // Appel la fonction parent avec le nom et le nombre de tâches
+   
+
+    } catch (error) {
+      console.error(error.message);
+      alert("Erreur lors de la création du projet.");
+    } 
+  }
+  
   useEffect(() => {
     if (tableRef.current) {
       setTableHeight(tableRef.current.offsetHeight);
     }
   }, [tasks]);
 
-/*   useEffect(() => {
-    const initialTasks = Array.from({ length: initialTaskCount ? initialTaskCount : 3 }, () => ({
-      name: "",
-      duration: "",
-      projectId: currentProject.id
-    }));
-    setTasks(initialTasks);
-  }, [initialTaskCount]); */
   useEffect(() => {
-    if (currentProject?.id) {
-      fetch(`http://localhost:3001/tasks/project/${currentProject.id}`)
-        .then((response) => {
-          if (!response.ok) {
-            if (response.status === 404) {
-              // Si le serveur renvoie 404, on initialise avec 3 tâches vides
-              return [];
-            }
-            throw new Error(`Erreur ${response.status}`);
-          }
-          return response.json();
-        })
-        .then((data) => {
-          if (data.length === 0) {
-            setTasks(Array.from({ length: 3 }, () => ({ name: "", duration: "", projectId: currentProject.id })));
-          } else {
-            setTasks(data);
-          }
-        })
-        .catch((error) => console.error("Erreur lors de la récupération des tâches :", error));
-    }
-  }, [currentProject]);
+    const fetchTasks = async () => {
+      if (!currentProject?.id) return; // Vérifie que currentProject existe
   
+      const initialTasks = Array.from({ length: 3 }, () => ({
+        name: "",
+        duration: "",
+        projectId: currentProject.id
+      }));
   
-
-  const handleInitializeTasks = (taskCount) => {
-    const initialTasks = Array.from({ length: taskCount }, () => ({
-      name: "",
-      duration: "",
-      projectId: currentProject.id
-    }));
-    setTasks(initialTasks);
-    setInitialized(true);
-    setIsModalOpen(false);
-  };
+      try {
+        const response = await fetch(`http://localhost:3001/tasks/project/${currentProject.id}`);
+        if (response.ok) {
+          const data = await response.json();
+          console.log(data);
+          setTasks(data);
+          setIsInitialEntry(false);
+        } else {
+          setTasks(initialTasks);
+          setIsInitialEntry(true);
+        }
+      } catch (error) {
+        console.error("Erreur API :", error);
+        setTasks(initialTasks);
+        setIsInitialEntry(true);
+      }
+    };
+  
+    fetchTasks();
+    fetchTasksFromBackend();
+    fetchProject(currentProject.id);
+  }, [currentProject]); // Dépendance sur currentProject
+  
 
   const addColumn = () => {
-    setTasks([...tasks, { name: "", duration: "" ,projectId: currentProject.id}]);
+    setTasks([...tasks, { name: "", duration: "", projectId: currentProject.id }]);
   };
 
   const removeColumn = () => {
@@ -89,19 +115,14 @@ const Tache = ({ initialTaskCount , currentProject}) => {
   };
 
   const handleDurationChange = (index, value) => {
-    if (/^\d*$/.test(value)) { // N'accepte que les chiffres
+    if (/^\d*$/.test(value)) {
       const updatedTasks = [...tasks];
-      updatedTasks[index].duration = value === "" ? "" : Math.max(1, parseInt(value, 10)); // Min 1
+      updatedTasks[index].duration = value === "" ? "" : Math.max(1, parseInt(value, 10));
       setTasks(updatedTasks);
     }
   };
 
   const allTasksValid = tasks.every((task) => task.name.trim() !== "" && task.duration >= 1);
-
-  const openModal = (task) => {
-    setSelectedTask(task);
-    setIsModalOpen(true);
-  };
 
   const handleSaveAndOpenModal = async () => {
     try {
@@ -111,8 +132,10 @@ const Tache = ({ initialTaskCount , currentProject}) => {
         body: JSON.stringify({ tasks }),
       });
       if (response.ok) {
-        alert("Tâches enregistrées !");
-        setIsModalOpen(true); // Ouvre la modal après succès
+        const data = await response.json();
+        setIsInitialEntry(false);
+        setIsDependencyModalOpen(true);
+        await fetchTasksFromBackend();
       } else {
         alert("Erreur lors de l'enregistrement.");
       }
@@ -121,20 +144,69 @@ const Tache = ({ initialTaskCount , currentProject}) => {
     }
   };
 
-  const handleDependencyValidation = (type) => {
-    console.log("Type reçu :", type); // Vérification
-    setDependencyType(type);
-    setShowDependencyRow(true); // Afficher la ligne après validation
-    setIsModalOpen(false);
+  const handleTaskUpdate = async (updatedTask) => {
+    try {
+      const response = await fetch(`http://localhost:3001/tasks/${updatedTask.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updatedTask),
+      });
+      if (response.ok) {
+        await fetchTasksFromBackend();
+      } else {
+        alert("Erreur lors de la mise à jour de la tâche.");
+      }
+    } catch (error) {
+      console.error("Erreur API :", error);
+    }
   };
-  
+
+  const handleTaskDelete = async (taskId) => {
+    try {
+      const response = await fetch(`http://localhost:3001/tasks/${taskId}`, {
+        method: "DELETE",
+      });
+      if (response.ok) {
+        await fetchTasksFromBackend();
+      } else {
+        alert("Erreur lors de la suppression de la tâche.");
+      }
+    } catch (error) {
+      console.error("Erreur API :", error);
+    }
+  };
+
+  const handleTaskCreate = async (task) => {
+    try {
+      const response = await fetch(`http://localhost:3001/tasks/`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tasks: [{ name: task.name, duration: task.duration, projectId: currentProject.id }] }), 
+      });
+      if (response.ok) {
+        await fetchTasksFromBackend();
+      } else {
+        alert("Erreur lors de la création de la tâche.");
+      }
+    } catch (error) {
+      console.error("Erreur API :", error);
+    }
+  };
+
+  const handleDependencyValidation = async (type) => {
+    setDependencyType(type);
+    console.log("mandeha ve ");
+    await fetchProject(currentProject.id);
+    setIsDependencyModalOpen(false);
+  };
 
   return (
     <div className="w-11/12 max-w-6xl mx-auto bg-white p-8 shadow-md rounded-lg mt-10">
+      {isInitialEntry ? (
         <div className="relative">
           <div className="overflow-x-scroll scrollbar-hidden shadow-md mt-5">
-            <h1>{currentProject.name}{currentProject.description}</h1>
-            <table ref={tableRef} className="min-w-full text-center border-collapse shadow-lg  overflow-hidden mt-5 mb-5">
+            <h1>{project.name}</h1>
+            <table ref={tableRef} className="min-w-full text-center border-collapse shadow-lg overflow-hidden mt-5 mb-5">
               <thead>
                 <tr className="bg-orange-100 text-gray-800 text-xl font-semibold">
                   <th className="p-3 border border-orange-200">Tâches</th>
@@ -145,12 +217,12 @@ const Tache = ({ initialTaskCount , currentProject}) => {
                         value={task.name}
                         onChange={(e) => handleNameChange(index, e.target.value)}
                         placeholder={`Tâche ${index + 1}`}
-                        className="w-full p-3 text-center bg-transparent text-gray-900 placeholder-gray-400 outline-none border-b border-transparent focus:border-gray-600 transition-all "
+                        className="w-full p-3 text-center bg-transparent text-gray-900 placeholder-gray-400 outline-none border-b border-transparent focus:border-gray-600 transition-all"
                       />
                     </th>
                   ))}
                 </tr>
-                <tr className={`bg-white  text-xl`}>
+                <tr className="bg-white text-xl">
                   <th className="p-3 font-bold border-orange-200 text-gray-700">Durée</th>
                   {tasks.map((task, index) => (
                     <td key={index} className="p-3 border border-orange-200">
@@ -164,17 +236,6 @@ const Tache = ({ initialTaskCount , currentProject}) => {
                     </td>
                   ))}
                 </tr>
-                {showDependencyRow && (
-                <tr className="bg-gray-50 border-orange-200 text-xl">
-                  <th className="p-3 font-bold  text-gray-700">Tâches {dependencyType}</th>
-                  {tasks.map((task, index) => (
-                    <td key={index} className="p-3 border border-orange-200">
-                      {/* Ici, tu peux ajouter un champ de saisie ou une valeur en lecture seule */}
-                    </td>
-                  ))}
-                </tr>
-              )}
-
               </thead>
             </table>
           </div>
@@ -204,35 +265,48 @@ const Tache = ({ initialTaskCount , currentProject}) => {
               </button>
             </div>
           </div>
-          {!showDependencyRow && (
-            <div className="flex justify-end mt-4">
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={handleSaveAndOpenModal}
-                disabled={!allTasksValid}
-                className={`px-4 py-2 rounded-lg text-white mt-5 ${
-                  allTasksValid ? "bg-green-500 hover:bg-green-700" : "bg-gray-400 cursor-not-allowed"
-                }`}
-              >
-                Ajouter dépendance
-              </motion.button>
-            </div>
-          )}
 
+          <div className="flex justify-end mt-4">
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={handleSaveAndOpenModal}
+              disabled={!allTasksValid}
+              className={`px-4 py-2 rounded-lg text-white mt-5 ${
+                allTasksValid ? "bg-green-500 hover:bg-green-700" : "bg-gray-400 cursor-not-allowed"
+              }`}
+            >
+              Ajouter dépendance
+            </motion.button>
+          </div>
         </div>
+      ) : (
+        <TaskListTable 
+          tasks={fetchedTasks}
+          setTasks={setFetchedTasks} 
+          currentProject={project}
+          setProject={setProject}
+          onTaskUpdate={handleTaskUpdate}
+          onTaskDelete={handleTaskDelete}
+          onTaskCreate={handleTaskCreate}
+          dependencyType={dependencyType}
+        />
+      )}
 
       <DependanceModal
         isModalOpen={isDependencyModalOpen}
         setIsModalOpen={setIsDependencyModalOpen}
         dependencyType={dependencyType}
+        projectId={currentProject.id}
         setDependencyType={handleDependencyValidation} 
       />
-          {/* Graphe CPM */}
+                {/* Graphe CPM */}
     <h2 className="text-xl font-bold mt-8 mb-4">Diagramme du chemin critique</h2>
     <CPMGraph projectId={currentProject.id} />
-
     </div>
+
+
+  
   );
 };
 
