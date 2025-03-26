@@ -10,10 +10,21 @@ const TaskDetailsModal = ({ isOpen, onClose, task, allTasks, dependencyType }) =
     // Réinitialiser à chaque ouverture de la modal
     if (isOpen) {
       setSelectedTaskIndices([]);
-      setAddedTasks([]);
+      
+      // Si c'est une modal de type "successeur", pré-remplir avec les successeurs existants
+      if (dependencyType === "successeur" && task && task.successors) {
+        const existingSuccessors = task.successors.map(succ => {
+          // Trouver la tâche correspondante dans allTasks
+          const matchingTask = allTasks.find(t => t.id === succ.taskId);
+          return matchingTask;
+        }).filter(t => t !== undefined); // Filtrer les tâches non trouvées
+  
+        setAddedTasks(existingSuccessors);
+      }
+      
       console.log(task);
     }
-  }, [isOpen]);
+  }, [isOpen, task, dependencyType, allTasks]);
 
   const handleCheckboxChange = (index) => {
     if (selectedTaskIndices.includes(index)) {
@@ -34,19 +45,16 @@ const TaskDetailsModal = ({ isOpen, onClose, task, allTasks, dependencyType }) =
   };
   
   const handleValidate = async () => {
-    if (addedTasks.length === 0) return;
-  
     const taskId = task?.id;  // Vérifie ici
+  
+    // Modification clé : on autorise les tableaux vides
     const dependencyIds = addedTasks.map(t => t.id);
   
-    console.log("taskId:", taskId);  // <-- AJOUT
-    console.log("dependencyIds:", dependencyIds);  // <-- AJOUT
-  
     const payload = dependencyType === "successeur"
-      ? { taskId, successorIds: dependencyIds }
+      ? { taskId, successorIds: dependencyIds }  // Même avec un tableau vide
       : { taskId, dependsOnIds: dependencyIds };
   
-    console.log("Payload envoyé :", payload);  // <-- AJOUT
+    console.log("Payload envoyé :", payload);
   
     try {
       const response = await fetch('http://localhost:3001/dependencies', {
@@ -65,7 +73,7 @@ const TaskDetailsModal = ({ isOpen, onClose, task, allTasks, dependencyType }) =
     } catch (err) {
       alert(`Erreur réseau : ${err.message}`);
     }
-  };  
+  }; 
   
   if (!isOpen) return null;
 
@@ -178,9 +186,7 @@ const otherTasks = allTasks
   whileHover={{ scale: 1.05 }}
   whileTap={{ scale: 0.95 }}
   onClick={handleValidate}
-  disabled={addedTasks.length === 0}
-  className={`px-4 py-2 rounded text-white ${
-    addedTasks.length > 0 ? "bg-green-500 hover:bg-green-700" : "bg-gray-300 cursor-not-allowed"
+  className={`px-4 py-2 rounded text-white ${ "bg-green-500 hover:bg-green-700" 
   }`}
 >
   Valider

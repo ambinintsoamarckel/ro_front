@@ -261,8 +261,8 @@ const TaskScheduler = ({ initialTaskCount , currentProject}) => {
 <TaskDetailsModal
   isOpen={isTaskModalOpen}
   onClose={() => {setIsTaskModalOpen(false);fetchTasksFromBackend();}}
-  task={tasks[selectedTaskIndex]}
-  allTasks={tasks}
+  task={fetchedTasks[selectedTaskIndex]}
+  allTasks={fetchedTasks}
   dependencyType={dependencyType}
 />
 
