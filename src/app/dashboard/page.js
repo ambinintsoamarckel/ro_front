@@ -12,8 +12,8 @@ const Dashboard = () => {
 
   return (
     <Layout setInitialTaskCount={setInitialTaskCount} setCurrentProject={setCurrentProject} setProjectPage={setProjectPage} projects={projects} setProjects={setProjects}>
-      {!projectPage && initialTaskCount && <TaskScheduler initialTaskCount={initialTaskCount} currentProject = {currentProject}/>}
-      {projectPage && <Tache currentProject={currentProject}/>}
+      { (projectPage || initialTaskCount )&& <TaskScheduler initialTaskCount={initialTaskCount} currentProject = {currentProject}/>}
+
     </Layout>
   );
 };

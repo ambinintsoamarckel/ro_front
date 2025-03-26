@@ -5,8 +5,9 @@ import { Plus ,Minus} from "lucide-react";
 import { motion } from "framer-motion";
 import DependanceModal from "./DependanceModal";
 import TaskListTable from "./TaskListTable";
+import CPMGraph from "./CPMGraph";
 
-const TaskScheduler = ({ currentProject }) => {
+const TaskScheduler = ({ currentProject, initialTaskCount }) => {
   const [tasks, setTasks] = useState([{ name: "", duration: "", projectId: currentProject.id }]);
   const [fetchedTasks, setFetchedTasks] = useState([]);
   const [isInitialEntry, setIsInitialEntry] = useState(true);
@@ -67,7 +68,7 @@ const TaskScheduler = ({ currentProject }) => {
     const fetchTasks = async () => {
       if (!currentProject?.id) return; // Vérifie que currentProject existe
   
-      const initialTasks = Array.from({ length: 3 }, () => ({
+      const initialTasks = Array.from({ length: initialTaskCount || 3 }, () => ({
         name: "",
         duration: "",
         projectId: currentProject.id
@@ -78,19 +79,23 @@ const TaskScheduler = ({ currentProject }) => {
         if (response.ok) {
           const data = await response.json();
           setTasks(data);
+          setFetchedTasks(data);
           setIsInitialEntry(false);
         } else {
           setTasks(initialTasks);
+          
           setIsInitialEntry(true);
         }
       } catch (error) {
         console.error("Erreur API :", error);
         setTasks(initialTasks);
+        
         setIsInitialEntry(true);
       }
     };
   
     fetchTasks();
+    fetch
     fetchProject(currentProject.id);
   }, [currentProject]); // Dépendance sur currentProject
   
@@ -297,7 +302,12 @@ const TaskScheduler = ({ currentProject }) => {
         projectId={currentProject.id}
         setDependencyType={handleDependencyValidation} 
       />
+                    {/* Graphe CPM */}
+    <h2 className="text-xl font-bold mt-8 mb-4">Diagramme du chemin critique</h2>
+    <CPMGraph projectId={currentProject.id} />
     </div>
+
+    
   );
 };
 
