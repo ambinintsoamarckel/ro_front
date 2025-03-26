@@ -173,6 +173,23 @@ const TaskScheduler = ({ currentProject }) => {
     }
   };
 
+  const handleTaskCreate = async (task) => {
+    try {
+      const response = await fetch(`http://localhost:3001/tasks/`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tasks: [{ name: task.name, duration: task.duration, projectId: currentProject.id }] }), 
+      });
+      if (response.ok) {
+        await fetchTasksFromBackend();
+      } else {
+        alert("Erreur lors de la création de la tâche.");
+      }
+    } catch (error) {
+      console.error("Erreur API :", error);
+    }
+  };
+
   const handleDependencyValidation = async (type) => {
     setDependencyType(type);
     console.log("mandeha ve ");
@@ -268,6 +285,7 @@ const TaskScheduler = ({ currentProject }) => {
           setProject={setProject}
           onTaskUpdate={handleTaskUpdate}
           onTaskDelete={handleTaskDelete}
+          onTaskCreate={handleTaskCreate}
           dependencyType={dependencyType}
         />
       )}
