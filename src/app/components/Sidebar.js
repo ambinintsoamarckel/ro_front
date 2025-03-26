@@ -69,17 +69,17 @@ const Sidebar = ({ setInitialTaskCount, setCurrentProject, setProjectPage, proje
   return (
     <div className="flex">
       {/* Bouton pour ouvrir le sidebar */}
-      <button onClick={() => setIsOpen(!isOpen)} className="fixed top-4 left-4 p-2 text-white rounded z-50">
+      <button onClick={() => setIsOpen(!isOpen)} className="fixed top-4 left-4 p-2 text-gray-700 rounded z-30">
         {isOpen ? <X /> : <Menu size={30} />}
       </button>
 
       {/* Sidebar */}
       <div
-        className={`fixed top-0 left-0 h-full bg-gray-800 text-white w-70 p-4 
+        className={`fixed top-0 left-0 h-full bg-[#FFFFFF] text-gray-700 w-70 p-4 
         transform ${isOpen ? "translate-x-0" : "-translate-x-full"} 
-        transition-transform duration-300 ease-in-out`}
+        transition-transform duration-300 ease-in-out z-30`}
       >
-        <button onClick={() => setIsOpen(false)} className="text-white p-2 mb-4">
+        <button onClick={() => setIsOpen(false)} className="text-gray-700 p-2 mb-4">
           <X />
         </button>
 
