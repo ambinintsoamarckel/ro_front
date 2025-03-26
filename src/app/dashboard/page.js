@@ -3,7 +3,6 @@
 import { useState } from "react";
 import Layout from "../components/Layout";
 import TaskScheduler from "../components/TaskScheduler";
-import Tache from "../components/Tache";
 const Dashboard = () => {
   const [initialTaskCount, setInitialTaskCount] = useState(null);
   const [currentProject, setCurrentProject] = useState({}); // Valeur par défaut nulle

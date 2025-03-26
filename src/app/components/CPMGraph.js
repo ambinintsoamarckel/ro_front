@@ -232,7 +232,7 @@ const CPMGraph  = forwardRef((props, ref) => {
                  source: task.id.toString(),
                  target: successor.toString(),
                  animated: task.critical,
-                 label: task.duration.toString() + "j",
+                 label: task.duration.toString(),
                  labelStyle: { fontSize: "14px", fill: task.critical ? "red" : "black" },
                  style: {
                    stroke: task.critical ? "red" : "black",
