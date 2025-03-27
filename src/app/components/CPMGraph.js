@@ -6,10 +6,83 @@ import ReactFlow, {
   Background,
   applyNodeChanges,
   applyEdgeChanges,
-  useReactFlow,
+  useReactFlow,getBezierPath, getSimpleBezierPath, getSmoothStepPath 
 } from "reactflow";
 import dagre from "dagre";
 import "reactflow/dist/style.css";
+
+
+const CustomEdge = ({
+  id,
+  sourceX,
+  sourceY,
+  targetX,
+  targetY,
+  sourcePosition,
+  targetPosition,
+  style = {},
+  markerEnd,
+  label,
+  labelStyle,
+}) => {
+  // Paramètres de courbure personnalisés
+  const edgeParams = {
+    sourceX,
+    sourceY,
+    sourcePosition,
+    targetX,
+    targetY,
+    targetPosition,
+    borderRadius: 30,  // Rayon de courbure
+  };
+
+  // Générer le chemin avec courbure
+  const [path, labelX, labelY] = getSmoothStepPath(edgeParams);
+
+  return (
+    <>
+      <path
+        id={id}
+        style={{
+          ...style,
+          fill: 'none',
+          strokeWidth: style.strokeWidth || 2,
+        }}
+        className="react-flow__edge-path"
+        d={path}
+        markerEnd={markerEnd}
+      />
+      
+      {/* Espace pour la durée avec un petit rectangle blanc */}
+      {label && (
+        <g>
+          <rect
+            x={labelX - 15}
+            y={labelY - 10}
+            width={30}
+            height={20}
+            fill="white"
+            stroke="none"
+          />
+          <text
+            x={labelX}
+            y={labelY}
+            textAnchor="middle"
+            alignmentBaseline="middle"
+            style={{
+              ...labelStyle,
+              fontSize: "12px",
+              fontWeight: "bold",
+            }}
+            className="react-flow__edge-label"
+          >
+            {label}
+          </text>
+        </g>
+      )}
+    </>
+  );
+};
 
 // Configuration pour l'algorithme de layout Dagre
 const dagreGraph = new dagre.graphlib.Graph();
@@ -406,6 +479,9 @@ const CPMGraph = forwardRef((props, ref) => {
     getEdges: () => edges,
     reloadData: () => loadCriticalPathData()
   }));
+  const edgeTypes = {
+    custom: CustomEdge,
+  };
   return (
     <div>
     {isLoading ? (
@@ -413,19 +489,23 @@ const CPMGraph = forwardRef((props, ref) => {
     ) : (
     <div style={containerStyle} ref={flowContainerRef}>
       <div style={innerContainerStyle}>
-        <ReactFlow
+      <ReactFlow
           nodes={nodes}
-          edges={edges}
+          edges={edges.map(edge => ({
+            ...edge,
+            type: 'custom', // Utiliser le type d'arête personnalisé
+          }))}
+          edgeTypes={edgeTypes} // Ajouter cette ligne
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
           fitView={false}
-          zoomOnScroll={false} // Désactivé pour permettre le défilement normal
-          zoomOnPinch={false} // Désactivé
-          zoomOnDoubleClick={false} // Désactivé
-          panOnScroll={false} // Désactivé pour permettre le défilement normal
-          panOnDrag={false} // Désactivé pour le graphe, mais les nœuds restent déplaçables
-          preventScrolling={false} // Permettre le défilement normal
-          nodesDraggable={true} // Les nœuds peuvent être déplacés
+          zoomOnScroll={false}
+          zoomOnPinch={false}
+          zoomOnDoubleClick={false}
+          panOnScroll={false}
+          panOnDrag={false}
+          preventScrolling={false}
+          nodesDraggable={true}
           elementsSelectable={true}
           style={reactFlowStyle}
         >
