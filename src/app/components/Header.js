@@ -54,9 +54,9 @@ const Header = () => {
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.95 }}
             onClick={handleLogout}
-            className={`fixed top-4 right-4 p-2 rounded-full shadow-md transition duration-300 bg-[#EDB640] text-white`}
+            className={`fixed top-5 right-10 p-2 rounded-full shadow-md transition duration-300 bg-[#EDB640] text-white`}
           >
-            <Power size={20} />
+            <Power size={25} />
           </motion.button>
         </nav>
       </div>

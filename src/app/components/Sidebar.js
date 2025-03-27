@@ -88,10 +88,10 @@ const Sidebar = ({ setInitialTaskCount, setCurrentProject, setProjectPage, proje
           >
 
             <ul>
-              <li className="flex items-center cursor-pointer p-3 rounded-xl transition-all duration-300 ease-in-out bg-gray-200 text-black shadow-lg transform hover:scale-105 hover:bg-[#FFAA00] hover:translate-x-2 my-8" onClick={() => setIsModalOpen(true)}>
+              <li className="flex items-center text-2xs cursor-pointer p-3 rounded-xl transition-all duration-300 ease-in-out bg-gray-200 text-black shadow-lg transform hover:scale-105 hover:bg-[#FFAA00] hover:translate-x-2 my-8" onClick={() => setIsModalOpen(true)}>
                 <BadgePlus className="mr-2" size={25} /> Nouveau projet
               </li>
-              <li className="flex items-center cursor-pointer p-3 rounded-xl transition-all duration-300 ease-in-out bg-gray-200 text-black shadow-lg transform hover:scale-105 hover:bg-[#FFAA00] hover:translate-x-2 my-8 justify-between p-3" onClick={handleShowProjects}>
+              <li className="flex items-center  text-2xs cursor-pointer p-3 rounded-xl transition-all duration-300 ease-in-out bg-gray-200 text-black shadow-lg transform hover:scale-105 hover:bg-[#FFAA00] hover:translate-x-2 my-8 justify-between p-3" onClick={handleShowProjects}>
                 <div className="flex items-center">
                   <User className="mr-2" size={25} /> Mes projets
                 </div>
@@ -122,10 +122,10 @@ const Sidebar = ({ setInitialTaskCount, setCurrentProject, setProjectPage, proje
                     </ul>
                   </div>
                 )}
-              <li className="flex items-center cursor-pointer p-3 rounded-xl transition-all duration-300 ease-in-out bg-gray-200 text-black shadow-lg transform hover:scale-105 hover:bg-[#FFAA00] hover:translate-x-2 my-8">
+              <li className="flex items-center text-2xs cursor-pointer p-3 rounded-xl transition-all duration-300 ease-in-out bg-gray-200 text-black shadow-lg transform hover:scale-105 hover:bg-[#FFAA00] hover:translate-x-2 my-8">
                 <HeartIcon className="mr-2" size={25} /> Favoris
               </li>
-              <li className="flex items-center cursor-pointer p-3 rounded-xl transition-all duration-300 ease-in-out bg-gray-200 text-black shadow-lg transform hover:scale-105 hover:bg-[#FFAA00] hover:translate-x-2 my-8">
+              <li className="flex items-center ctext-2xs ursor-pointer p-3 rounded-xl transition-all duration-300 ease-in-out bg-gray-200 text-black shadow-lg transform hover:scale-105 hover:bg-[#FFAA00] hover:translate-x-2 my-8">
                 <Settings className="mr-2" /> Paramètres
               </li>
             </ul>
