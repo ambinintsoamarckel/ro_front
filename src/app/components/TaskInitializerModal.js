@@ -9,7 +9,7 @@ const TaskInitializerModal = ({ isOpen, onClose, onInitialize }) => {
   const [isFavorite, setIsFavorite] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const isValid = taskCount !== "" && parseInt(taskCount) >= 3;
+  const isValid = name.trim() !== "" && taskCount !== "" && parseInt(taskCount) >= 3;
 
   const autoResizeTextarea = (textarea) => {
     if (textarea) {
@@ -155,7 +155,7 @@ const TaskInitializerModal = ({ isOpen, onClose, onInitialize }) => {
                 whileTap={{ scale: 0.95 }}
                 onClick={handleSubmit}
                 disabled={!isValid || loading}
-                className={`w-40 py-3 px-4 text-white rounded-lg font-medium transition-all duration-300 ${isValid ? "bg-green-500 hover:bg-green-700" : "bg-gray-400 cursor-not-allowed"}`}
+                className={`w-40 py-3 px-4 text-white rounded-lg font-medium transition-all duration-300 ${isValid ? "bg-green-600 hover:bg-green-800" : "bg-green-500 cursor-not-allowed"}`}
                 >
                   {loading ? "Création..." : "Créer"}
                 </motion.button>
