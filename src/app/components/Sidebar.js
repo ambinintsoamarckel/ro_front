@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import TaskInitializerModal from "./TaskInitializerModal";
-import { Menu, X, BadgePlus, User, Settings, HeartIcon } from "lucide-react";
+import { Menu, X, BadgePlus, User, Settings, HeartIcon, ChevronDown, ChevronUp  } from "lucide-react";
 
 const Sidebar = ({ setInitialTaskCount, setCurrentProject, setProjectPage, projects, setProjects }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -74,56 +75,65 @@ const Sidebar = ({ setInitialTaskCount, setCurrentProject, setProjectPage, proje
       </button>
 
       {/* Sidebar */}
-      <div
-        className={`fixed top-0 left-0 h-full bg-[#FFFFFF] text-gray-700 w-70 p-4 
-        transform ${isOpen ? "translate-x-0" : "-translate-x-full"} 
-        transition-transform duration-300 ease-in-out z-30`}
-      >
-        <button onClick={() => setIsOpen(false)} className="text-gray-700 p-2 mb-4">
-          <X />
-        </button>
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ x: "-100%" }}
+            animate={{ x: 0 }}
+            exit={{ x: "-100%" }}
+            transition={{ duration: 0.3, ease: "easeInOut" }}
+            className="fixed top-0 left-0 h-full bg-white text-gray-700 w-70 p-4 z-30 shadow-lg overflow-y-auto"
+          >
 
-        <ul>
-          <li className="flex items-center p-3 hover:bg-gray-700 text-xl rounded mt-10 mb-5" onClick={() => setIsModalOpen(true)}>
-            <BadgePlus className="mr-2" size={25} /> Nouveau projet
-          </li>
+            <button onClick={() => setIsOpen(false)} className="text-gray-700 p-2 mb-4">
+              <X />
+            </button>
 
-          <li className="flex items-center p-3 hover:bg-gray-700 text-xl rounded mt-10 mb-5" onClick={handleShowProjects}>
-            <User className="mr-2" size={25} /> Mon projet
-          </li>
-
-          {/* Liste des projets */}
-          {showProjects && (
-            <ul className="ml-6 mb-4">
-              {projects.length > 0 ? (
-                projects.map((project) => (
-                  <li
-                    key={project.id}
-                    className="text-sm hover:text-gray-400 cursor-pointer mt-1"
-                    onClick={() => {
-                      setCurrentProject(project);
-                      setProjectPage(true);
-                      setIsOpen(false);
-                      console.log("Projet sélectionné :", project.name);
-                    }}
-                  >
-                    {project.name}
-                  </li>
-                ))
-              ) : (
-                <li className="text-sm text-gray-400 mt-1">Aucun projet trouvé</li>
-              )}
+            <ul>
+              <li className="flex items-center p-3 hover:bg-gray-700 text-xl rounded mt-10 mb-5" onClick={() => setIsModalOpen(true)}>
+                <BadgePlus className="mr-2" size={25} /> Nouveau projet
+              </li>
+              <li className="flex items-center justify-between p-3 hover:bg-gray-700 text-xl rounded mt-10 mb-5 cursor-pointer" onClick={handleShowProjects}>
+                <div className="flex items-center">
+                  <User className="mr-2" size={25} /> Mes projets
+                </div>
+                {showProjects ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+              </li>
+                        {/* Liste des projets */}
+                {showProjects && (
+                  <div className="ml-6 mb-4 max-h-60 overflow-y-auto">
+                    <ul>
+                      {projects.length > 0 ? (
+                        projects.map((project) => (
+                          <li
+                            key={project.id}
+                            className="text-sm hover:text-gray-400 cursor-pointer mt-1"
+                            onClick={() => {
+                              setCurrentProject(project);
+                              setProjectPage(true);
+                              setIsOpen(false);
+                              console.log("Projet sélectionné :", project.name);
+                            }}
+                          >
+                            {project.name}
+                          </li>
+                        ))
+                      ) : (
+                        <li className="text-sm text-gray-400 mt-1">Aucun projet trouvé</li>
+                      )}
+                    </ul>
+                  </div>
+                )}
+              <li className="flex items-center p-3 hover:bg-gray-700 text-xl rounded mt-10 mb-5">
+                <HeartIcon className="mr-2" size={25} /> Favoris
+              </li>
+              <li className="flex items-center p-3 hover:bg-gray-700 text-xl rounded mt-10 mb-5">
+                <Settings className="mr-2" /> Paramètres
+              </li>
             </ul>
-          )}
-
-          <li className="flex items-center p-3 hover:bg-gray-700 text-xl rounded mt-10 mb-5">
-            <HeartIcon className="mr-2" size={25} /> Favoris
-          </li>
-          <li className="flex items-center p-3 hover:bg-gray-700 text-xl rounded mt-10 mb-5">
-            <Settings className="mr-2" /> Paramètres
-          </li>
-        </ul>
-      </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <TaskInitializerModal
         isOpen={isModalOpen}
