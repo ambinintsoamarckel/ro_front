@@ -270,6 +270,7 @@ const TaskListTable = ({
         onClose={() => {setIsTaskModalOpen(false);fetchTasksFromBackend();}}
         task={tasks[selectedTaskIndex]}
         allTasks={tasks}
+        projectId={currentProject.id}
         dependencyType={currentProject.isSuccessor ? "successeur" : "antérieur"}
       />
     </div>

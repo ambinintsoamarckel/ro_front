@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Trash2 } from 'lucide-react';
 
-const TaskDetailsModal = ({ isOpen, onClose, task, allTasks, dependencyType }) => {
+const TaskDetailsModal = ({ isOpen, onClose, task, allTasks, dependencyType,projectId }) => {
   const [selectedTaskIndices, setSelectedTaskIndices] = useState([]);
   const [addedTasks, setAddedTasks] = useState([]);
 
@@ -44,7 +44,7 @@ const TaskDetailsModal = ({ isOpen, onClose, task, allTasks, dependencyType }) =
 
   const handleAddTasks = () => {
     const newTasks = selectedTaskIndices.map(index => allTasks[index]);
-    setAddedTasks(newTasks);
+    setAddedTasks(prev => [...prev, ...newTasks]);
     setSelectedTaskIndices([]); // Optionnel : réinitialise les sélections
   };
 
@@ -65,7 +65,7 @@ const TaskDetailsModal = ({ isOpen, onClose, task, allTasks, dependencyType }) =
     console.log("Payload envoyé :", payload);
   
     try {
-      const response = await fetch('http://localhost:3001/dependencies', {
+      const response = await fetch(`http://localhost:3001/dependencies/${projectId}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
