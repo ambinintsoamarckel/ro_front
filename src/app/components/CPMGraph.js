@@ -129,9 +129,11 @@ const SpecialNode = ({ label, isStart }) => {
       >
         <div
           style={{
-            fontSize: "20px",
+            fontSize: "18px",
             fontWeight: "bold",
-            color: color
+            color: color,
+            textAlign: "center",
+            whiteSpace: "pre-line" // Pour supporter les sauts de ligne
           }}
         >
           {label}
@@ -141,7 +143,9 @@ const SpecialNode = ({ label, isStart }) => {
   );
 };
 
-const CPMGraph  = forwardRef((props, ref) => {
+
+
+const CPMGraph = forwardRef((props, ref) => {
   const { projectId, onDataLoaded } = props;
   const [nodes, setNodes] = useState([]);
   const [edges, setEdges] = useState([]);
@@ -151,131 +155,160 @@ const CPMGraph  = forwardRef((props, ref) => {
   const [isLoading, setIsLoading] = useState(true);
   const flowContainerRef = useRef(null);
   const direction = 'LR';
+  
   const loadCriticalPathData = useCallback(() => {
     setIsLoading(true);
     fetch(`http://localhost:3001/critical-path/${projectId}`)
       .then((res) => res.json())
       .then((data) => {
-        // Votre logique existante de transformation des données...
-        // (gardez le code de transformation des données tel quel)
-             // Identifier les tâches qui n'ont pas de prédécesseurs (tâches de début)
-             const startTaskIds = new Set(data.map(task => task.id.toString()));
-             data.forEach(task => {
-               task.successors.forEach(successor => {
-                 startTaskIds.delete(successor.toString());
-               });
-             });
-             
-             // Identifier les tâches qui n'ont pas de successeurs (tâches de fin)
-             const endTaskIds = new Set();
-             data.forEach(task => {
-               if (task.successors.length === 0) {
-                 endTaskIds.add(task.id.toString());
-               }
-             });
-     
-             // Création du nœud de début
-             const startNode = {
-               id: 'start',
-               position: { x: 0, y: 0 },
-               data: { label: <SpecialNode label="Début" isStart={true} /> },
-               style: {
-                 background: "transparent",
-                 border: "none",
-                 width: 120,
-                 height: 120,
-               },
-               sourcePosition: 'right',
-               targetPosition: 'left',
-               draggable: true,
-             };
-             
-             // Création du nœud de fin
-             const endNode = {
-               id: 'end',
-               position: { x: 0, y: 0 },
-               data: { label: <SpecialNode label="Fin" isStart={false} /> },
-               style: {
-                 background: "transparent",
-                 border: "none",
-                 width: 120,
-                 height: 120,
-               },
-               sourcePosition: 'right',
-               targetPosition: 'left',
-               draggable: true,
-             };
-     
-             // Création des nœuds de tâches
-             const taskNodes = data.map((task) => ({
-               id: task.id.toString(),
-               position: { x: 0, y: 0 },
-               data: { label: <TaskNode task={task} /> },
-               style: {
-                 background: "transparent",
-                 border: "none",
-                 width: 120,
-                 height: 120,
-               },
-               sourcePosition: 'right',
-               targetPosition: 'left',
-               draggable: true,
-             }));
-             
-             // Combinaison de tous les nœuds
-             const formattedNodes = [startNode, ...taskNodes, endNode];
-     
-             // Créer les arêtes entre les tâches
-             const taskEdges = data.flatMap((task) =>
-               task.successors.map((successor) => ({
-                 id: `e${task.id}-${successor}`,
-                 source: task.id.toString(),
-                 target: successor.toString(),
-                 animated: task.critical,
-                 label: task.duration.toString(),
-                 labelStyle: { fontSize: "14px", fill: task.critical ? "red" : "black" },
-                 style: {
-                   stroke: task.critical ? "red" : "black",
-                   strokeWidth: task.critical ? 4 : 2,
-                 },
-               }))
-             );
-             
-             // Créer les arêtes depuis le nœud de début vers les premières tâches
-             const startEdges = Array.from(startTaskIds).map(taskId => ({
-               id: `estart-${taskId}`,
-               source: 'start',
-               target: taskId,
-               animated: true,
-               style: {
-                 stroke: "green",
-                 strokeWidth: 3,
-               },
-             }));
-             
-             // Créer les arêtes depuis les dernières tâches vers le nœud de fin
-             const endEdges = Array.from(endTaskIds).map(taskId => ({
-               id: `e${taskId}-end`,
-               source: taskId,
-               target: 'end',
-               animated: true,
-               style: {
-                 stroke: "red",
-                 strokeWidth: 3,
-               },
-             }));
-             
-             // Combinaison de toutes les arêtes
-             const formattedEdges = [...startEdges, ...taskEdges, ...endEdges];
-     
-             // Appliquer le layout automatique
-             const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(
-               formattedNodes,
-               formattedEdges,
-               direction
-             );
+        // Trouver le max earlyFinish pour le nœud de fin
+        const maxEarlyFinish = Math.max(...data.map(task => task.earlyFinish), 0);
+        
+        // Identifier les tâches qui n'ont pas de prédécesseurs (tâches de début)
+        const startTaskIds = new Set(data.map(task => task.id.toString()));
+        data.forEach(task => {
+          task.successors.forEach(successor => {
+            startTaskIds.delete(successor.toString());
+          });
+        });
+        
+        // Identifier les tâches qui n'ont pas de successeurs (tâches de fin)
+        const endTaskIds = new Set();
+        data.forEach(task => {
+          if (task.successors.length === 0) {
+            endTaskIds.add(task.id.toString());
+          }
+        });
 
-        // Après avoir formatté les données
+        // Création du nœud de début
+        const startNode = {
+          id: 'start',
+          position: { x: 0, y: 0 },
+          data: { label: <SpecialNode label="Début" isStart={true} /> },
+          style: {
+            background: "transparent",
+            border: "none",
+            width: 120,
+            height: 120,
+          },
+          sourcePosition: 'right',
+          targetPosition: 'left',
+          draggable: true,
+        };
+        
+        // Création du nœud de fin avec le max earlyFinish
+        const endNode = {
+          id: 'end',
+          position: { x: 0, y: 0 },
+          data: { label: <SpecialNode label={`Fin\n(${maxEarlyFinish})`} isStart={false} /> },
+          style: {
+            background: "transparent",
+            border: "none",
+            width: 120,
+            height: 120,
+          },
+          sourcePosition: 'right',
+          targetPosition: 'left',
+          draggable: true,
+        };
+
+        // Création des nœuds de tâches
+        const taskNodes = data.map((task) => ({
+          id: task.id.toString(),
+          position: { x: 0, y: 0 },
+          data: { label: <TaskNode task={task} /> },
+          style: {
+            background: "transparent",
+            border: "none",
+            width: 120,
+            height: 120,
+          },
+          sourcePosition: 'right',
+          targetPosition: 'left',
+          draggable: true,
+        }));
+        
+        // Combinaison de tous les nœuds
+        const formattedNodes = [startNode, ...taskNodes, endNode];
+
+        // Fonction pour déterminer si un arc est critique
+        const isEdgeCritical = (sourceTask, targetTask) => {
+          return sourceTask.critical && 
+                 targetTask.critical && 
+                 sourceTask.earlyFinish === targetTask.earlyStart;
+        };
+
+        // Créer les arêtes entre les tâches
+        const taskEdges = data.flatMap((task) =>
+          task.successors.map((successor) => {
+            const targetTask = data.find(t => t.id.toString() === successor.toString());
+            return {
+              id: `e${task.id}-${successor}`,
+              source: task.id.toString(),
+              target: successor.toString(),
+              label: task.duration.toString(),
+              labelStyle: { 
+                fontSize: "14px", 
+                fill: isEdgeCritical(task, targetTask) ? "red" : "black" 
+              },
+              style: {
+                stroke: isEdgeCritical(task, targetTask) ? "red" : "black",
+                strokeWidth: isEdgeCritical(task, targetTask) ? 4 : 2,
+                strokeDasharray: 'none' // Trait entier
+              },
+            };
+          })
+        );
+        
+        // Créer les arêtes depuis le nœud de début vers les premières tâches
+        const startEdges = Array.from(startTaskIds).map(taskId => ({
+          id: `estart-${taskId}`,
+          source: 'start',
+          target: taskId,
+          style: {
+            stroke: "green",
+            strokeWidth: 3,
+            strokeDasharray: 'none' // Trait entier
+          },
+        }));
+        
+        // Créer les arêtes depuis les dernières tâches vers le nœud de fin
+        const endEdges = Array.from(endTaskIds).map(taskId => {
+          const sourceTask = data.find(t => t.id.toString() === taskId);
+          
+          // Condition pour un arc rouge : 
+          // 1. La tâche source est critique
+          // 2. Son earlyFinish est égal au maxEarlyFinish
+          const isEndEdgeCritical = sourceTask.critical && 
+                                     sourceTask.earlyFinish === maxEarlyFinish;
+  
+          return {
+            id: `e${taskId}-end`,
+            source: taskId,
+            target: 'end',
+            label: sourceTask.duration.toString(),
+            labelStyle: { 
+              fontSize: "14px", 
+              fill: isEndEdgeCritical ? "red" : "black" 
+            },
+            style: {
+              stroke: isEndEdgeCritical ? "red" : "black",
+              strokeWidth: isEndEdgeCritical ? 4 : 3,
+              strokeDasharray: 'none'
+            },
+          };
+        });
+        
+        // Combinaison de toutes les arêtes
+        const formattedEdges = [...startEdges, ...taskEdges, ...endEdges];
+
+        // Appliquer le layout automatique
+        const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(
+          formattedNodes,
+          formattedEdges,
+          direction
+        );
+
         setNodes(layoutedNodes);
         setEdges(layoutedEdges);
         
@@ -284,7 +317,6 @@ const CPMGraph  = forwardRef((props, ref) => {
         setGraphWidth(calculatedWidth);
         setGraphHeight(Math.max(calculatedHeight, 800));
 
-        // Appeler le callback optionnel si fourni
         if (onDataLoaded) {
           onDataLoaded(data);
         }
