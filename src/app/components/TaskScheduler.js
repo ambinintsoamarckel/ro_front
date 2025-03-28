@@ -212,10 +212,12 @@ const TaskScheduler = ({ currentProject, initialTaskCount }) => {
   return (
     <div className="w-11/12 max-w-6xl mx-auto bg-white p-8 shadow-md rounded-lg mt-10">
       {isInitialEntry ? (
-        <div className="relative">
+        <div className="relative"> 
+          <div className="sticky top-0 left-0 w-full ">
+            <h1 className="text-center text-3xl font-bold">{project.name}</h1>
+            <p className="text-center text-gray-500 italic mt-1">{project.description}</p>
+          </div>
           <div className="overflow-x-scroll scrollbar-hidden shadow-md mt-5">
-          <h1 className="text-center text-3xl font-bold">{project.name}</h1>
-          <p className="text-center text-gray-500 italic mt-1">{project.description}</p>
             <table ref={tableRef} className="min-w-full text-center border-collapse shadow-lg overflow-hidden mt-5 mb-5">
               <thead>
                 <tr className="bg-orange-100 text-gray-800 text-xl font-semibold">
