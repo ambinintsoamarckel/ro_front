@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef , useEffect } from "react";
-import { Edit2, Trash2, X, Check, ArrowRight, Plus, Save } from "lucide-react";
+import { Edit2, Trash2, X, Check, ArrowRight, Plus, Save , CheckSquare2, SquareX, CheckCircle2, CircleX } from "lucide-react";
 import TaskDetailsModal from "./TaskDetailsModal";
 
 const TaskListTable = ({ 
@@ -21,6 +21,7 @@ const TaskListTable = ({
   const [selectedTaskIndex, setSelectedTaskIndex] = useState(null);
   const [tempTask, setTempTask] = useState(null);
   const [tableHeight, setTableHeight] = useState(0);
+  const [activeTaskIndex, setActiveTaskIndex] = useState(null);
   const tableRef = useRef(null);
   useEffect(() => {
     if (tableRef.current) {
@@ -96,12 +97,13 @@ const TaskListTable = ({
         <div className="overflow-x-scroll scrollbar-hidden shadow-md mt-5">
           <table ref={tableRef} className="min-w-full text-center border-collapse shadow-lg overflow-hidden mt-5 mb-5">
             <thead>
-            <tr className="bg-orange-100 text-gray-800 text-xl font-semibold">
+              <tr className="bg-orange-100 text-gray-800 text-xl font-semibold">
                 <th className="p-3 border border-orange-200">Tâches</th>
                 {tasks.map((task, index) => (
                   <th 
                     key={index} 
-                    className="p-3 border border-orange-200 relative w-[200px] min-w-[200px] whitespace-nowrap text-center group"
+                    className={`p-3 border border-orange-200 relative w-[200px] min-w-[200px] whitespace-nowrap text-center group`}
+                    onMouseEnter={() => activeTaskIndex === null && setActiveTaskIndex(null)} // Désactive si aucun bouton actif
                   >
                     <div className="flex flex-col items-center">
                       {editingTaskIndex === index ? (
@@ -109,27 +111,41 @@ const TaskListTable = ({
                           type="text"
                           value={editedTask.name}
                           onChange={(e) => setEditedTask({...editedTask, name: e.target.value})}
-                          className="w-full p-2 border rounded text-center"
+                          className="w-full p-3 text-center bg-transparent text-gray-900 placeholder-gray-400 outline-none border-b border-transparent focus:border-gray-600 transition-all w-[200px] min-w-[200px] whitespace-nowrap"
                         />
                       ) : (
                         <span className="text-center">{task.name}</span>
                       )}
-
-                      {/* Les boutons ne s'affichent que si l'input n'est pas actif */}
-                      {editingTaskIndex !== index && (
+                      {editingTaskIndex !== index && activeTaskIndex === null && (
                         <>
-                          <button 
-                            onClick={() => handleEditStart(task, index)} 
-                            className="absolute top-2 left-2 text-blue-500 p-1 rounded opacity-0 group-hover:opacity-100 transition-opacity"
-                          >
-                            <Edit2 size={25} className="fill-none hover:fill-blue-500 transition" />
-                          </button>
-                          <button 
-                            onClick={() => setDeleteConfirmIndex(index)} 
-                            className="absolute top-2 right-2 text-red-500  p-1 rounded opacity-0 group-hover:opacity-100 transition-opacity"
-                          >
-                            <Trash2 size={25} className="fill-none hover:fill-red-500 transition" />
-                          </button>
+                          <div className="absolute top-2 left-2 group">
+                            <button 
+                              onClick={() => {
+                                handleEditStart(task, index);
+                                setActiveTaskIndex(index);
+                              }} 
+                              className=" relative group text-blue-500 p-1 rounded opacity-0 group-hover:opacity-100 transition-opacity"
+                            >
+                              <Edit2 size={30} className="fill-none hover:fill-blue-300 transition" />
+                            </button>
+                            <span className="absolute mt-2 left-1/2 top-8 -translate-x-1/2 bg-gray-700 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition">
+                              Modifier
+                            </span>
+                          </div>
+                          <div className="absolute top-2 right-2 group">
+                            <button 
+                              onClick={() => {
+                                setDeleteConfirmIndex(index);
+                                setActiveTaskIndex(index);
+                              }} 
+                              className="relative group text-red-500  p-1 rounded opacity-0 group-hover:opacity-100 transition-opacity"
+                            >
+                              <Trash2 size={30} className="fill-none hover:fill-red-300 transition" />
+                            </button>
+                            <span className="absolute mt-2 left-1/2 top-8 -translate-x-1/2 bg-gray-700 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition">
+                              Supprimer
+                            </span>
+                          </div>
                         </>
                       )}
                     </div>
@@ -142,7 +158,7 @@ const TaskListTable = ({
                       type="text"
                       value={tempTask.name}
                       onChange={(e) => setTempTask({ ...tempTask, name: e.target.value })}
-                      className="w-full p-2 border rounded"
+                      className="w-full p-3 text-center bg-transparent text-gray-900 placeholder-gray-400 outline-none border-b border-transparent focus:border-gray-600 transition-all w-[200px] min-w-[200px] whitespace-nowrap"
                       placeholder="Nouvelle tâche"
                     />
                   </th>
@@ -161,42 +177,66 @@ const TaskListTable = ({
                               const value = e.target.value === "" ? "" : Math.max(1, parseInt(e.target.value, 10));
                               setEditedTask({ ...editedTask, duration: value });
                             }}
-                            className="w-full p-2 border rounded text-center"
+                            className="w-full text-center bg-transparent text-gray-900 outline-none border-b border-transparent focus:border-gray-600 transition-all"
                             min="1"
                           />
                         ) : (
-                          <span className="text-center">{task.duration}</span> // Suppression des guillemets autour `task.duration`
+                          <span className="text-center">{task.duration}</span> 
                         )}
 
                         {editingTaskIndex === index ? (
                           <>
-                            <button 
-                              onClick={handleEditSave} 
-                              className="text-green-500 hover:bg-green-100 p-1 rounded"
-                            >
-                              <Check size={20} />
-                            </button>
-                            <button 
-                              onClick={handleEditCancel} 
-                              className="text-red-500 hover:bg-red-100 p-1 rounded"
-                            >
-                              <X size={20} />
-                            </button>
+                            <div className="flex space-x-30 mt-5">
+                              <div className="relative group">
+                                <button 
+                                  onClick={handleEditSave} 
+                                  className="text-green-500  p-1 rounded"
+                                >
+                                  <CheckSquare2 size={30} className="fill-none hover:fill-green-300 transition"  />
+                                </button>
+                                <span className="absolute mt-2 left-1/2 top-8 -translate-x-1/2 bg-gray-700 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition">
+                                  Sauvegarder
+                                </span>
+                              </div>
+                              <div className="relative group">
+                                <button 
+                                  onClick={handleEditCancel} 
+                                  className="text-red-500  p-1 rounded"
+                                >
+                                  <SquareX size={30} className="fill-none hover:fill-red-300 transition"/>
+                                </button>
+                                <span className="absolute mt-2 left-1/2 top-8 -translate-x-1/2 bg-gray-700 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition">
+                                  Annuler
+                                </span>
+                              </div>
+                            </div>
                           </>
                         ) : deleteConfirmIndex === index ? (
                           <>
-                            <button 
-                              onClick={() => handleDeleteConfirm(task.id)} 
-                              className="text-red-500 hover:bg-red-100 p-1 rounded"
-                            >
-                              <Check size={20} />
-                            </button>
-                            <button 
-                              onClick={() => setDeleteConfirmIndex(null)} 
-                              className="text-gray-500 hover:bg-gray-100 p-1 rounded"
-                            >
-                              <X size={20} />
-                            </button>
+                            <div className="flex space-x-30 mt-5">
+                              <div className="relative group">
+                                <button 
+                                  onClick={() => handleDeleteConfirm(task.id)} 
+                                  className="text-red-500  p-1 rounded"
+                                >
+                                  <CheckSquare2 size={30} className="fill-none hover:fill-red-300 transition"/>
+                                </button>
+                                <span className="absolute mt-2 left-1/2 top-8 -translate-x-1/2 bg-gray-700 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition">
+                                  Sauvegarder
+                                </span>
+                              </div>
+                              <div className="relative group">
+                                <button 
+                                  onClick={() => setDeleteConfirmIndex(null)} 
+                                  className="text-gray-500  p-1 rounded"
+                                >
+                                  <SquareX size={30} className="fill-none hover:fill-gray-300 transition"/>
+                                </button>
+                                <span className="absolute mt-2 left-1/2 top-8 -translate-x-1/2 bg-gray-700 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition">
+                                  Annuler
+                                </span>
+                              </div>
+                            </div>
                           </>
                         ) : null }
                       </div>
@@ -208,17 +248,27 @@ const TaskListTable = ({
                         type="number"
                         value={tempTask.duration}
                         onChange={(e) => setTempTask({ ...tempTask, duration: Math.max(1, parseInt(e.target.value, 10) || 1) })}
-                        className="w-full p-2 border rounded"
+                        className="w-full text-center bg-transparent text-gray-900 outline-none border-b border-transparent focus:border-gray-600 transition-all"
                         placeholder="Durée"
                       />
-                      <div className="flex space-x-2 mt-2 justify-center">
-                      <button onClick={handleSaveTempColumn} disabled={!tempTask.name.trim() || tempTask.duration <= 0} className="text-green-500 hover:bg-green-100 p-1 rounded">
-                        <Save size={20} />
-                      </button>
-                      <button onClick={handleCancelTempColumn} className="text-red-500 hover:bg-red-100 p-1 rounded">
-                        <X size={20} />
-                      </button>
-                    </div>
+                      <div className="flex space-x-30 mt-5 justify-center">
+                        <div className="relative group">
+                          <button onClick={handleSaveTempColumn} disabled={!tempTask.name.trim() || tempTask.duration <= 0} className="text-green-500  p-1 rounded">
+                            <Save size={30} className="fill-none hover:fill-green-300 transition"/>
+                          </button>
+                          <span className="absolute mt-2 left-1/2 top-8 -translate-x-1/2 bg-gray-700 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition">
+                            Enregistrer
+                          </span>
+                        </div>
+                        <div className="relative group">
+                          <button onClick={handleCancelTempColumn} className="text-red-500 p-1 rounded">
+                            <SquareX size={30} className="fill-none hover:fill-red-300 transition" />
+                          </button>
+                          <span className="absolute mt-2 left-1/2 top-8 -translate-x-1/2 bg-gray-700 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition">
+                            Annuler
+                          </span>
+                        </div>
+                      </div>
                     </td>
                   )}
                 </tr>
