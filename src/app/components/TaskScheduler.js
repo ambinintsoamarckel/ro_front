@@ -227,7 +227,7 @@ const TaskScheduler = ({ currentProject, initialTaskCount }) => {
                         value={task.name}
                         onChange={(e) => handleNameChange(index, e.target.value)}
                         placeholder={`Tâche ${index + 1}`}
-                        className="w-full p-3 text-center bg-transparent text-gray-900 placeholder-gray-400 outline-none border-b border-transparent focus:border-gray-600 transition-all"
+                        className="w-full p-3 text-center bg-transparent text-gray-900 placeholder-gray-400 outline-none border-b border-transparent focus:border-gray-600 transition-all w-[200px] min-w-[200px] whitespace-nowrap"
                       />
                     </th>
                   ))}
@@ -235,7 +235,7 @@ const TaskScheduler = ({ currentProject, initialTaskCount }) => {
                 <tr className="bg-white text-xl">
                   <th className="p-3 font-bold border-orange-200 text-gray-700">Durée</th>
                   {tasks.map((task, index) => (
-                    <td key={index} className="p-3 border border-orange-200">
+                    <td key={index} className="p-3 border border-orange-200 w-[200px] min-w-[200px] whitespace-nowrap">
                       <input
                         type="number"
                         value={task.duration}

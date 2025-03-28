@@ -99,7 +99,7 @@ const TaskListTable = ({
                 {tasks.map((task, index) => (
                   <th 
                     key={index} 
-                    className="p-3 border border-orange-200 relative"
+                    className="p-3 border border-orange-200 relative w-[200px] min-w-[200px] whitespace-nowrap"
                   >
                     <div className="flex items-center justify-between">
                       {editingTaskIndex === index ? (
@@ -186,7 +186,7 @@ const TaskListTable = ({
               <tr className="bg-white text-xl">
                 <th className="p-3 font-bold border-orange-200 text-gray-700">Durée</th>
                 {tasks.map((task, index) => (
-                  <td key={index} className="p-3 border border-orange-200">
+                  <td key={index} className="p-3 border border-orange-200 w-[200px] min-w-[200px] whitespace-nowrap">
                     {editingTaskIndex === index ? (
                       <input
                         type="number"
@@ -204,7 +204,7 @@ const TaskListTable = ({
                   </td>
                 ))}
                 {tempTask && (
-                <td className="p-3 border border-orange-200">
+                <td className="p-3 border border-orange-200 w-[200px] min-w-[200px] whitespace-nowrap">
                   <input
                     type="number"
                     value={tempTask.duration}
@@ -221,7 +221,7 @@ const TaskListTable = ({
                   {tasks.map((task, index) => (
                     <td
                       key={index}
-                      className="p-3 border border-orange-200 cursor-pointer hover:bg-gray-100 transition"
+                      className="p-3 border border-orange-200 cursor-pointer hover:bg-gray-100 transition w-[200px] min-w-[200px] whitespace-nowrap"
                       onClick={() => openTaskModal(index)}
                     >
                       {!currentProject.isSuccessor && task.dependencies.length > 0 ? (
