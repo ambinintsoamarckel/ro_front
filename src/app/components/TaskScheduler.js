@@ -204,7 +204,6 @@ const TaskScheduler = ({ currentProject, initialTaskCount }) => {
 
   const handleDependencyValidation = async (type) => {
     setDependencyType(type);
-    console.log("mandeha ve ");
     await fetchProject(currentProject.id);
     setIsDependencyModalOpen(false);
   };

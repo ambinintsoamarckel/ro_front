@@ -101,20 +101,19 @@ const TaskListTable = ({
                 {tasks.map((task, index) => (
                   <th 
                     key={index} 
-                    className="p-3 border border-orange-200 relative w-[200px] min-w-[200px] whitespace-nowrap"
+                    className="p-3 border border-orange-200 relative w-[200px] min-w-[200px] whitespace-nowrap text-center group"
                   >
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-col items-center">
                       {editingTaskIndex === index ? (
                         <input
                           type="text"
                           value={editedTask.name}
                           onChange={(e) => setEditedTask({...editedTask, name: e.target.value})}
-                          className="w-full p-2 border rounded"
+                          className="w-full p-2 border rounded text-center"
                         />
                       ) : (
-                        task.name
+                        <span className="text-center">{task.name}</span>
                       )}
-                      <div className="flex space-x-2 absolute right-2 top-1/2 transform -translate-y-1/2">
                         {editingTaskIndex === index ? (
                           <>
                             <button 
@@ -149,19 +148,18 @@ const TaskListTable = ({
                           <>
                             <button 
                               onClick={() => handleEditStart(task, index)} 
-                              className="text-blue-500 hover:bg-blue-100 p-1 rounded"
+                              className="absolute top-2 left-2 text-blue-500 p-1 rounded opacity-0 group-hover:opacity-100 transition-opacity"
                             >
-                              <Edit2 size={20} />
+                              <Edit2 size={25} className="fill-none hover:fill-blue-500 transition" />
                             </button>
                             <button 
                               onClick={() => setDeleteConfirmIndex(index)} 
-                              className="text-red-500 hover:bg-red-100 p-1 rounded"
+                              className="absolute top-2 right-2 text-red-500  p-1 rounded opacity-0 group-hover:opacity-100 transition-opacity"
                             >
-                              <Trash2 size={20} />
+                              <Trash2 size={25} className="fill-none hover:fill-red-500 transition" />
                             </button>
                           </>
                         )}
-                      </div>
                     </div>
                   </th>
                 ))}
