@@ -96,7 +96,7 @@ const TaskListTable = ({
         <div className="overflow-x-scroll scrollbar-hidden shadow-md mt-5">
           <table ref={tableRef} className="min-w-full text-center border-collapse shadow-lg overflow-hidden mt-5 mb-5">
             <thead>
-              <tr className="bg-orange-100 text-gray-800 text-xl font-semibold">
+            <tr className="bg-orange-100 text-gray-800 text-xl font-semibold">
                 <th className="p-3 border border-orange-200">Tâches</th>
                 {tasks.map((task, index) => (
                   <th 
@@ -114,6 +114,60 @@ const TaskListTable = ({
                       ) : (
                         <span className="text-center">{task.name}</span>
                       )}
+
+                      {/* Les boutons ne s'affichent que si l'input n'est pas actif */}
+                      {editingTaskIndex !== index && (
+                        <>
+                          <button 
+                            onClick={() => handleEditStart(task, index)} 
+                            className="absolute top-2 left-2 text-blue-500 p-1 rounded opacity-0 group-hover:opacity-100 transition-opacity"
+                          >
+                            <Edit2 size={25} className="fill-none hover:fill-blue-500 transition" />
+                          </button>
+                          <button 
+                            onClick={() => setDeleteConfirmIndex(index)} 
+                            className="absolute top-2 right-2 text-red-500  p-1 rounded opacity-0 group-hover:opacity-100 transition-opacity"
+                          >
+                            <Trash2 size={25} className="fill-none hover:fill-red-500 transition" />
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  </th>
+                ))}
+                
+                {tempTask && (
+                  <th className="p-3 border border-orange-200">
+                    <input
+                      type="text"
+                      value={tempTask.name}
+                      onChange={(e) => setTempTask({ ...tempTask, name: e.target.value })}
+                      className="w-full p-2 border rounded"
+                      placeholder="Nouvelle tâche"
+                    />
+                  </th>
+                )}
+              </tr>
+              <tr className="bg-white text-xl">
+                <th className="p-3 font-bold border-orange-200 text-gray-700">Durée</th>
+                  {tasks.map((task, index) => (
+                    <td key={index} className="p-3 border border-orange-200 w-[200px] min-w-[200px] whitespace-nowrap">
+                      <div className="flex flex-col items-center">
+                        {editingTaskIndex === index ? (
+                          <input
+                            type="number"
+                            value={editedTask.duration}
+                            onChange={(e) => {
+                              const value = e.target.value === "" ? "" : Math.max(1, parseInt(e.target.value, 10));
+                              setEditedTask({ ...editedTask, duration: value });
+                            }}
+                            className="w-full p-2 border rounded text-center"
+                            min="1"
+                          />
+                        ) : (
+                          <span className="text-center">{task.duration}</span> // Suppression des guillemets autour `task.duration`
+                        )}
+
                         {editingTaskIndex === index ? (
                           <>
                             <button 
@@ -144,77 +198,31 @@ const TaskListTable = ({
                               <X size={20} />
                             </button>
                           </>
-                        ) : (
-                          <>
-                            <button 
-                              onClick={() => handleEditStart(task, index)} 
-                              className="absolute top-2 left-2 text-blue-500 p-1 rounded opacity-0 group-hover:opacity-100 transition-opacity"
-                            >
-                              <Edit2 size={25} className="fill-none hover:fill-blue-500 transition" />
-                            </button>
-                            <button 
-                              onClick={() => setDeleteConfirmIndex(index)} 
-                              className="absolute top-2 right-2 text-red-500  p-1 rounded opacity-0 group-hover:opacity-100 transition-opacity"
-                            >
-                              <Trash2 size={25} className="fill-none hover:fill-red-500 transition" />
-                            </button>
-                          </>
-                        )}
-                    </div>
-                  </th>
-                ))}
-                {tempTask && (
-                <th className="p-3 border border-orange-200">
-                  <input
-                    type="text"
-                    value={tempTask.name}
-                    onChange={(e) => setTempTask({ ...tempTask, name: e.target.value })}
-                    className="w-full p-2 border rounded"
-                    placeholder="Nouvelle tâche"
-                  />
-                  <div className="flex space-x-2 mt-2 justify-center">
-                    <button onClick={handleSaveTempColumn} disabled={!tempTask.name.trim() || tempTask.duration <= 0} className="text-green-500 hover:bg-green-100 p-1 rounded">
-                      <Save size={20} />
-                    </button>
-                    <button onClick={handleCancelTempColumn} className="text-red-500 hover:bg-red-100 p-1 rounded">
-                      <X size={20} />
-                    </button>
-                  </div>
-                </th>
-              )}
-              </tr>
-              <tr className="bg-white text-xl">
-                <th className="p-3 font-bold border-orange-200 text-gray-700">Durée</th>
-                {tasks.map((task, index) => (
-                  <td key={index} className="p-3 border border-orange-200 w-[200px] min-w-[200px] whitespace-nowrap">
-                    {editingTaskIndex === index ? (
+                        ) : null }
+                      </div>
+                    </td>
+                  ))}
+                  {tempTask && (
+                    <td className="p-3 border border-orange-200 w-[200px] min-w-[200px] whitespace-nowrap">
                       <input
                         type="number"
-                        value={editedTask.duration}
-                        onChange={(e) => {
-                          const value = e.target.value === "" ? "" : Math.max(1, parseInt(e.target.value, 10));
-                          setEditedTask({...editedTask, duration: value});
-                        }}
+                        value={tempTask.duration}
+                        onChange={(e) => setTempTask({ ...tempTask, duration: Math.max(1, parseInt(e.target.value, 10) || 1) })}
                         className="w-full p-2 border rounded"
-                        min="1"
+                        placeholder="Durée"
                       />
-                    ) : (
-                      task.duration
-                    )}
-                  </td>
-                ))}
-                {tempTask && (
-                <td className="p-3 border border-orange-200 w-[200px] min-w-[200px] whitespace-nowrap">
-                  <input
-                    type="number"
-                    value={tempTask.duration}
-                    onChange={(e) => setTempTask({ ...tempTask, duration: Math.max(1, parseInt(e.target.value, 10) || 1) })}
-                    className="w-full p-2 border rounded"
-                    placeholder="Durée"
-                  />
-                </td>
-              )}
-              </tr>
+                      <div className="flex space-x-2 mt-2 justify-center">
+                      <button onClick={handleSaveTempColumn} disabled={!tempTask.name.trim() || tempTask.duration <= 0} className="text-green-500 hover:bg-green-100 p-1 rounded">
+                        <Save size={20} />
+                      </button>
+                      <button onClick={handleCancelTempColumn} className="text-red-500 hover:bg-red-100 p-1 rounded">
+                        <X size={20} />
+                      </button>
+                    </div>
+                    </td>
+                  )}
+                </tr>
+
               
                 <tr className="bg-gray-50 border-orange-200 text-xl">
                   <th className="p-3 font-bold text-gray-700 whitespace-nowrap w-[200px]">Tâches {currentProject.isSuccessor ? "successeur" : "antérieur" }</th>
