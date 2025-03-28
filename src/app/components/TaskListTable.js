@@ -90,7 +90,8 @@ const TaskListTable = ({
 
       <div className="relative">
         <div className="overflow-x-scroll scrollbar-hidden shadow-md mt-5">
-          <h1>{currentProject.name}</h1>
+          <h1 className="text-center text-3xl font-bold">{currentProject.name}</h1>
+          <p className="text-center text-gray-500 italic mt-1">{currentProject.description}</p>
           <table ref={tableRef} className="min-w-full text-center border-collapse shadow-lg overflow-hidden mt-5 mb-5">
             <thead>
               <tr className="bg-orange-100 text-gray-800 text-xl font-semibold">
@@ -216,7 +217,7 @@ const TaskListTable = ({
               </tr>
               
                 <tr className="bg-gray-50 border-orange-200 text-xl">
-                  <th className="p-3 font-bold text-gray-700">Tâches {currentProject.isSuccessor ? "successeur" : "antérieur" }</th>
+                  <th className="p-3 font-bold text-gray-700 whitespace-nowrap w-[200px]">Tâches {currentProject.isSuccessor ? "successeur" : "antérieur" }</th>
                   {tasks.map((task, index) => (
                     <td
                       key={index}
