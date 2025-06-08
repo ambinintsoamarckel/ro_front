@@ -211,7 +211,7 @@ const TaskScheduler = ({ currentProject, initialTaskCount }) => {
   };
 
   return (
-    <div className="w-11/12 max-w-6xl mx-auto bg-white p-8 shadow-md rounded-lg mt-10">
+  <div className="w-full max-w-[1600px] mx-auto bg-white p-8 shadow-md rounded-lg mt-10">
       {isInitialEntry ? (
         <div className="relative"> 
           <div className="sticky top-0 left-0 w-full ">

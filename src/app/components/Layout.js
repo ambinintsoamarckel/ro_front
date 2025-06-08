@@ -1,25 +1,31 @@
 import Header from "./Header";
 import Sidebar from "./Sidebar";
-//import TaskScheduler from "./TaskScheduler";
 
-const Layout = ({ children , setInitialTaskCount, setCurrentProject, setProjectPage, projects,setProjects }) => {
+const Layout = ({ children, setInitialTaskCount, setCurrentProject, setProjectPage, projects, setProjects }) => {
   return (
-    <div className="relative ">
-      {/* Sidebar au-dessus du header */}
-      <div className="absolute top-0 left-0 z-50">
-       <Sidebar setInitialTaskCount={setInitialTaskCount} setCurrentProject={setCurrentProject} setProjectPage={setProjectPage} projects={projects} setProjects={setProjects} />
-
-      </div>
-
-      {/* Header (en dessous du sidebar) */}
-      <div className="relative z-40">
+    <div className="min-h-screen flex flex-col">
+      {/* Header */}
+      <div className="z-40">
         <Header />
       </div>
 
-      {/* Contenu principal */}
-      <main className="ml-[250px] mt-[60px] p-4">
-        {children} 
-      </main>
+      <div className="flex flex-1">
+        {/* Sidebar */}
+        <div className="w-[250px] z-50">
+          <Sidebar
+            setInitialTaskCount={setInitialTaskCount}
+            setCurrentProject={setCurrentProject}
+            setProjectPage={setProjectPage}
+            projects={projects}
+            setProjects={setProjects}
+          />
+        </div>
+
+        {/* Contenu principal */}
+        <main className="flex-1 mt-[60px] px-2 sm:px-4 lg:px-6">
+          {children}
+        </main>
+      </div>
     </div>
   );
 };
