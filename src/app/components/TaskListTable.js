@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef , useEffect } from "react";
-import { Edit2, Trash2, X, Check, ArrowRight, Plus, Save } from "lucide-react";
+import { Edit2, Trash2, X, Check, ArrowRight, Plus, Save , CheckSquare2, SquareX, CheckCircle2, CircleX } from "lucide-react";
 import TaskDetailsModal from "./TaskDetailsModal";
 
 const TaskListTable = ({ 
@@ -21,6 +21,7 @@ const TaskListTable = ({
   const [selectedTaskIndex, setSelectedTaskIndex] = useState(null);
   const [tempTask, setTempTask] = useState(null);
   const [tableHeight, setTableHeight] = useState(0);
+  const [activeTaskIndex, setActiveTaskIndex] = useState(null);
   const tableRef = useRef(null);
   useEffect(() => {
     if (tableRef.current) {
@@ -89,8 +90,11 @@ const TaskListTable = ({
   return (
 
       <div className="relative">
+        <div className="sticky top-0 left-0 w-full ">
+          <h1 className="text-center text-3xl font-bold">{currentProject.name}</h1>
+          <p className="text-center text-gray-500 italic mt-1">{currentProject.description}</p>
+        </div>
         <div className="overflow-x-scroll scrollbar-hidden shadow-md mt-5">
-          <h1>{currentProject.name}</h1>
           <table ref={tableRef} className="min-w-full text-center border-collapse shadow-lg overflow-hidden mt-5 mb-5">
             <thead>
               <tr className="bg-orange-100 text-gray-800 text-xl font-semibold">
@@ -98,129 +102,184 @@ const TaskListTable = ({
                 {tasks.map((task, index) => (
                   <th 
                     key={index} 
-                    className="p-3 border border-orange-200 relative"
+                    className={`p-3 border border-orange-200 relative w-[200px] min-w-[200px] whitespace-nowrap text-center group`}
+                    onMouseEnter={() => activeTaskIndex === null && setActiveTaskIndex(null)} // Désactive si aucun bouton actif
                   >
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-col items-center">
                       {editingTaskIndex === index ? (
                         <input
                           type="text"
                           value={editedTask.name}
                           onChange={(e) => setEditedTask({...editedTask, name: e.target.value})}
-                          className="w-full p-2 border rounded"
+                          className="w-full p-3 text-center bg-transparent text-gray-900 placeholder-gray-400 outline-none border-b border-transparent focus:border-gray-600 transition-all w-[200px] min-w-[200px] whitespace-nowrap"
                         />
                       ) : (
-                        task.name
+                        <span className="text-center">{task.name}</span>
                       )}
-                      <div className="flex space-x-2 absolute right-2 top-1/2 transform -translate-y-1/2">
-                        {editingTaskIndex === index ? (
-                          <>
+                      {editingTaskIndex !== index && activeTaskIndex === null && (
+                        <>
+                          <div className="absolute top-2 left-2 group">
                             <button 
-                              onClick={handleEditSave} 
-                              className="text-green-500 hover:bg-green-100 p-1 rounded"
+                              onClick={() => {
+                                handleEditStart(task, index);
+                                setActiveTaskIndex(index);
+                              }} 
+                              className=" relative group text-blue-500 p-1 rounded opacity-0 group-hover:opacity-100 transition-opacity"
                             >
-                              <Check size={20} />
+                              <Edit2 size={30} className="fill-none hover:fill-blue-300 transition" />
                             </button>
+                            <span className="absolute mt-2 left-1/2 top-8 -translate-x-1/2 bg-gray-700 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition">
+                              Modifier
+                            </span>
+                          </div>
+                          <div className="absolute top-2 right-2 group">
                             <button 
-                              onClick={handleEditCancel} 
-                              className="text-red-500 hover:bg-red-100 p-1 rounded"
+                              onClick={() => {
+                                setDeleteConfirmIndex(index);
+                                setActiveTaskIndex(index);
+                              }} 
+                              className="relative group text-red-500  p-1 rounded opacity-0 group-hover:opacity-100 transition-opacity"
                             >
-                              <X size={20} />
+                              <Trash2 size={30} className="fill-none hover:fill-red-300 transition" />
                             </button>
-                          </>
-                        ) : deleteConfirmIndex === index ? (
-                          <>
-                            <button 
-                              onClick={() => handleDeleteConfirm(task.id)} 
-                              className="text-red-500 hover:bg-red-100 p-1 rounded"
-                            >
-                              <Check size={20} />
-                            </button>
-                            <button 
-                              onClick={() => setDeleteConfirmIndex(null)} 
-                              className="text-gray-500 hover:bg-gray-100 p-1 rounded"
-                            >
-                              <X size={20} />
-                            </button>
-                          </>
-                        ) : (
-                          <>
-                            <button 
-                              onClick={() => handleEditStart(task, index)} 
-                              className="text-blue-500 hover:bg-blue-100 p-1 rounded"
-                            >
-                              <Edit2 size={20} />
-                            </button>
-                            <button 
-                              onClick={() => setDeleteConfirmIndex(index)} 
-                              className="text-red-500 hover:bg-red-100 p-1 rounded"
-                            >
-                              <Trash2 size={20} />
-                            </button>
-                          </>
-                        )}
-                      </div>
+                            <span className="absolute mt-2 left-1/2 top-8 -translate-x-1/2 bg-gray-700 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition">
+                              Supprimer
+                            </span>
+                          </div>
+                        </>
+                      )}
                     </div>
                   </th>
                 ))}
+                
                 {tempTask && (
-                <th className="p-3 border border-orange-200">
-                  <input
-                    type="text"
-                    value={tempTask.name}
-                    onChange={(e) => setTempTask({ ...tempTask, name: e.target.value })}
-                    className="w-full p-2 border rounded"
-                    placeholder="Nouvelle tâche"
-                  />
-                  <div className="flex space-x-2 mt-2 justify-center">
-                    <button onClick={handleSaveTempColumn} disabled={!tempTask.name.trim() || tempTask.duration <= 0} className="text-green-500 hover:bg-green-100 p-1 rounded">
-                      <Save size={20} />
-                    </button>
-                    <button onClick={handleCancelTempColumn} className="text-red-500 hover:bg-red-100 p-1 rounded">
-                      <X size={20} />
-                    </button>
-                  </div>
-                </th>
-              )}
+                  <th className="p-3 border border-orange-200">
+                    <input
+                      type="text"
+                      value={tempTask.name}
+                      onChange={(e) => setTempTask({ ...tempTask, name: e.target.value })}
+                      className="w-full p-3 text-center bg-transparent text-gray-900 placeholder-gray-400 outline-none border-b border-transparent focus:border-gray-600 transition-all w-[200px] min-w-[200px] whitespace-nowrap"
+                      placeholder="Nouvelle tâche"
+                    />
+                  </th>
+                )}
               </tr>
               <tr className="bg-white text-xl">
                 <th className="p-3 font-bold border-orange-200 text-gray-700">Durée</th>
-                {tasks.map((task, index) => (
-                  <td key={index} className="p-3 border border-orange-200">
-                    {editingTaskIndex === index ? (
+                  {tasks.map((task, index) => (
+                    <td key={index} className="p-3 border border-orange-200 w-[200px] min-w-[200px] whitespace-nowrap">
+                      <div className="flex flex-col items-center">
+                        {editingTaskIndex === index ? (
+                          <input
+                            type="number"
+                            value={editedTask.duration}
+                            onChange={(e) => {
+                              const value = e.target.value === "" ? "" : Math.max(1, parseInt(e.target.value, 10));
+                              setEditedTask({ ...editedTask, duration: value });
+                            }}
+                            className="w-full text-center bg-transparent text-gray-900 outline-none border-b border-transparent focus:border-gray-600 transition-all"
+                            min="1"
+                          />
+                        ) : (
+                          <span className="text-center">{task.duration}</span> 
+                        )}
+
+                        {editingTaskIndex === index ? (
+                          <>
+                            <div className="flex space-x-30 mt-5">
+                              <div className="relative group">
+                                <button 
+                                  onClick={handleEditSave} 
+                                  className="text-green-500  p-1 rounded"
+                                >
+                                  <CheckSquare2 size={30} className="fill-none hover:fill-green-300 transition"  />
+                                </button>
+                                <span className="absolute mt-2 left-1/2 top-8 -translate-x-1/2 bg-gray-700 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition">
+                                  Sauvegarder
+                                </span>
+                              </div>
+                              <div className="relative group">
+                                <button 
+                                  onClick={handleEditCancel} 
+                                  className="text-red-500  p-1 rounded"
+                                >
+                                  <SquareX size={30} className="fill-none hover:fill-red-300 transition"/>
+                                </button>
+                                <span className="absolute mt-2 left-1/2 top-8 -translate-x-1/2 bg-gray-700 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition">
+                                  Annuler
+                                </span>
+                              </div>
+                            </div>
+                          </>
+                        ) : deleteConfirmIndex === index ? (
+                          <>
+                            <div className="flex space-x-30 mt-5">
+                              <div className="relative group">
+                                <button 
+                                  onClick={() => handleDeleteConfirm(task.id)} 
+                                  className="text-red-500  p-1 rounded"
+                                >
+                                  <CheckSquare2 size={30} className="fill-none hover:fill-red-300 transition"/>
+                                </button>
+                                <span className="absolute mt-2 left-1/2 top-8 -translate-x-1/2 bg-gray-700 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition">
+                                  Sauvegarder
+                                </span>
+                              </div>
+                              <div className="relative group">
+                                <button 
+                                  onClick={() => setDeleteConfirmIndex(null)} 
+                                  className="text-gray-500  p-1 rounded"
+                                >
+                                  <SquareX size={30} className="fill-none hover:fill-gray-300 transition"/>
+                                </button>
+                                <span className="absolute mt-2 left-1/2 top-8 -translate-x-1/2 bg-gray-700 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition">
+                                  Annuler
+                                </span>
+                              </div>
+                            </div>
+                          </>
+                        ) : null }
+                      </div>
+                    </td>
+                  ))}
+                  {tempTask && (
+                    <td className="p-3 border border-orange-200 w-[200px] min-w-[200px] whitespace-nowrap">
                       <input
                         type="number"
-                        value={editedTask.duration}
-                        onChange={(e) => {
-                          const value = e.target.value === "" ? "" : Math.max(1, parseInt(e.target.value, 10));
-                          setEditedTask({...editedTask, duration: value});
-                        }}
-                        className="w-full p-2 border rounded"
-                        min="1"
+                        value={tempTask.duration}
+                        onChange={(e) => setTempTask({ ...tempTask, duration: Math.max(1, parseInt(e.target.value, 10) || 1) })}
+                        className="w-full text-center bg-transparent text-gray-900 outline-none border-b border-transparent focus:border-gray-600 transition-all"
+                        placeholder="Durée"
                       />
-                    ) : (
-                      task.duration
-                    )}
-                  </td>
-                ))}
-                {tempTask && (
-                <td className="p-3 border border-orange-200">
-                  <input
-                    type="number"
-                    value={tempTask.duration}
-                    onChange={(e) => setTempTask({ ...tempTask, duration: Math.max(1, parseInt(e.target.value, 10) || 1) })}
-                    className="w-full p-2 border rounded"
-                    placeholder="Durée"
-                  />
-                </td>
-              )}
-              </tr>
+                      <div className="flex space-x-30 mt-5 justify-center">
+                        <div className="relative group">
+                          <button onClick={handleSaveTempColumn} disabled={!tempTask.name.trim() || tempTask.duration <= 0} className="text-green-500  p-1 rounded">
+                            <Save size={30} className="fill-none hover:fill-green-300 transition"/>
+                          </button>
+                          <span className="absolute mt-2 left-1/2 top-8 -translate-x-1/2 bg-gray-700 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition">
+                            Enregistrer
+                          </span>
+                        </div>
+                        <div className="relative group">
+                          <button onClick={handleCancelTempColumn} className="text-red-500 p-1 rounded">
+                            <SquareX size={30} className="fill-none hover:fill-red-300 transition" />
+                          </button>
+                          <span className="absolute mt-2 left-1/2 top-8 -translate-x-1/2 bg-gray-700 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition">
+                            Annuler
+                          </span>
+                        </div>
+                      </div>
+                    </td>
+                  )}
+                </tr>
+
               
                 <tr className="bg-gray-50 border-orange-200 text-xl">
-                  <th className="p-3 font-bold text-gray-700">Tâches {currentProject.isSuccessor ? "successeur" : "antérieur" }</th>
+                  <th className="p-3 font-bold text-gray-700 whitespace-nowrap w-[200px]">Tâches {currentProject.isSuccessor ? "successeur" : "antérieur" }</th>
                   {tasks.map((task, index) => (
                     <td
                       key={index}
-                      className="p-3 border border-orange-200 cursor-pointer hover:bg-gray-100 transition"
+                      className="p-3 border border-orange-200 cursor-pointer hover:bg-gray-100 transition w-[200px] min-w-[200px] whitespace-nowrap"
                       onClick={() => openTaskModal(index)}
                     >
                       {!currentProject.isSuccessor && task.dependencies.length > 0 ? (

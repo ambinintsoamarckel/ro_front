@@ -206,7 +206,6 @@ const TaskScheduler = ({ currentProject, initialTaskCount }) => {
 
   const handleDependencyValidation = async (type) => {
     setDependencyType(type);
-    console.log("mandeha ve ");
     await fetchProject(currentProject.id);
     setIsDependencyModalOpen(false);
   };
@@ -214,9 +213,12 @@ const TaskScheduler = ({ currentProject, initialTaskCount }) => {
   return (
     <div className="w-11/12 max-w-6xl mx-auto bg-white p-8 shadow-md rounded-lg mt-10">
       {isInitialEntry ? (
-        <div className="relative">
+        <div className="relative"> 
+          <div className="sticky top-0 left-0 w-full ">
+            <h1 className="text-center text-3xl font-bold">{project.name}</h1>
+            <p className="text-center text-gray-500 italic mt-1">{project.description}</p>
+          </div>
           <div className="overflow-x-scroll scrollbar-hidden shadow-md mt-5">
-            <h1>{project.name}</h1>
             <table ref={tableRef} className="min-w-full text-center border-collapse shadow-lg overflow-hidden mt-5 mb-5">
               <thead>
                 <tr className="bg-orange-100 text-gray-800 text-xl font-semibold">
@@ -228,7 +230,7 @@ const TaskScheduler = ({ currentProject, initialTaskCount }) => {
                         value={task.name}
                         onChange={(e) => handleNameChange(index, e.target.value)}
                         placeholder={`Tâche ${index + 1}`}
-                        className="w-full p-3 text-center bg-transparent text-gray-900 placeholder-gray-400 outline-none border-b border-transparent focus:border-gray-600 transition-all"
+                        className="w-full p-3 text-center bg-transparent text-gray-900 placeholder-gray-400 outline-none border-b border-transparent focus:border-gray-600 transition-all w-[200px] min-w-[200px] whitespace-nowrap"
                       />
                     </th>
                   ))}
@@ -236,7 +238,7 @@ const TaskScheduler = ({ currentProject, initialTaskCount }) => {
                 <tr className="bg-white text-xl">
                   <th className="p-3 font-bold border-orange-200 text-gray-700">Durée</th>
                   {tasks.map((task, index) => (
-                    <td key={index} className="p-3 border border-orange-200">
+                    <td key={index} className="p-3 border border-orange-200 w-[200px] min-w-[200px] whitespace-nowrap">
                       <input
                         type="number"
                         value={task.duration}
