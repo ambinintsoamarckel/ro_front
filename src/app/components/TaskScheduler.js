@@ -6,6 +6,8 @@ import { motion } from "framer-motion";
 import DependanceModal from "./DependanceModal";
 import TaskListTable from "./TaskListTable";
 import CPMGraph from "./CPMGraph";
+import { ReactFlowProvider } from "reactflow"; // <-- ajoute cette ligne
+
 
 const TaskScheduler = ({ currentProject, initialTaskCount }) => {
   const [tasks, setTasks] = useState([{ name: "", duration: "", projectId: currentProject.id }]);
@@ -311,14 +313,15 @@ const TaskScheduler = ({ currentProject, initialTaskCount }) => {
       />
                     {/* Graphe CPM */}
     <h2 className="text-xl font-bold mt-8 mb-4">Diagramme du chemin critique</h2>
-    <CPMGraph 
-        ref={cpmGraphRef}
-        projectId={currentProject.id} 
-        onDataLoaded={(data) => {
-          // Optionnel : faire quelque chose avec les données chargées
-          console.log("Données du chemin critique chargées", data);
-        }}
-      />
+
+  <CPMGraph 
+    ref={cpmGraphRef}
+    projectId={currentProject.id} 
+    onDataLoaded={(data) => {
+      console.log("Données du chemin critique chargées", data);
+    }}
+  />
+
     </div>
 
     

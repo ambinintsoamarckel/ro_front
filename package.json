@@ -17,7 +17,9 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "reactflow": "^11.11.4",
-    "ro_front": "file:"
+    "ro_front": "file:",
+    "vis-data": "^7.1.9",
+    "vis-network": "^9.1.10"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
