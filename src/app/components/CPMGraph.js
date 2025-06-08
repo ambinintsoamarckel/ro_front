@@ -36,7 +36,7 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
           },
           ...tasks.map(task => {
             const isCritical = task.slack === 0;
-            const label = `${task.earlyStart} | ${task.lateStart}\n${task.name}`;
+            const label = `\n${task.earlyStart}|${task.lateStart}\n\n${task.name}`;
 
             return {
               id: task.id,
@@ -57,12 +57,12 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
                 vadjust: -4 // remonte légèrement le texte
               },
               widthConstraint: {
-                minimum: 100,
-                maximum: 100
+                minimum: 70,
+                maximum: 70
               },
               heightConstraint: {
-                minimum: 100,
-                maximum: 100
+                minimum: 70,
+                maximum: 70
               },
               fixed: { x: false, y: false }
             };
