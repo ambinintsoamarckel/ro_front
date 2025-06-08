@@ -13,7 +13,7 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
       .then(res => res.json())
       .then(tasks => {
         const maxEarlyFinish = Math.max(...tasks.map(t => t.earlyFinish), 0);
-        
+
         const startTaskIds = new Set(tasks.map(task => task.id));
         tasks.forEach(task =>
           task.successors.forEach(s => startTaskIds.delete(s))
@@ -37,12 +37,11 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
           ...tasks.map(task => {
             const isCritical = task.slack === 0;
             const label = `${task.earlyStart} | ${task.lateStart}\n${task.name}`;
-          
+
             return {
               id: task.id,
               label: label,
               shape: "circle",
-              size: 70,
               color: {
                 background: "white",
                 border: "#000000"
@@ -50,15 +49,20 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
               borderWidth: 2,
               font: {
                 color: "#000000",
-                size: 12,
+                size: 12, // taille réduite
                 face: "Courier New",
                 bold: true,
                 multi: true,
-                align: "center"
+                align: "center",
+                vadjust: -4 // remonte légèrement le texte
               },
-              scaling: {
-                min: 70,
-                max: 70
+              widthConstraint: {
+                minimum: 100,
+                maximum: 100
+              },
+              heightConstraint: {
+                minimum: 100,
+                maximum: 100
               },
               fixed: { x: false, y: false }
             };
@@ -195,45 +199,53 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
           options
         );
 
-        // 🔴 Custom Slack badge (rounded square)
         networkRef.current.on("afterDrawing", function (ctx) {
           const nodePositions = networkRef.current.getPositions();
-        
+
           tasks.forEach(task => {
             const pos = nodePositions[task.id];
             if (pos) {
-              // Ligne horizontale séparatrice entre ES/LS et nom tâche
               ctx.beginPath();
               ctx.strokeStyle = "#999999";
               ctx.lineWidth = 1;
-              ctx.moveTo(pos.x - 30, pos.y);
-              ctx.lineTo(pos.x + 30, pos.y);
+              ctx.moveTo(pos.x - 40, pos.y);
+              ctx.lineTo(pos.x + 40, pos.y);
               ctx.stroke();
-        
-              // Badge Slack en haut, moitié dans le cercle
-              const badgeRadius = 12;
-              const badgeX = pos.x;
-              const badgeY = pos.y - 38; // plus haut, moitié dans le cercle
-        
+
+              const badgeWidth = 30;
+              const badgeHeight = 20;
+              const cornerRadius = 6;
+              const badgeX = pos.x - badgeWidth / 2;
+              const badgeY = pos.y - 50;
+
               const isCritical = task.slack === 0;
               ctx.fillStyle = isCritical ? "#F44336" : "#4CAF50";
               ctx.strokeStyle = isCritical ? "#C62828" : "#2E7D32";
               ctx.lineWidth = 2;
-        
+
               ctx.beginPath();
-              ctx.arc(badgeX, badgeY, badgeRadius, 0, 2 * Math.PI);
+              ctx.moveTo(badgeX + cornerRadius, badgeY);
+              ctx.lineTo(badgeX + badgeWidth - cornerRadius, badgeY);
+              ctx.quadraticCurveTo(badgeX + badgeWidth, badgeY, badgeX + badgeWidth, badgeY + cornerRadius);
+              ctx.lineTo(badgeX + badgeWidth, badgeY + badgeHeight - cornerRadius);
+              ctx.quadraticCurveTo(badgeX + badgeWidth, badgeY + badgeHeight, badgeX + badgeWidth - cornerRadius, badgeY + badgeHeight);
+              ctx.lineTo(badgeX + cornerRadius, badgeY + badgeHeight);
+              ctx.quadraticCurveTo(badgeX, badgeY + badgeHeight, badgeX, badgeY + badgeHeight - cornerRadius);
+              ctx.lineTo(badgeX, badgeY + cornerRadius);
+              ctx.quadraticCurveTo(badgeX, badgeY, badgeX + cornerRadius, badgeY);
+              ctx.closePath();
+
               ctx.fill();
               ctx.stroke();
-        
+
               ctx.fillStyle = "white";
-              ctx.font = "bold 10px Arial";
+              ctx.font = "bold 12px Arial";
               ctx.textAlign = "center";
               ctx.textBaseline = "middle";
-              ctx.fillText(task.slack.toString(), badgeX, badgeY);
+              ctx.fillText(task.slack.toString(), pos.x, badgeY + badgeHeight / 2);
             }
           });
         });
-        
 
         setTimeout(() => {
           if (networkRef.current) {
