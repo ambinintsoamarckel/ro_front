@@ -14,250 +14,177 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
       .then(tasks => {
         const maxEarlyFinish = Math.max(...tasks.map(t => t.earlyFinish), 0);
         
-        // Identifier les tâches de début et de fin
         const startTaskIds = new Set(tasks.map(task => task.id));
-        tasks.forEach(task => 
+        tasks.forEach(task =>
           task.successors.forEach(s => startTaskIds.delete(s))
         );
-        
+
         const endTaskIds = tasks
           .filter(task => task.successors.length === 0)
           .map(task => task.id);
 
-        // Créer les noeuds
         const nodes = new DataSet([
-          // Noeud de début
-          { 
-            id: "start", 
-            label: "DÉBUT",
+          {
+            id: "start",
+            label: "START",
             shape: "circle",
-            color: { 
-              background: "#4CAF50", 
-              border: "#2E7D32"
-            },
-            borderWidth: 3,
-            size: 50,
-            font: { 
-              color: "white", 
-              size: 14, 
-              face: "Arial", 
-              bold: true
-            },
-            shadow: {
-              enabled: true,
-              color: "rgba(76, 175, 80, 0.5)",
-              size: 8,
-              x: 2,
-              y: 2
-            }
+            size: 45,
+            color: { background: "#4CAF50", border: "#2E7D32" },
+            borderWidth: 2,
+            font: { color: "white", size: 12, face: "Arial", bold: true },
+            shadow: { enabled: true, color: "rgba(0,0,0,0.2)", size: 4, x: 2, y: 2 }
           },
-          // Noeuds de tâches
           ...tasks.map(task => {
             const isCritical = task.slack === 0;
-            
-            // Format du label avec mise en évidence du slack
-
-            const timingText = `${task.earlyStart} | ${task.lateStart}`;
-            const nameText = task.name;
-            const fullLabel = `\n${timingText}\n${nameText}`;
-            
+            const label = `${task.earlyStart} | ${task.lateStart}\n${task.name}`;
+          
             return {
               id: task.id,
-              label: fullLabel,
-              color: {
-                background: isCritical ? "#FFCDD2" : "#E3F2FD",
-                border: isCritical ? "#D32F2F" : "#1976D2"
-              },
-              borderWidth: isCritical ? 4 : 2,
+              label: label,
               shape: "circle",
-              size: 60,
-              font: { 
-                color: isCritical ? "#B71C1C" : "#0D47A1", 
-                size: 10, 
-                face: "Arial",
+              size: 70,
+              color: {
+                background: "white",
+                border: "#000000"
+              },
+              borderWidth: 2,
+              font: {
+                color: "#000000",
+                size: 12,
+                face: "Courier New",
                 bold: true,
                 multi: true,
                 align: "center"
               },
-              shadow: {
-                enabled: true,
-                color: isCritical ? "rgba(211, 47, 47, 0.4)" : "rgba(25, 118, 210, 0.4)",
-                size: 6,
-                x: 2,
-                y: 2
-              }
+              scaling: {
+                min: 70,
+                max: 70
+              },
+              fixed: { x: false, y: false }
             };
           }),
-          // Noeud de fin
-          { 
-            id: "end", 
-            label: `FIN\n(${maxEarlyFinish})`,
+          {
+            id: "end",
+            label: `END\n${maxEarlyFinish}`,
             shape: "circle",
-            color: { 
-              background: "#F44336", 
-              border: "#B71C1C"
-            },
-            borderWidth: 3,
-            size: 50,
-            font: { 
-              color: "white", 
-              size: 14, 
-              face: "Arial", 
+            size: 45,
+            color: { background: "#FF5722", border: "#D84315" },
+            borderWidth: 2,
+            font: {
+              color: "white",
+              size: 12,
+              face: "Arial",
               bold: true,
-              multi: true
+              multi: true,
+              align: "center"
             },
             shadow: {
               enabled: true,
-              color: "rgba(244, 67, 54, 0.5)",
-              size: 8,
+              color: "rgba(0,0,0,0.2)",
+              size: 4,
               x: 2,
               y: 2
             }
           }
         ]);
 
-        // Créer les arêtes
         const edges = new DataSet([
-          // Arêtes de début (vertes)
           ...Array.from(startTaskIds).map(taskId => ({
             from: "start",
             to: taskId,
-            color: { color: "#4CAF50" },
-            width: 3,
-            smooth: {
-              type: "continuous",
-              roundness: 0.3
-            },
-            arrows: {
-              to: { 
-                enabled: true,
-                scaleFactor: 1,
-                type: "arrow"
-              }
-            }
+            color: { color: "#666666" },
+            width: 2,
+            smooth: { type: "continuous", roundness: 0.2 },
+            arrows: { to: { enabled: true, scaleFactor: 0.8, type: "arrow" } }
           })),
-          
-          // Arêtes entre tâches
           ...tasks.flatMap(task =>
             task.successors.map(succ => {
               const target = tasks.find(t => t.id === succ);
-              const isCritical = task.slack === 0 && target && target.slack === 0 && 
-                               task.earlyFinish === target.earlyStart;
-              
+              const isCritical = task.slack === 0 && target && target.slack === 0 &&
+                                 task.earlyFinish === target.earlyStart;
+
               return {
                 from: task.id,
                 to: succ,
                 label: task.duration.toString(),
-                color: { color: isCritical ? "#D32F2F" : "#1976D2" },
-                width: isCritical ? 4 : 2,
-                font: { 
-                  color: isCritical ? "#D32F2F" : "#1976D2", 
-                  size: 12,
+                color: { color: isCritical ? "#F44336" : "#666666" },
+                width: isCritical ? 3 : 2,
+                font: {
+                  color: "#333333",
+                  size: 11,
                   face: "Arial",
                   bold: true,
-                  background: "white",
-                  strokeWidth: 2,
-                  strokeColor: "white"
+                  background: "rgba(255, 255, 255, 0.9)",
+                  strokeWidth: 1,
+                  strokeColor: "#ffffff"
                 },
-                smooth: {
-                  type: "continuous",
-                  roundness: 0.3
-                },
-                arrows: {
-                  to: { 
-                    enabled: true,
-                    scaleFactor: 1,
-                    type: "arrow"
-                  }
-                }
+                smooth: { type: "continuous", roundness: 0.2 },
+                arrows: { to: { enabled: true, scaleFactor: 0.8, type: "arrow" } }
               };
             })
           ),
-          
-          // Arêtes vers la fin
           ...endTaskIds.map(taskId => {
             const task = tasks.find(t => t.id === taskId);
             const isCritical = task.slack === 0 && task.earlyFinish === maxEarlyFinish;
-            
+
             return {
               from: taskId,
               to: "end",
               label: task.duration.toString(),
-              color: { color: isCritical ? "#D32F2F" : "#1976D2" },
-              width: isCritical ? 4 : 2,
-              font: { 
-                color: isCritical ? "#D32F2F" : "#1976D2", 
-                size: 12,
+              color: { color: isCritical ? "#F44336" : "#666666" },
+              width: isCritical ? 3 : 2,
+              font: {
+                color: "#333333",
+                size: 11,
                 face: "Arial",
                 bold: true,
-                background: "white",
-                strokeWidth: 2,
-                strokeColor: "white"
+                background: "rgba(255, 255, 255, 0.9)",
+                strokeWidth: 1,
+                strokeColor: "#ffffff"
               },
-              smooth: {
-                type: "continuous",
-                roundness: 0.3
-              },
-              arrows: {
-                to: { 
-                  enabled: true,
-                  scaleFactor: 1,
-                  type: "arrow"
-                }
-              }
+              smooth: { type: "continuous", roundness: 0.2 },
+              arrows: { to: { enabled: true, scaleFactor: 0.8, type: "arrow" } }
             };
           })
         ]);
 
-        // Configuration du réseau
         const options = {
           layout: {
             hierarchical: {
               direction: "LR",
-              nodeSpacing: 120,
-              levelSeparation: 180,
+              nodeSpacing: 150,
+              levelSeparation: 200,
               sortMethod: "directed",
-              shakeTowards: "leaves"
+              shakeTowards: "leaves",
+              parentCentralization: true
             }
           },
           edges: {
-            smooth: {
-              type: "continuous",
-              roundness: 0.3
-            },
-            arrows: {
-              to: { 
-                enabled: true,
-                scaleFactor: 1,
-                type: "arrow"
-              }
-            }
+            smooth: { type: "continuous", roundness: 0.2 },
+            arrows: { to: { enabled: true, scaleFactor: 0.8, type: "arrow" } }
           },
-          physics: {
-            enabled: false
-          },
+          physics: { enabled: false },
           interaction: {
             dragNodes: true,
             dragView: true,
             zoomView: true,
             selectConnectedEdges: false,
-            hover: false,
+            hover: true,
             navigationButtons: false,
             keyboard: false
           },
           nodes: {
             chosen: {
-              node: function(values, id, selected, hovering) {
+              node: function (values, id, selected, hovering) {
                 values.shadow = true;
-                values.shadowSize = 15;
-                values.shadowColor = "rgba(0,0,0,0.5)";
-                values.borderWidth = values.borderWidth + 1;
+                values.shadowSize = 8;
+                values.shadowColor = "rgba(0,0,0,0.3)";
+                values.borderWidth = 3;
               }
             }
           }
         };
 
-        // Créer ou mettre à jour le réseau
         if (networkRef.current) {
           networkRef.current.destroy();
         }
@@ -268,29 +195,36 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
           options
         );
 
-        // Custom rendering pour ajouter les badges verts pour le slack
+        // 🔴 Custom Slack badge (rounded square)
         networkRef.current.on("afterDrawing", function (ctx) {
           const nodePositions = networkRef.current.getPositions();
-          
+        
           tasks.forEach(task => {
             const pos = nodePositions[task.id];
             if (pos) {
-              // Dessiner un badge vert pour le slack en haut du nœud
-              ctx.fillStyle = "#4CAF50";
-              ctx.strokeStyle = "#2E7D32";
-              ctx.lineWidth = 2;
-              
-              // Badge circulaire
-              const badgeX = pos.x;
-              const badgeY = pos.y - 35;
+              // Ligne horizontale séparatrice entre ES/LS et nom tâche
+              ctx.beginPath();
+              ctx.strokeStyle = "#999999";
+              ctx.lineWidth = 1;
+              ctx.moveTo(pos.x - 30, pos.y);
+              ctx.lineTo(pos.x + 30, pos.y);
+              ctx.stroke();
+        
+              // Badge Slack en haut, moitié dans le cercle
               const badgeRadius = 12;
-              
+              const badgeX = pos.x;
+              const badgeY = pos.y - 38; // plus haut, moitié dans le cercle
+        
+              const isCritical = task.slack === 0;
+              ctx.fillStyle = isCritical ? "#F44336" : "#4CAF50";
+              ctx.strokeStyle = isCritical ? "#C62828" : "#2E7D32";
+              ctx.lineWidth = 2;
+        
               ctx.beginPath();
               ctx.arc(badgeX, badgeY, badgeRadius, 0, 2 * Math.PI);
               ctx.fill();
               ctx.stroke();
-              
-              // Texte du slack dans le badge
+        
               ctx.fillStyle = "white";
               ctx.font = "bold 10px Arial";
               ctx.textAlign = "center";
@@ -299,18 +233,18 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
             }
           });
         });
+        
 
-        // Ajuster la vue initiale
         setTimeout(() => {
           if (networkRef.current) {
             networkRef.current.fit({
               animation: {
-                duration: 500,
+                duration: 800,
                 easingFunction: "easeInOutQuad"
               }
             });
           }
-        }, 100);
+        }, 200);
 
         if (onDataLoaded) onDataLoaded(tasks);
       })
@@ -321,8 +255,7 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
 
   useEffect(() => {
     loadCriticalPathData();
-    
-    // Cleanup
+
     return () => {
       if (networkRef.current) {
         networkRef.current.destroy();
@@ -332,8 +265,8 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
   }, [loadCriticalPathData]);
 
   useImperativeHandle(ref, () => ({
-    getNodes: () => networkRef.current ? networkRef.current.body.data.nodes : null,
-    getEdges: () => networkRef.current ? networkRef.current.body.data.edges : null,
+    getNodes: () => networkRef.current?.body.data.nodes || null,
+    getEdges: () => networkRef.current?.body.data.edges || null,
     reloadData: () => loadCriticalPathData(),
     fitView: () => {
       if (networkRef.current) {
@@ -348,17 +281,12 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
       style={{
         width: "100%",
         height: "80vh",
-        border: "2px solid #ddd",
-        borderRadius: "12px",
-        boxShadow: "0 4px 20px rgba(0, 0, 0, 0.1)",
+        border: "1px solid #e0e0e0",
+        borderRadius: "8px",
+        boxShadow: "0 2px 12px rgba(0, 0, 0, 0.08)",
         overflow: "hidden",
         position: "relative",
-        background: `
-          linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%),
-          radial-gradient(circle, #e0e0e0 1px, transparent 1px)
-        `,
-        backgroundSize: "100% 100%, 20px 20px",
-        backgroundBlendMode: "multiply, normal"
+        backgroundColor: "#fafafa"
       }}
     />
   );
