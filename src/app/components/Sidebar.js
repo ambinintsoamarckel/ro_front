@@ -14,13 +14,20 @@ import {
   Star
 } from "lucide-react";
 
-const Sidebar = ({ setInitialTaskCount, setCurrentProject, setProjectPage, projects, setProjects }) => {
+const Sidebar = ({ setInitialTaskCount, setCurrentProject, setProjectPage, projects, setProjects, onSecondSidebarToggle }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showProjects, setShowProjects] = useState(false);
   const [activeTab, setActiveTab] = useState('home');
   // Nouvel état pour la deuxième sidebar
   const [secondSidebarOpen, setSecondSidebarOpen] = useState(false);
   const [secondSidebarContent, setSecondSidebarContent] = useState('');
+
+  // Informer le parent quand l'état de la deuxième sidebar change
+  useEffect(() => {
+    if (onSecondSidebarToggle) {
+      onSecondSidebarToggle(secondSidebarOpen);
+    }
+  }, [secondSidebarOpen, onSecondSidebarToggle]);
 
   // Charger les projets au montage
   useEffect(() => {
@@ -81,17 +88,22 @@ const Sidebar = ({ setInitialTaskCount, setCurrentProject, setProjectPage, proje
     setSecondSidebarOpen(true);
   };
 
+  // Fonction pour fermer la deuxième sidebar
+  const closeSecondSidebar = () => {
+    setSecondSidebarOpen(false);
+  };
+
   // Fonction pour le bouton Menu
   const handleMenuClick = () => {
     if (secondSidebarOpen) {
-      setSecondSidebarOpen(false);
+      closeSecondSidebar();
     } else {
       openSecondSidebar('recent');
     }
   };
 
   const sidebarItems = [
-    { id: 'menu', icon:Menu, label: 'Menu', action: () => handleMenuClick(true) },
+    { id: 'menu', icon:Menu, label: 'Menu', action: () => handleMenuClick() },
     { id: 'nouveau', icon: BadgePlus, label: 'Nouveau', action: () => setIsModalOpen(true) },
     { id: 'home', icon: Home, label: 'Accueil', action: () => openSecondSidebar('home') },
     { id: 'projects', icon: FolderOpen, label: 'Projets', action: () => openSecondSidebar('projects') },
@@ -131,7 +143,15 @@ const Sidebar = ({ setInitialTaskCount, setCurrentProject, setProjectPage, proje
       case 'recent':
         return (
           <div className="flex-1 overflow-y-auto p-4">
-            <h3 className="text-lg font-semibold text-slate-800 mb-4">Projets récents</h3>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-slate-800">Projets récents</h3>
+              <button
+                onClick={closeSecondSidebar}
+                className="p-1 hover:bg-slate-100 rounded-md transition-colors"
+              >
+                <X size={18} className="text-slate-500" />
+              </button>
+            </div>
             <div className="space-y-4">
               {projects.length > 0 ? (
                 <div className="space-y-2">
@@ -146,7 +166,7 @@ const Sidebar = ({ setInitialTaskCount, setCurrentProject, setProjectPage, proje
                       onClick={() => {
                         setCurrentProject(project);
                         setProjectPage(true);
-                        setSecondSidebarOpen(false);
+                        closeSecondSidebar();
                       }}
                     >
                       <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center mr-3">
@@ -189,14 +209,22 @@ const Sidebar = ({ setInitialTaskCount, setCurrentProject, setProjectPage, proje
             <div className="p-4">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold text-slate-800">Mes Projets</h3>
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => setIsModalOpen(true)}
-                  className="p-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
-                >
-                  <BadgePlus size={16} />
-                </motion.button>
+                <div className="flex items-center space-x-2">
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => setIsModalOpen(true)}
+                    className="p-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+                  >
+                    <BadgePlus size={16} />
+                  </motion.button>
+                  <button
+                    onClick={closeSecondSidebar}
+                    className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
+                  >
+                    <X size={16} className="text-slate-500" />
+                  </button>
+                </div>
               </div>
               
               <div className="space-y-2">
@@ -212,7 +240,7 @@ const Sidebar = ({ setInitialTaskCount, setCurrentProject, setProjectPage, proje
                       onClick={() => {
                         setCurrentProject(project);
                         setProjectPage(true);
-                        setSecondSidebarOpen(false);
+                        closeSecondSidebar();
                       }}
                     >
                       <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center mr-3">
@@ -252,7 +280,15 @@ const Sidebar = ({ setInitialTaskCount, setCurrentProject, setProjectPage, proje
       case 'favoris':
         return (
           <div className="flex-1 overflow-y-auto p-4">
-            <h3 className="text-lg font-semibold text-slate-800 mb-4">Favoris</h3>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-slate-800">Favoris</h3>
+              <button
+                onClick={closeSecondSidebar}
+                className="p-1 hover:bg-slate-100 rounded-md transition-colors"
+              >
+                <X size={18} className="text-slate-500" />
+              </button>
+            </div>
             <motion.div 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -268,7 +304,15 @@ const Sidebar = ({ setInitialTaskCount, setCurrentProject, setProjectPage, proje
       case 'parametres':
         return (
           <div className="flex-1 overflow-y-auto p-4">
-            <h3 className="text-lg font-semibold text-slate-800 mb-4">Paramètres</h3>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-slate-800">Paramètres</h3>
+              <button
+                onClick={closeSecondSidebar}
+                className="p-1 hover:bg-slate-100 rounded-md transition-colors"
+              >
+                <X size={18} className="text-slate-500" />
+              </button>
+            </div>
             <div className="space-y-4">
               <div className="bg-white rounded-lg p-4 border border-slate-200">
                 <h4 className="font-semibold text-slate-700 mb-3 text-sm">Général</h4>
@@ -309,7 +353,15 @@ const Sidebar = ({ setInitialTaskCount, setCurrentProject, setProjectPage, proje
       default: // home
         return (
           <div className="flex-1 overflow-y-auto p-4">
-            <h3 className="text-lg font-semibold text-slate-800 mb-4">Accueil</h3>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-slate-800">Accueil</h3>
+              <button
+                onClick={closeSecondSidebar}
+                className="p-1 hover:bg-slate-100 rounded-md transition-colors"
+              >
+                <X size={18} className="text-slate-500" />
+              </button>
+            </div>
             <div className="space-y-4">
               <motion.button
                 whileHover={{ scale: 1.02 }}
@@ -336,7 +388,7 @@ const Sidebar = ({ setInitialTaskCount, setCurrentProject, setProjectPage, proje
                         onClick={() => {
                           setCurrentProject(project);
                           setProjectPage(true);
-                          setSecondSidebarOpen(false);
+                          closeSecondSidebar();
                         }}
                       >
                         <div className="w-6 h-6 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-md flex items-center justify-center mr-3">
@@ -358,7 +410,7 @@ const Sidebar = ({ setInitialTaskCount, setCurrentProject, setProjectPage, proje
 
   return (
     <>
-      {/* Sidebar principale (votre code original) */}
+      {/* Sidebar principale */}
       <motion.div 
         initial={{ x: -80, opacity: 0 }}
         animate={{ x: 0, opacity: 1 }}
@@ -399,7 +451,7 @@ const Sidebar = ({ setInitialTaskCount, setCurrentProject, setProjectPage, proje
         </motion.div>
       </motion.div>
 
-      {/* Deuxième sidebar (nouvelle) */}
+      {/* Deuxième sidebar */}
       <AnimatePresence>
         {secondSidebarOpen && (
           <motion.div
@@ -407,9 +459,8 @@ const Sidebar = ({ setInitialTaskCount, setCurrentProject, setProjectPage, proje
             animate={{ x: 0, opacity: 1 }}
             exit={{ x: -320, opacity: 0 }}
             transition={{ duration: 0.3, ease: "easeInOut" }}
-            className="fixed left-24 top-20 h-[calc(100vh-6rem)] w-80 z-30 overflow-y-auto flex flex-col"
+            className="fixed left-20 top-20 h-[calc(100vh-6rem)] w-80 z-30 overflow-hidden flex flex-col"
           >
-            {/* Contenu de la deuxième sidebar */}
             {renderSecondSidebarContent()}
           </motion.div>
         )}

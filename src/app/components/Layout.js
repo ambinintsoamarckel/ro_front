@@ -1,8 +1,22 @@
+"use client";
+
+import { useState } from "react";
 import Header from "./Header";
 import Sidebar from "./Sidebar";
 import Dashboard from "./Dashboard";
 
 const Layout = ({ children, setInitialTaskCount, setCurrentProject, setProjectPage, projects, setProjects }) => {
+  // État pour savoir si la deuxième sidebar est ouverte
+  const [isSecondSidebarOpen, setIsSecondSidebarOpen] = useState(false);
+  
+  // Calcul dynamique de la marge gauche
+  const getMainContentMargin = () => {
+    if (isSecondSidebarOpen) {
+      return 'ml-[376px]'; // 24px (première sidebar) + 320px (deuxième sidebar) + 32px (espacement réduit)
+    }
+    return 'ml-[0px]'; // 24px (première sidebar) + 32px (espacement réduit)
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
       {/* Header - Prend toute la largeur */}
@@ -12,19 +26,20 @@ const Layout = ({ children, setInitialTaskCount, setCurrentProject, setProjectPa
 
       {/* Contenu principal avec sidebar */}
       <div className="flex flex-1 pt-[60px] sm:pt-[80px]">
-        {/* Sidebar */}
-        <div className="w-[250px] z-50 fixed left-0 top-[60px] sm:top-[80px] bottom-0">
+        {/* Sidebar - Position fixe */}
+        <div className="z-50 fixed left-0 top-[60px] sm:top-[80px] bottom-0">
           <Sidebar
             setInitialTaskCount={setInitialTaskCount}
             setCurrentProject={setCurrentProject}
             setProjectPage={setProjectPage}
             projects={projects}
             setProjects={setProjects}
+            onSecondSidebarToggle={setIsSecondSidebarOpen}
           />
         </div>
 
-        {/* Contenu principal - Décalé de la largeur de la sidebar */}
-        <main className="flex-1 ml-[250px] px-2 sm:px-4 lg:px-6 py-4">
+        {/* Contenu principal - Marge dynamique */}
+        <main className={`flex-1 ${getMainContentMargin()} px-2 sm:px-4 lg:px-6 py-4 transition-all duration-300 ease-in-out`}>
           {children}
         </main>
       </div>
