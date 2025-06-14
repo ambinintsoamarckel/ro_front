@@ -292,7 +292,6 @@ if (networkRef.current) {
   networkRef.current.destroy();
 }
 networkRef.current = new Network(containerRef.current, { nodes, edges }, initialOptions);
-
 // 3. Attendre que le layout soit appliqué
 setTimeout(() => {
   const positions = networkRef.current.getPositions();
@@ -308,7 +307,7 @@ setTimeout(() => {
     }
   };
 
-  // 5. Recréer le graphe avec nouvelle config (ou simplement setOptions)
+  // 5. Appliquer la nouvelle config
   networkRef.current.setOptions(finalOptions);
 
   // 6. Réappliquer les positions manuellement
@@ -316,16 +315,37 @@ setTimeout(() => {
     networkRef.current.moveNode(id, pos.x, pos.y);
   }
 
-  // 7. Resize & setReady
+  // 7. Calcul du nouveau width/height du canvas
   const xs = Object.values(positions).map(p => p.x);
   const ys = Object.values(positions).map(p => p.y);
   const padding = 150;
-
-  const width = Math.max(1000, Math.abs(Math.max(...xs) - Math.min(...xs)) + padding * 2);
+  const width  = Math.max(1000, Math.abs(Math.max(...xs) - Math.min(...xs)) + padding * 2);
   const height = Math.max(800, Math.abs(Math.max(...ys) - Math.min(...ys)) + padding * 2);
 
+  // 8. Enregistrer la taille (génère les scrollbars sur le parent)
   setGraphSize({ width, height });
 
+  // 9. Installer le clamp au dragEnd pour limiter aux bords du canvas
+  const clampPadding = 40;  // marge intérieure
+  const minX = -width  / 2 + clampPadding;
+  const maxX =  width  / 2 - clampPadding;
+  const minY = -height / 2 + clampPadding;
+  const maxY =  height / 2 - clampPadding;
+
+  networkRef.current.on("dragEnd", params => {
+    if (!params.nodes || params.nodes.length === 0) return;
+    const posAfter = networkRef.current.getPositions(params.nodes);
+    params.nodes.forEach(id => {
+      const { x, y } = posAfter[id];
+      const cx = Math.max(minX, Math.min(maxX, x));
+      const cy = Math.max(minY, Math.min(maxY, y));
+      if (cx !== x || cy !== y) {
+        networkRef.current.moveNode(id, cx, cy);
+      }
+    });
+  });
+
+  // 10. On déclenche l’affichage une fois prêt
   setTimeout(() => setIsGraphReady(true), 100);
 }, 100);
 
@@ -491,11 +511,13 @@ setTimeout(() => {
         style={{
           width: `${graphSize.width}px`,
           height: `${graphSize.height}px`,
+          overflow: "hidden",      // ← empêche juste les nœuds de déborder visuellement
           position: "relative",
           opacity: isGraphReady ? 1 : 0,
           transition: "opacity 0.3s ease-in-out"
         }}
       />
+
       <style jsx>{`
         @keyframes spin {
           0% { transform: rotate(0deg); }
