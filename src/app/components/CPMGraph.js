@@ -8,14 +8,17 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
   const containerRef = useRef(null);
   const networkRef = useRef(null);
   const [graphSize, setGraphSize] = React.useState({ width: 1000, height: 800 });
+  const [isGraphReady, setIsGraphReady] = React.useState(false);
 
   const loadCriticalPathData = useCallback(() => {
+    setIsGraphReady(false); // Masquer le graphique pendant le chargement
     fetch(`http://localhost:3001/critical-path/${projectId}`)
       .then(res => res.json())
       .then(data => {
         // Vérifier si les données sont valides
         if (!data || !Array.isArray(data) || data.length === 0) {
           console.warn("Aucune donnée de tâches disponible");
+          setIsGraphReady(true); // Afficher même s'il n'y a pas de données
           return;
         }
         
@@ -301,6 +304,11 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
           animation: false
         });
 
+        // Attendre que tout soit complètement rendu avant d'afficher
+        setTimeout(() => {
+          setIsGraphReady(true);
+        }, 100);
+
         networkRef.current.on("afterDrawing", function (ctx) {
           const nodePositions = networkRef.current.getPositions();
 
@@ -373,6 +381,7 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
       })
       .catch(err => {
         console.error("Erreur lors du chargement des données:", err);
+        setIsGraphReady(true); // Afficher même en cas d'erreur
         // Optionnel : afficher un état d'erreur à l'utilisateur
       });
   }, [projectId, onDataLoaded]);
@@ -408,17 +417,72 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
         border: "1px solid #e2e8f0",
         borderRadius: "16px",
         boxShadow: "0 10px 40px rgba(0, 0, 0, 0.05), 0 4px 16px rgba(0, 0, 0, 0.08)",
-        background: "linear-gradient(135deg, #f8fafc 0%, #ffffff 100%)"
+        background: "linear-gradient(135deg, #f8fafc 0%, #ffffff 100%)",
+        position: "relative"
       }}
     >
+      {!isGraphReady && (
+        <div
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            backgroundColor: "rgba(248, 250, 252, 0.9)",
+            zIndex: 10
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: "16px"
+            }}
+          >
+            <div
+              style={{
+                width: "40px",
+                height: "40px",
+                border: "4px solid #e2e8f0",
+                borderTop: "4px solid #3b82f6",
+                borderRadius: "50%",
+                animation: "spin 1s linear infinite"
+              }}
+            />
+            <div
+              style={{
+                color: "#64748b",
+                fontSize: "14px",
+                fontFamily: "Inter, -apple-system, BlinkMacSystemFont, sans-serif",
+                fontWeight: "500"
+              }}
+            >
+              Chargement du graphique...
+            </div>
+          </div>
+        </div>
+      )}
       <div
         ref={containerRef}
         style={{
           width: `${graphSize.width}px`,
           height: `${graphSize.height}px`,
-          position: "relative"
+          position: "relative",
+          opacity: isGraphReady ? 1 : 0,
+          transition: "opacity 0.3s ease-in-out"
         }}
       />
+      <style jsx>{`
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+      `}</style>
     </div>
   );
 });
