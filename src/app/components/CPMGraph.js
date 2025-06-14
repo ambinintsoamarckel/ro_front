@@ -7,6 +7,8 @@ import "vis-network/styles/vis-network.css";
 const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
   const containerRef = useRef(null);
   const networkRef = useRef(null);
+  const [graphSize, setGraphSize] = React.useState({ width: 1000, height: 800 });
+
 
   const loadCriticalPathData = useCallback(() => {
     fetch(`http://localhost:3001/critical-path/${projectId}`)
@@ -67,7 +69,7 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
               borderWidth: isCritical ? 3 : 2,
               font: {
                 color: isCritical ? "#dc2626" : "#1d4ed8",
-                size: 11,
+                size: 13,
                 face: "Inter, -apple-system, BlinkMacSystemFont, sans-serif",
                 bold: true,
                 multi: true,
@@ -242,7 +244,7 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
           interaction: {
             dragNodes: true,
             dragView: true,
-            zoomView: true,
+            zoomView: false,
             selectConnectedEdges: false,
             hover: true,
             navigationButtons: false,
@@ -269,6 +271,34 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
           { nodes, edges },
           options
         );
+        // Fixer le zoom et la position
+        networkRef.current.moveTo({
+          position: { x: 0, y: 0 },  // point central
+          scale: 0.8,                // zoom constant pour tous les graphes
+          animation: false
+        });
+
+        setTimeout(() => {
+          if (networkRef.current) {
+            const positions = networkRef.current.getPositions();
+            let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+        
+            Object.values(positions).forEach(pos => {
+              if (pos.x < minX) minX = pos.x;
+              if (pos.x > maxX) maxX = pos.x;
+              if (pos.y < minY) minY = pos.y;
+              if (pos.y > maxY) maxY = pos.y;
+            });
+        
+            // Ajouter une marge
+            const padding = 100;
+            const width = Math.abs(maxX - minX) + padding * 2;
+            const height = Math.abs(maxY - minY) + padding * 2;
+        
+            setGraphSize({ width, height });
+          }
+        }, 500); // attendre que le graphe soit bien dessiné
+        
 
         networkRef.current.on("afterDrawing", function (ctx) {
           const nodePositions = networkRef.current.getPositions();
@@ -338,7 +368,7 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
             }
           });
         });
-
+        /*
         setTimeout(() => {
           if (networkRef.current) {
             networkRef.current.fit({
@@ -348,7 +378,7 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
               }
             });
           }
-        }, 300);
+        }, 300);*/
 
         if (onDataLoaded) onDataLoaded(tasks);
       })
@@ -378,22 +408,29 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
       }
     }
   }));
-
   return (
     <div
-      ref={containerRef}
       style={{
         width: "100%",
         height: "80vh",
+        overflow: "auto", // <-- scroll horizontal + vertical
         border: "1px solid #e2e8f0",
         borderRadius: "16px",
         boxShadow: "0 10px 40px rgba(0, 0, 0, 0.05), 0 4px 16px rgba(0, 0, 0, 0.08)",
-        overflow: "hidden",
-        position: "relative",
         background: "linear-gradient(135deg, #f8fafc 0%, #ffffff 100%)"
       }}
-    />
+    >
+      <div
+        ref={containerRef}
+        style={{
+          width: "2000px", // largeur fixe plus grande pour déclencher le scroll horizontal
+          height: "1500px", // hauteur fixe plus grande pour déclencher le scroll vertical
+          position: "relative"
+        }}
+      />
+    </div>
   );
+  
 });
 
 CPMGraph.displayName = "CPMGraph";
