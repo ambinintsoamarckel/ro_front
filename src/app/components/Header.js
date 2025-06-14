@@ -93,7 +93,8 @@ const Header = () => {
           initial={{ y: -20, opacity: 0, scale: 0.9 }}
           animate={{ y: 0, opacity: 1, scale: 1 }}
           transition={{ duration: 0.6, delay: 0.4, ease: "easeOut" }}
-          className="flex-1 max-w-lg mx-2 sm:mx-4 lg:ml-6 lg:mr-8"
+          className="flex-1 max-w-lg mx-2 sm:mx-3 lg:ml-0 lg:mr-4"
+
         >
           <motion.div 
             className="relative group"

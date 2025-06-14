@@ -15,10 +15,12 @@ import {
 } from "lucide-react";
 
 const Sidebar = ({ setInitialTaskCount, setCurrentProject, setProjectPage, projects, setProjects }) => {
-  const [isOpen, setIsOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showProjects, setShowProjects] = useState(false);
   const [activeTab, setActiveTab] = useState('home');
+  // Nouvel état pour la deuxième sidebar
+  const [secondSidebarOpen, setSecondSidebarOpen] = useState(false);
+  const [secondSidebarContent, setSecondSidebarContent] = useState('');
 
   // Charger les projets au montage
   useEffect(() => {
@@ -73,12 +75,18 @@ const Sidebar = ({ setInitialTaskCount, setCurrentProject, setProjectPage, proje
     }
   };
 
+  // Fonction pour ouvrir la deuxième sidebar
+  const openSecondSidebar = (content) => {
+    setSecondSidebarContent(content);
+    setSecondSidebarOpen(true);
+  };
+
   const sidebarItems = [
     { id: 'nouveau', icon: BadgePlus, label: 'Nouveau', action: () => setIsModalOpen(true) },
-    { id: 'home', icon: Home, label: 'Accueil', action: () => setActiveTab('home') },
-    { id: 'projects', icon: FolderOpen, label: 'Projets', action: () => setShowProjects(!showProjects) },
-    { id: 'favoris', icon: Star, label: 'Favoris', action: () => setActiveTab('favoris') },
-    { id: 'parametres', icon: Settings, label: 'Paramètres', action: () => setActiveTab('parametres') },
+    { id: 'home', icon: Home, label: 'Accueil', action: () => openSecondSidebar('home') },
+    { id: 'projects', icon: FolderOpen, label: 'Projets', action: () => openSecondSidebar('projects') },
+    { id: 'favoris', icon: Star, label: 'Favoris', action: () => openSecondSidebar('favoris') },
+    { id: 'parametres', icon: Settings, label: 'Paramètres', action: () => openSecondSidebar('parametres') },
   ];
 
   const SidebarIcon = ({ item, isActive }) => (
@@ -107,186 +115,176 @@ const Sidebar = ({ setInitialTaskCount, setCurrentProject, setProjectPage, proje
     </div>
   );
 
-  const renderContent = () => {
-    switch (activeTab) {
+  // Contenu de la deuxième sidebar
+  const renderSecondSidebarContent = () => {
+    switch (secondSidebarContent) {
       case 'projects':
         return (
-          <div className="p-4">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-bold text-slate-800">Mes Projets</h3>
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => setIsModalOpen(true)}
-                className="flex items-center px-4 py-2 bg-gradient-to-r from-indigo-600 to-indigo-700 text-white rounded-xl hover:from-indigo-700 hover:to-indigo-800 transition-all duration-300 shadow-md hover:shadow-lg"
-              >
-                <BadgePlus size={16} className="mr-2" />
-                Nouveau
-              </motion.button>
-            </div>
-            
-            <div className="space-y-3 max-h-[400px] overflow-y-auto">
-              {projects.length > 0 ? (
-                projects.map((project, index) => (
-                  <motion.div
-                    key={project.id}
-                    initial={{ x: -50, opacity: 0 }}
-                    animate={{ x: 0, opacity: 1 }}
-                    transition={{ delay: index * 0.1 }}
-                    whileHover={{ scale: 1.02 }}
-                    className="flex items-center p-4 bg-white rounded-xl cursor-pointer transition-all duration-300 hover:bg-gradient-to-r hover:from-indigo-50 hover:to-slate-50 hover:shadow-md border border-slate-100 hover:border-indigo-200"
-                    onClick={() => {
-                      setCurrentProject(project);
-                      setProjectPage(true);
-                      console.log("Projet sélectionné :", project.name);
-                    }}
-                  >
-                    <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-indigo-700 rounded-xl flex items-center justify-center mr-4 shadow-md">
-                      <span className="text-white font-bold text-lg">
-                        {project.name.charAt(0).toUpperCase()}
-                      </span>
-                    </div>
-                    <div>
-                      <p className="font-semibold text-slate-800">{project.name}</p>
-                      <p className="text-sm text-slate-500">Modifié récemment</p>
-                    </div>
-                  </motion.div>
-                ))
-              ) : (
-                <motion.div 
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="text-center py-12"
+          <div className="flex-1 overflow-y-auto">
+            <div className="p-4">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-slate-800">Mes Projets</h3>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => setIsModalOpen(true)}
+                  className="p-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
                 >
-                  <FolderOpen size={64} className="mx-auto text-slate-300 mb-6" />
-                  <p className="text-slate-500 text-lg mb-4">Aucun projet trouvé</p>
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => setIsModalOpen(true)}
-                    className="px-6 py-3 bg-gradient-to-r from-indigo-600 to-indigo-700 text-white rounded-xl hover:from-indigo-700 hover:to-indigo-800 transition-all duration-300 shadow-md hover:shadow-lg"
+                  <BadgePlus size={16} />
+                </motion.button>
+              </div>
+              
+              <div className="space-y-2">
+                {projects.length > 0 ? (
+                  projects.map((project, index) => (
+                    <motion.div
+                      key={project.id}
+                      initial={{ x: -20, opacity: 0 }}
+                      animate={{ x: 0, opacity: 1 }}
+                      transition={{ delay: index * 0.05 }}
+                      whileHover={{ x: 4 }}
+                      className="flex items-center p-3 bg-white rounded-lg cursor-pointer transition-all duration-200 hover:bg-slate-50 hover:shadow-sm border border-slate-100"
+                      onClick={() => {
+                        setCurrentProject(project);
+                        setProjectPage(true);
+                        setSecondSidebarOpen(false);
+                      }}
+                    >
+                      <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center mr-3">
+                        <span className="text-white font-semibold text-xs">
+                          {project.name.charAt(0).toUpperCase()}
+                        </span>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-slate-800 text-sm truncate">{project.name}</p>
+                        <p className="text-xs text-slate-500">Modifié récemment</p>
+                      </div>
+                    </motion.div>
+                  ))
+                ) : (
+                  <motion.div 
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="text-center py-8"
                   >
-                    Créer un projet
-                  </motion.button>
-                </motion.div>
-              )}
+                    <FolderOpen size={48} className="mx-auto text-slate-300 mb-4" />
+                    <p className="text-slate-500 text-sm mb-4">Aucun projet</p>
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => setIsModalOpen(true)}
+                      className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm"
+                    >
+                      Créer un projet
+                    </motion.button>
+                  </motion.div>
+                )}
+              </div>
             </div>
           </div>
         );
       
       case 'favoris':
         return (
-          <div className="p-4">
-            <h3 className="text-xl font-bold text-slate-800 mb-6">Favoris</h3>
+          <div className="flex-1 overflow-y-auto p-4">
+            <h3 className="text-lg font-semibold text-slate-800 mb-4">Favoris</h3>
             <motion.div 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="text-center py-12"
+              className="text-center py-8"
             >
-              <Star size={64} className="mx-auto text-amber-300 mb-6" />
-              <p className="text-slate-500 text-lg mb-4">Aucun favori pour le moment</p>
-              <p className="text-slate-400 text-sm">Ajoutez vos projets préférés en cliquant sur l'étoile</p>
+              <Star size={48} className="mx-auto text-amber-300 mb-4" />
+              <p className="text-slate-500 text-sm mb-2">Aucun favori</p>
+              <p className="text-slate-400 text-xs">Ajoutez vos projets préférés</p>
             </motion.div>
           </div>
         );
       
       case 'parametres':
         return (
-          <div className="p-4">
-            <h3 className="text-xl font-bold text-slate-800 mb-6">Paramètres</h3>
+          <div className="flex-1 overflow-y-auto p-4">
+            <h3 className="text-lg font-semibold text-slate-800 mb-4">Paramètres</h3>
             <div className="space-y-4">
-              <div className="bg-white rounded-xl p-4 border border-slate-200">
-                <h4 className="font-semibold text-slate-700 mb-2">Général</h4>
+              <div className="bg-white rounded-lg p-4 border border-slate-200">
+                <h4 className="font-semibold text-slate-700 mb-3 text-sm">Général</h4>
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-slate-600">Thème sombre</span>
-                    <motion.button 
-                      whileTap={{ scale: 0.95 }}
-                      className="w-12 h-6 bg-slate-200 rounded-full relative"
-                    >
-                      <div className="w-5 h-5 bg-white rounded-full absolute top-0.5 left-0.5 transition-transform"></div>
-                    </motion.button>
+                    <button className="w-10 h-5 bg-slate-200 rounded-full relative">
+                      <div className="w-4 h-4 bg-white rounded-full absolute top-0.5 left-0.5 transition-transform shadow-sm"></div>
+                    </button>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-slate-600">Notifications</span>
-                    <motion.button 
-                      whileTap={{ scale: 0.95 }}
-                      className="w-12 h-6 bg-indigo-500 rounded-full relative"
-                    >
-                      <div className="w-5 h-5 bg-white rounded-full absolute top-0.5 right-0.5 transition-transform"></div>
-                    </motion.button>
+                    <button className="w-10 h-5 bg-indigo-500 rounded-full relative">
+                      <div className="w-4 h-4 bg-white rounded-full absolute top-0.5 right-0.5 transition-transform shadow-sm"></div>
+                    </button>
                   </div>
                 </div>
               </div>
               
-              <div className="bg-white rounded-xl p-4 border border-slate-200">
-                <h4 className="font-semibold text-slate-700 mb-2">Compte</h4>
-                <div className="space-y-3">
-                  <motion.button 
-                    whileHover={{ x: 5 }}
-                    className="w-full text-left text-sm text-slate-600 hover:text-indigo-600 transition-colors"
-                  >
+              <div className="bg-white rounded-lg p-4 border border-slate-200">
+                <h4 className="font-semibold text-slate-700 mb-3 text-sm">Compte</h4>
+                <div className="space-y-2">
+                  <button className="w-full text-left text-sm text-slate-600 hover:text-indigo-600 transition-colors py-1">
                     Modifier le profil
-                  </motion.button>
-                  <motion.button 
-                    whileHover={{ x: 5 }}
-                    className="w-full text-left text-sm text-slate-600 hover:text-indigo-600 transition-colors"
-                  >
+                  </button>
+                  <button className="w-full text-left text-sm text-slate-600 hover:text-indigo-600 transition-colors py-1">
                     Changer le mot de passe
-                  </motion.button>
-                  <motion.button 
-                    whileHover={{ x: 5 }}
-                    className="w-full text-left text-sm text-red-600 hover:text-red-700 transition-colors"
-                  >
+                  </button>
+                  <button className="w-full text-left text-sm text-red-600 hover:text-red-700 transition-colors py-1">
                     Déconnexion
-                  </motion.button>
+                  </button>
                 </div>
               </div>
             </div>
           </div>
         );
       
-      default:
+      default: // home
         return (
-          <div className="p-4">
-            <h3 className="text-xl font-bold text-slate-800 mb-6">Accueil</h3>
+          <div className="flex-1 overflow-y-auto p-4">
+            <h3 className="text-lg font-semibold text-slate-800 mb-4">Accueil</h3>
             <div className="space-y-4">
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => setIsModalOpen(true)}
-                className="w-full flex items-center justify-center px-6 py-4 bg-gradient-to-r from-indigo-600 to-indigo-700 text-white rounded-xl hover:from-indigo-700 hover:to-indigo-800 transition-all duration-300 shadow-lg hover:shadow-xl"
+                className="w-full flex items-center justify-center px-4 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg hover:from-indigo-700 hover:to-purple-700 transition-all duration-300 shadow-sm"
               >
-                <BadgePlus size={22} className="mr-3" />
-                <span className="font-semibold">Créer un nouveau projet</span>
+                <BadgePlus size={18} className="mr-2" />
+                <span className="font-medium text-sm">Nouveau projet</span>
               </motion.button>
               
-              <div className="border-t border-slate-200 pt-6">
-                <h4 className="font-bold text-slate-700 mb-4">Récemment utilisés</h4>
-                <div className="space-y-3">
-                  {projects.slice(0, 3).map((project, index) => (
-                    <motion.div
-                      key={project.id}
-                      initial={{ x: -30, opacity: 0 }}
-                      animate={{ x: 0, opacity: 1 }}
-                      transition={{ delay: index * 0.1 }}
-                      whileHover={{ x: 5 }}
-                      className="flex items-center p-3 rounded-xl hover:bg-gradient-to-r hover:from-indigo-50 hover:to-slate-50 cursor-pointer transition-all duration-300 border border-slate-100 hover:border-indigo-200"
-                      onClick={() => {
-                        setCurrentProject(project);
-                        setProjectPage(true);
-                      }}
-                    >
-                      <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-indigo-700 rounded-lg flex items-center justify-center mr-3">
-                        <span className="text-white font-bold text-sm">
-                          {project.name.charAt(0).toUpperCase()}
-                        </span>
-                      </div>
-                      <span className="text-sm font-medium text-slate-600">{project.name}</span>
-                    </motion.div>
-                  ))}
+              {projects.length > 0 && (
+                <div className="border-t border-slate-200 pt-4">
+                  <h4 className="font-semibold text-slate-700 mb-3 text-sm">Récents</h4>
+                  <div className="space-y-2">
+                    {projects.slice(0, 3).map((project, index) => (
+                      <motion.div
+                        key={project.id}
+                        initial={{ x: -20, opacity: 0 }}
+                        animate={{ x: 0, opacity: 1 }}
+                        transition={{ delay: index * 0.1 }}
+                        whileHover={{ x: 4 }}
+                        className="flex items-center p-2 rounded-lg hover:bg-slate-50 cursor-pointer transition-all duration-200"
+                        onClick={() => {
+                          setCurrentProject(project);
+                          setProjectPage(true);
+                          setSecondSidebarOpen(false);
+                        }}
+                      >
+                        <div className="w-6 h-6 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-md flex items-center justify-center mr-3">
+                          <span className="text-white font-semibold text-xs">
+                            {project.name.charAt(0).toUpperCase()}
+                          </span>
+                        </div>
+                        <span className="text-sm font-medium text-slate-600 truncate">{project.name}</span>
+                      </motion.div>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           </div>
         );
@@ -295,7 +293,7 @@ const Sidebar = ({ setInitialTaskCount, setCurrentProject, setProjectPage, proje
 
   return (
     <>
-      {/* Sidebar fixe style Canva avec décalage vers le bas */}
+      {/* Sidebar principale (votre code original) */}
       <motion.div 
         initial={{ x: -80, opacity: 0 }}
         animate={{ x: 0, opacity: 1 }}
@@ -322,7 +320,7 @@ const Sidebar = ({ setInitialTaskCount, setCurrentProject, setProjectPage, proje
             >
               <SidebarIcon
                 item={item}
-                isActive={activeTab === item.id || (item.id === 'projects' && showProjects)}
+                isActive={secondSidebarContent === item.id && secondSidebarOpen}
               />
             </motion.div>
           ))}
@@ -341,38 +339,35 @@ const Sidebar = ({ setInitialTaskCount, setCurrentProject, setProjectPage, proje
         </motion.div>
       </motion.div>
 
-      {/* Panel de contenu extensible avec décalage vers le bas */}
+      {/* Deuxième sidebar (nouvelle) */}
       <AnimatePresence>
-        {(activeTab === 'projects' && showProjects) || activeTab !== 'home' ? (
+        {secondSidebarOpen && (
           <motion.div
             initial={{ x: -320, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
             exit={{ x: -320, opacity: 0 }}
             transition={{ duration: 0.3, ease: "easeInOut" }}
-            className="fixed left-20 top-20 h-[calc(100vh-6rem)] w-80 bg-gradient-to-br from-white to-slate-50 border-r border-slate-200 shadow-xl z-30 overflow-y-auto"
+            className="fixed left-24 top-20 h-[calc(100vh-6rem)] w-80 bg-gradient-to-br from-white to-slate-50 border-r border-slate-200 shadow-xl z-30 overflow-y-auto flex flex-col"
           >
-            {/* Header du panel */}
+            {/* Header de la deuxième sidebar */}
             <div className="sticky top-0 bg-gradient-to-r from-indigo-700 to-indigo-800 text-white border-b border-indigo-600 p-4 flex items-center justify-between shadow-md">
               <h2 className="font-bold text-lg tracking-wide">
-                {sidebarItems.find(item => item.id === activeTab)?.label || 'Contenu'}
+                {sidebarItems.find(item => item.id === secondSidebarContent)?.label || 'Contenu'}
               </h2>
               <motion.button
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
-                onClick={() => {
-                  setActiveTab('home');
-                  setShowProjects(false);
-                }}
+                onClick={() => setSecondSidebarOpen(false)}
                 className="p-2 hover:bg-indigo-600 rounded-lg transition-colors duration-300"
               >
                 <X size={18} className="text-indigo-100" />
               </motion.button>
             </div>
             
-            {/* Contenu du panel */}
-            {renderContent()}
+            {/* Contenu de la deuxième sidebar */}
+            {renderSecondSidebarContent()}
           </motion.div>
-        ) : null}
+        )}
       </AnimatePresence>
 
       {/* Modal pour créer un nouveau projet */}

@@ -25,7 +25,6 @@ const Layout = ({ children, setInitialTaskCount, setCurrentProject, setProjectPa
 
         {/* Contenu principal - Décalé de la largeur de la sidebar */}
         <main className="flex-1 ml-[250px] px-2 sm:px-4 lg:px-6 py-4">
-          <Dashboard />
           {children}
         </main>
       </div>
