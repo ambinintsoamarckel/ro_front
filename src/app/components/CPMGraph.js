@@ -6,10 +6,81 @@ import "vis-network/styles/vis-network.css";
 
 const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
   const containerRef = useRef(null);
+  const scrollContainerRef = useRef(null); // Référence au container avec scrollbars
   const networkRef = useRef(null);
+  const dragStateRef = useRef({ isDragging: false, draggedNode: null });
+  const autoscrollRef = useRef(null); // Pour gérer l'autoscroll
   const [graphSize, setGraphSize] = React.useState({ width: 1000, height: 800 });
   const [isGraphReady, setIsGraphReady] = React.useState(false);
-  const [selectedNodeId, setSelectedNodeId] = React.useState(null); // Pour suivre le nœud sélectionné (si nécessaire pour futures fonctionnalités)
+  const [selectedNodeId, setSelectedNodeId] = React.useState(null);
+
+  // Fonction d'autoscroll améliorée
+  const handleAutoscroll = useCallback((mouseX, mouseY) => {
+    if (!scrollContainerRef.current || !dragStateRef.current.isDragging) return;
+
+    const container = scrollContainerRef.current;
+    const containerRect = container.getBoundingClientRect();
+    const scrollZone = 60; // Zone élargie pour une meilleure réactivité
+    const maxScrollSpeed = 15; // Vitesse max
+    const minScrollSpeed = 3; // Vitesse min
+
+    let scrollX = 0;
+    let scrollY = 0;
+
+    // Calcul autoscroll horizontal avec vitesse progressive
+    if (mouseX < containerRect.left + scrollZone) {
+      const distance = containerRect.left + scrollZone - mouseX;
+      const speed = minScrollSpeed + (distance / scrollZone) * (maxScrollSpeed - minScrollSpeed);
+      scrollX = -Math.min(speed, maxScrollSpeed);
+    } else if (mouseX > containerRect.right - scrollZone) {
+      const distance = mouseX - (containerRect.right - scrollZone);
+      const speed = minScrollSpeed + (distance / scrollZone) * (maxScrollSpeed - minScrollSpeed);
+      scrollX = Math.min(speed, maxScrollSpeed);
+    }
+
+    // Calcul autoscroll vertical avec vitesse progressive
+    if (mouseY < containerRect.top + scrollZone) {
+      const distance = containerRect.top + scrollZone - mouseY;
+      const speed = minScrollSpeed + (distance / scrollZone) * (maxScrollSpeed - minScrollSpeed);
+      scrollY = -Math.min(speed, maxScrollSpeed);
+    } else if (mouseY > containerRect.bottom - scrollZone) {
+      const distance = mouseY - (containerRect.bottom - scrollZone);
+      const speed = minScrollSpeed + (distance / scrollZone) * (maxScrollSpeed - minScrollSpeed);
+      scrollY = Math.min(speed, maxScrollSpeed);
+    }
+
+    // Appliquer le scroll avec requestAnimationFrame pour plus de fluidité
+    if (scrollX !== 0 || scrollY !== 0) {
+      requestAnimationFrame(() => {
+        container.scrollLeft += scrollX;
+        container.scrollTop += scrollY;
+      });
+    }
+  }, []);
+
+  // Gestionnaire de mouvement de souris global avec throttling
+  const handleGlobalMouseMove = useCallback((e) => {
+    if (dragStateRef.current.isDragging) {
+      // Throttle pour améliorer les performances
+      if (!handleGlobalMouseMove.lastCall || Date.now() - handleGlobalMouseMove.lastCall > 16) {
+        handleAutoscroll(e.clientX, e.clientY);
+        handleGlobalMouseMove.lastCall = Date.now();
+      }
+    }
+  }, [handleAutoscroll]);
+
+  // Fonction pour vérifier si un point est dans les limites du container
+  const isPointInContainer = useCallback((x, y) => {
+    if (!scrollContainerRef.current) return true;
+    
+    const containerRect = scrollContainerRef.current.getBoundingClientRect();
+    return (
+      x >= containerRect.left &&
+      x <= containerRect.right &&
+      y >= containerRect.top &&
+      y <= containerRect.bottom
+    );
+  }, []);
 
   const loadCriticalPathData = useCallback(() => {
     setIsGraphReady(false);
@@ -70,7 +141,6 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
               x: 0,
               y: 4
             },
-
           },
           ...tasks.map(task => {
             const isCritical = task.slack === 0;
@@ -113,7 +183,7 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
                 x: 0,
                 y: 3
               },
-              fixed: { x: false, y: false } // Les nœuds de tâches peuvent être déplacés individuellement
+              fixed: { x: false, y: false }
             };
           }),
           {
@@ -153,7 +223,6 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
               x: 0,
               y: 4
             },
-
           }
         ]);
 
@@ -175,7 +244,6 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
                 type: "arrow" 
               } 
             },
-            
             shadow: {
               enabled: true,
               color: "rgba(124, 58, 237, 0.15)",
@@ -269,102 +337,127 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
           })
         ]);
 
-      // 1. Options avec layout hiérarchique pour placement initial
-const initialOptions = {
-  layout: {
-    hierarchical: {
-      direction: "LR",
-      nodeSpacing: 180,
-      levelSeparation: 220,
-      sortMethod: "directed"
-    }
-  },
-  physics: { enabled: false },
-  interaction: {
-    dragNodes: false, // on empêche temporairement le drag
-    dragView: false,
-    zoomView: false
-  }
-};
+        // Options avec layout hiérarchique pour placement initial
+        const initialOptions = {
+          layout: {
+            hierarchical: {
+              direction: "LR",
+              nodeSpacing: 180,
+              levelSeparation: 220,
+              sortMethod: "directed"
+            }
+          },
+          physics: { enabled: false },
+          interaction: {
+            dragNodes: false,
+            dragView: false,
+            zoomView: false
+          }
+        };
 
-// 2. Création temporaire du graph avec layout actif
-if (networkRef.current) {
-  networkRef.current.destroy();
-}
-networkRef.current = new Network(containerRef.current, { nodes, edges }, initialOptions);
-// 3. Attendre que le layout soit appliqué
-setTimeout(() => {
-  const positions = networkRef.current.getPositions();
+        // Création temporaire du graph avec layout actif
+        if (networkRef.current) {
+          networkRef.current.destroy();
+        }
+        networkRef.current = new Network(containerRef.current, { nodes, edges }, initialOptions);
 
-  // 4. On désactive le layout hiérarchique, active le drag libre
-  const finalOptions = {
-    layout: { hierarchical: false },
-    physics: { enabled: false },
-    interaction: {
-      dragNodes: true,
-      dragView: false,
-      zoomView: false
-    }
-  };
+        // Attendre que le layout soit appliqué
+        setTimeout(() => {
+          if (!networkRef.current) return;
+          const positions = networkRef.current.getPositions();
 
-  // 5. Appliquer la nouvelle config
-  networkRef.current.setOptions(finalOptions);
+          // Désactiver le layout hiérarchique, activer le drag libre
+          const finalOptions = {
+            layout: { hierarchical: false },
+            physics: { enabled: false },
+            interaction: {
+              dragNodes: true,
+              dragView: false,
+              zoomView: false
+            }
+          };
 
-  // 6. Réappliquer les positions manuellement
-  for (const [id, pos] of Object.entries(positions)) {
-    networkRef.current.moveNode(id, pos.x, pos.y);
-  }
+          // Appliquer la nouvelle config
+          networkRef.current.setOptions(finalOptions);
 
-  // 7. Calcul du nouveau width/height du canvas
-  const xs = Object.values(positions).map(p => p.x);
-  const ys = Object.values(positions).map(p => p.y);
-  const padding = 150;
-  const width  = Math.max(1000, Math.abs(Math.max(...xs) - Math.min(...xs)) + padding * 2);
-  const height = Math.max(800, Math.abs(Math.max(...ys) - Math.min(...ys)) + padding * 2);
+          // Réappliquer les positions manuellement
+          for (const [id, pos] of Object.entries(positions)) {
+            networkRef.current.moveNode(id, pos.x, pos.y);
+          }
 
-  // 8. Enregistrer la taille (génère les scrollbars sur le parent)
-  setGraphSize({ width, height });
+          // Calcul du nouveau width/height du canvas
+          const xs = Object.values(positions).map(p => p.x);
+          const ys = Object.values(positions).map(p => p.y);
+          const padding = 150;
+          const width = Math.max(1000, Math.abs(Math.max(...xs) - Math.min(...xs)) + padding * 2);
+          const height = Math.max(800, Math.abs(Math.max(...ys) - Math.min(...ys)) + padding * 2);
 
-  // 9. Installer le clamp au dragEnd pour limiter aux bords du canvas
-  const clampPadding = 40;  // marge intérieure
-  const minX = -width  / 2 + clampPadding;
-  const maxX =  width  / 2 - clampPadding;
-  const minY = -height / 2 + clampPadding;
-  const maxY =  height / 2 - clampPadding;
+          // Enregistrer la taille
+          setGraphSize({ width, height });
 
-  networkRef.current.on("dragEnd", params => {
-    if (!params.nodes || params.nodes.length === 0) return;
-    const posAfter = networkRef.current.getPositions(params.nodes);
-    params.nodes.forEach(id => {
-      const { x, y } = posAfter[id];
-      const cx = Math.max(minX, Math.min(maxX, x));
-      const cy = Math.max(minY, Math.min(maxY, y));
-      if (cx !== x || cy !== y) {
-        networkRef.current.moveNode(id, cx, cy);
-      }
-    });
-  });
+          // Limites pour le clamping
+          const clampPadding = 40;
+          const minX = -width / 2 + clampPadding;
+          const maxX = width / 2 - clampPadding;
+          const minY = -height / 2 + clampPadding;
+          const maxY = height / 2 - clampPadding;
 
-  // 10. On déclenche l’affichage une fois prêt
-  setTimeout(() => setIsGraphReady(true), 100);
-}, 100);
+          // Gestionnaire de début de drag
+          networkRef.current.on("dragStart", (params) => {
+            if (params.nodes && params.nodes.length > 0) {
+              dragStateRef.current.isDragging = true;
+              dragStateRef.current.draggedNode = params.nodes[0];
+            }
+          });
 
+          // Gestionnaire pendant le drag - utilise onBeforeDrawing pour intercepter avant le rendu
+          networkRef.current.on("beforeDrawing", (ctx) => {
+            if (dragStateRef.current.isDragging && dragStateRef.current.draggedNode) {
+              // Vérifier la position de la souris pour l'autoscroll
+              // Note: nous utilisons les événements de souris globaux pour cela
+            }
+          });
 
+          // Gestionnaire de fin de drag
+          networkRef.current.on("dragEnd", (params) => {
+            dragStateRef.current.isDragging = false;
+            dragStateRef.current.draggedNode = null;
+
+            if (!params.nodes || params.nodes.length === 0) return;
+            
+            // Clamping final - vérifier que networkRef.current existe
+            if (!networkRef.current) return;
+            const posAfter = networkRef.current.getPositions(params.nodes);
+            params.nodes.forEach(id => {
+              const { x, y } = posAfter[id];
+              const cx = Math.max(minX, Math.min(maxX, x));
+              const cy = Math.max(minY, Math.min(maxY, y));
+              if (cx !== x || cy !== y) {
+                networkRef.current.moveNode(id, cx, cy);
+              }
+            });
+          });
+
+          // Affichage une fois prêt
+          setTimeout(() => setIsGraphReady(true), 100);
+        }, 100);
+
+        // Dessin des badges slack
         networkRef.current.on("afterDrawing", function (ctx) {
           const nodePositions = networkRef.current.getPositions();
 
           tasks.forEach(task => {
             const pos = nodePositions[task.id];
             if (pos) {
-              // Ligne de séparation plus visible
+              // Ligne de séparation
               ctx.beginPath();
-              ctx.strokeStyle = "#64748b"; // Couleur plus foncée et visible
-              ctx.lineWidth = 2; // Épaisseur augmentée
-              ctx.moveTo(pos.x - 37, pos.y); // Ligne légèrement plus longue
+              ctx.strokeStyle = "#64748b";
+              ctx.lineWidth = 2;
+              ctx.moveTo(pos.x - 37, pos.y);
               ctx.lineTo(pos.x + 37, pos.y);
               ctx.stroke();
 
-              // Badge slack redessiné
+              // Badge slack
               const badgeWidth = 36;
               const badgeHeight = 24;
               const cornerRadius = 12;
@@ -397,7 +490,7 @@ setTimeout(() => {
               ctx.fill();
               ctx.stroke();
 
-              // Texte du badge avec ombre légère
+              // Texte du badge
               ctx.shadowColor = "rgba(0, 0, 0, 0.1)";
               ctx.shadowBlur = 2;
               ctx.shadowOffsetX = 0;
@@ -423,18 +516,23 @@ setTimeout(() => {
         console.error("Erreur lors du chargement des données:", err);
         setIsGraphReady(true);
       });
-  }, [projectId, onDataLoaded]);
+  }, [projectId, onDataLoaded, isPointInContainer]);
 
   useEffect(() => {
     loadCriticalPathData();
 
+    // Ajouter le gestionnaire global de mouvement de souris
+    document.addEventListener('mousemove', handleGlobalMouseMove);
+
     return () => {
+      document.removeEventListener('mousemove', handleGlobalMouseMove);
+      
       if (networkRef.current) {
         networkRef.current.destroy();
         networkRef.current = null;
       }
     };
-  }, [loadCriticalPathData]);
+  }, [loadCriticalPathData, handleGlobalMouseMove]);
 
   useImperativeHandle(ref, () => ({
     getNodes: () => networkRef.current?.body.data.nodes || null,
@@ -449,6 +547,7 @@ setTimeout(() => {
 
   return (
     <div
+      ref={scrollContainerRef}
       style={{
         width: "100%",
         height: "80vh",
@@ -511,7 +610,7 @@ setTimeout(() => {
         style={{
           width: `${graphSize.width}px`,
           height: `${graphSize.height}px`,
-          overflow: "hidden",      // ← empêche juste les nœuds de déborder visuellement
+          overflow: "hidden",
           position: "relative",
           opacity: isGraphReady ? 1 : 0,
           transition: "opacity 0.3s ease-in-out"
