@@ -6,81 +6,102 @@ import "vis-network/styles/vis-network.css";
 
 const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
   const containerRef = useRef(null);
-  const scrollContainerRef = useRef(null); // Référence au container avec scrollbars
+  const scrollContainerRef = useRef(null);
   const networkRef = useRef(null);
   const dragStateRef = useRef({ isDragging: false, draggedNode: null });
-  const autoscrollRef = useRef(null); // Pour gérer l'autoscroll
+  const autoscrollIntervalRef = useRef(null);
   const [graphSize, setGraphSize] = React.useState({ width: 1000, height: 800 });
   const [isGraphReady, setIsGraphReady] = React.useState(false);
   const [selectedNodeId, setSelectedNodeId] = React.useState(null);
 
-  // Fonction d'autoscroll améliorée
-  const handleAutoscroll = useCallback((mouseX, mouseY) => {
+  // Fonction d'autoscroll continue et fluide
+  const startAutoscroll = useCallback((mouseX, mouseY) => {
     if (!scrollContainerRef.current || !dragStateRef.current.isDragging) return;
+
+    // Nettoyer l'ancien interval
+    if (autoscrollIntervalRef.current) {
+      clearInterval(autoscrollIntervalRef.current);
+    }
 
     const container = scrollContainerRef.current;
     const containerRect = container.getBoundingClientRect();
-    const scrollZone = 60; // Zone élargie pour une meilleure réactivité
-    const maxScrollSpeed = 15; // Vitesse max
-    const minScrollSpeed = 3; // Vitesse min
+    const scrollZone = 80; // Zone de déclenchement élargie
+    const maxScrollSpeed = 8; // Vitesse maximale réduite pour plus de contrôle
+    const minScrollSpeed = 2;
 
-    let scrollX = 0;
-    let scrollY = 0;
+    // Calculer les vitesses de scroll
+    let scrollSpeedX = 0;
+    let scrollSpeedY = 0;
 
-    // Calcul autoscroll horizontal avec vitesse progressive
+    // Autoscroll horizontal
     if (mouseX < containerRect.left + scrollZone) {
-      const distance = containerRect.left + scrollZone - mouseX;
-      const speed = minScrollSpeed + (distance / scrollZone) * (maxScrollSpeed - minScrollSpeed);
-      scrollX = -Math.min(speed, maxScrollSpeed);
+      const distance = Math.max(0, containerRect.left + scrollZone - mouseX);
+      const normalizedDistance = Math.min(1, distance / scrollZone);
+      scrollSpeedX = -(minScrollSpeed + normalizedDistance * (maxScrollSpeed - minScrollSpeed));
     } else if (mouseX > containerRect.right - scrollZone) {
-      const distance = mouseX - (containerRect.right - scrollZone);
-      const speed = minScrollSpeed + (distance / scrollZone) * (maxScrollSpeed - minScrollSpeed);
-      scrollX = Math.min(speed, maxScrollSpeed);
+      const distance = Math.max(0, mouseX - (containerRect.right - scrollZone));
+      const normalizedDistance = Math.min(1, distance / scrollZone);
+      scrollSpeedX = minScrollSpeed + normalizedDistance * (maxScrollSpeed - minScrollSpeed);
     }
 
-    // Calcul autoscroll vertical avec vitesse progressive
+    // Autoscroll vertical
     if (mouseY < containerRect.top + scrollZone) {
-      const distance = containerRect.top + scrollZone - mouseY;
-      const speed = minScrollSpeed + (distance / scrollZone) * (maxScrollSpeed - minScrollSpeed);
-      scrollY = -Math.min(speed, maxScrollSpeed);
+      const distance = Math.max(0, containerRect.top + scrollZone - mouseY);
+      const normalizedDistance = Math.min(1, distance / scrollZone);
+      scrollSpeedY = -(minScrollSpeed + normalizedDistance * (maxScrollSpeed - minScrollSpeed));
     } else if (mouseY > containerRect.bottom - scrollZone) {
-      const distance = mouseY - (containerRect.bottom - scrollZone);
-      const speed = minScrollSpeed + (distance / scrollZone) * (maxScrollSpeed - minScrollSpeed);
-      scrollY = Math.min(speed, maxScrollSpeed);
+      const distance = Math.max(0, mouseY - (containerRect.bottom - scrollZone));
+      const normalizedDistance = Math.min(1, distance / scrollZone);
+      scrollSpeedY = minScrollSpeed + normalizedDistance * (maxScrollSpeed - minScrollSpeed);
     }
 
-    // Appliquer le scroll avec requestAnimationFrame pour plus de fluidité
-    if (scrollX !== 0 || scrollY !== 0) {
-      requestAnimationFrame(() => {
-        container.scrollLeft += scrollX;
-        container.scrollTop += scrollY;
-      });
+    // Démarrer l'autoscroll continu si nécessaire
+    if (scrollSpeedX !== 0 || scrollSpeedY !== 0) {
+      autoscrollIntervalRef.current = setInterval(() => {
+        if (!dragStateRef.current.isDragging || !scrollContainerRef.current) {
+          clearInterval(autoscrollIntervalRef.current);
+          return;
+        }
+
+        const currentScrollLeft = container.scrollLeft;
+        const currentScrollTop = container.scrollTop;
+
+        // Appliquer le scroll
+        container.scrollLeft = Math.max(0, Math.min(
+          container.scrollWidth - container.clientWidth,
+          currentScrollLeft + scrollSpeedX
+        ));
+        
+        container.scrollTop = Math.max(0, Math.min(
+          container.scrollHeight - container.clientHeight,
+          currentScrollTop + scrollSpeedY
+        ));
+      }, 16); // ~60fps
     }
   }, []);
 
-  // Gestionnaire de mouvement de souris global avec throttling
+  const stopAutoscroll = useCallback(() => {
+    if (autoscrollIntervalRef.current) {
+      clearInterval(autoscrollIntervalRef.current);
+      autoscrollIntervalRef.current = null;
+    }
+  }, []);
+
+  // Gestionnaire de mouvement de souris global
   const handleGlobalMouseMove = useCallback((e) => {
     if (dragStateRef.current.isDragging) {
-      // Throttle pour améliorer les performances
-      if (!handleGlobalMouseMove.lastCall || Date.now() - handleGlobalMouseMove.lastCall > 16) {
-        handleAutoscroll(e.clientX, e.clientY);
-        handleGlobalMouseMove.lastCall = Date.now();
-      }
+      startAutoscroll(e.clientX, e.clientY);
     }
-  }, [handleAutoscroll]);
+  }, [startAutoscroll]);
 
-  // Fonction pour vérifier si un point est dans les limites du container
-  const isPointInContainer = useCallback((x, y) => {
-    if (!scrollContainerRef.current) return true;
-    
-    const containerRect = scrollContainerRef.current.getBoundingClientRect();
-    return (
-      x >= containerRect.left &&
-      x <= containerRect.right &&
-      y >= containerRect.top &&
-      y <= containerRect.bottom
-    );
-  }, []);
+  // Gestionnaire de fin de drag global
+  const handleGlobalMouseUp = useCallback(() => {
+    if (dragStateRef.current.isDragging) {
+      dragStateRef.current.isDragging = false;
+      dragStateRef.current.draggedNode = null;
+      stopAutoscroll();
+    }
+  }, [stopAutoscroll]);
 
   const loadCriticalPathData = useCallback(() => {
     setIsGraphReady(false);
@@ -395,6 +416,16 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
           // Enregistrer la taille
           setGraphSize({ width, height });
 
+          // ZOOM FIXE À 0.8 - Appliquer après le dimensionnement
+          setTimeout(() => {
+            if (networkRef.current) {
+              networkRef.current.moveTo({
+                scale: 0.8,
+                animation: false
+              });
+            }
+          }, 50);
+
           // Limites pour le clamping
           const clampPadding = 40;
           const minX = -width / 2 + clampPadding;
@@ -410,22 +441,15 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
             }
           });
 
-          // Gestionnaire pendant le drag - utilise onBeforeDrawing pour intercepter avant le rendu
-          networkRef.current.on("beforeDrawing", (ctx) => {
-            if (dragStateRef.current.isDragging && dragStateRef.current.draggedNode) {
-              // Vérifier la position de la souris pour l'autoscroll
-              // Note: nous utilisons les événements de souris globaux pour cela
-            }
-          });
-
           // Gestionnaire de fin de drag
           networkRef.current.on("dragEnd", (params) => {
             dragStateRef.current.isDragging = false;
             dragStateRef.current.draggedNode = null;
+            stopAutoscroll();
 
             if (!params.nodes || params.nodes.length === 0) return;
             
-            // Clamping final - vérifier que networkRef.current existe
+            // Clamping final
             if (!networkRef.current) return;
             const posAfter = networkRef.current.getPositions(params.nodes);
             params.nodes.forEach(id => {
@@ -436,10 +460,31 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
                 networkRef.current.moveNode(id, cx, cy);
               }
             });
+
+            // S'assurer que le zoom reste à 0.8
+            setTimeout(() => {
+              if (networkRef.current) {
+                networkRef.current.moveTo({
+                  scale: 0.8,
+                  animation: false
+                });
+              }
+            }, 10);
+          });
+
+          // Empêcher le zoom sur la molette
+          networkRef.current.on("zoom", (params) => {
+            if (Math.abs(params.scale - 0.8) > 0.001) {
+              networkRef.current.moveTo({
+                position: params.pointer,
+                scale: 0.8,
+                animation: false
+              });
+            }
           });
 
           // Affichage une fois prêt
-          setTimeout(() => setIsGraphReady(true), 100);
+          setTimeout(() => setIsGraphReady(true), 150);
         }, 100);
 
         // Dessin des badges slack
@@ -516,23 +561,27 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
         console.error("Erreur lors du chargement des données:", err);
         setIsGraphReady(true);
       });
-  }, [projectId, onDataLoaded, isPointInContainer]);
+  }, [projectId, onDataLoaded, stopAutoscroll]);
 
   useEffect(() => {
     loadCriticalPathData();
 
-    // Ajouter le gestionnaire global de mouvement de souris
+    // Ajouter les gestionnaires globaux
     document.addEventListener('mousemove', handleGlobalMouseMove);
+    document.addEventListener('mouseup', handleGlobalMouseUp);
 
     return () => {
       document.removeEventListener('mousemove', handleGlobalMouseMove);
+      document.removeEventListener('mouseup', handleGlobalMouseUp);
+      
+      stopAutoscroll();
       
       if (networkRef.current) {
         networkRef.current.destroy();
         networkRef.current = null;
       }
     };
-  }, [loadCriticalPathData, handleGlobalMouseMove]);
+  }, [loadCriticalPathData, handleGlobalMouseMove, handleGlobalMouseUp, stopAutoscroll]);
 
   useImperativeHandle(ref, () => ({
     getNodes: () => networkRef.current?.body.data.nodes || null,
@@ -541,6 +590,15 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
     fitView: () => {
       if (networkRef.current) {
         networkRef.current.fit();
+        // Remettre le zoom à 0.8 après fit
+        setTimeout(() => {
+          if (networkRef.current) {
+            networkRef.current.moveTo({
+              scale: 0.8,
+              animation: true
+            });
+          }
+        }, 100);
       }
     }
   }));
