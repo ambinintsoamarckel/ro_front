@@ -20,9 +20,15 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
   // Animation du chemin critique
   const animateCriticalPath = useCallback(() => {
     if (!networkRef.current || criticalPathRef.current.length === 0) return;
-
+  
+    // Utiliser le temps réel au lieu d'un compteur manuel
+    const startTime = performance.now();
+  
     const animate = () => {
-      animationTimeRef.current += 0.02;
+      // Calculer le temps écoulé en millisecondes depuis le début
+      const currentTimeMs = performance.now() - startTime;
+      // Convertir en secondes avec une vitesse globale constante
+      animationTimeRef.current = currentTimeMs * 0.003; // 0.001 = vitesse normale
       
       // Force le redraw pour déclencher afterDrawing
       if (networkRef.current) {
@@ -34,7 +40,6 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
     
     animate();
   }, []);
-
   const stopAnimation = useCallback(() => {
     if (animationRef.current) {
       cancelAnimationFrame(animationRef.current);
@@ -571,106 +576,109 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
         }, 100);
 
         // Dessin avec animations du chemin critique
+        // Fonction afterDrawing avec bondissement élégant des badges critiques
         networkRef.current.on("afterDrawing", function (ctx) {
           const nodePositions = networkRef.current.getPositions();
           const currentTime = animationTimeRef.current;
 
-          // 1. Animation des arêtes critiques avec particules de lumière
+          // 1. Animation des arêtes critiques UNIQUEMENT
           const edges = networkRef.current.body.data.edges.get();
-          edges.forEach(edge => {
-            if (edge.isCritical) {
-              const fromPos = nodePositions[edge.from];
-              const toPos = nodePositions[edge.to];
+          const criticalEdges = edges.filter(edge => edge.isCritical);
+          
+          criticalEdges.forEach(edge => {
+            const fromPos = nodePositions[edge.from];
+            const toPos = nodePositions[edge.to];
+            
+            if (fromPos && toPos) {
+              // Effet de glow pulsant avec vitesse constante
+              const glowIntensity = 0.5 + 0.3 * Math.sin(currentTime * 2);
               
-              if (fromPos && toPos) {
-                // Effet de glow pulsant sur les arêtes critiques
-                const glowIntensity = 0.5 + 0.3 * Math.sin(currentTime * 3);
-                
-                // Dessiner plusieurs couches pour l'effet glow
-                for (let i = 0; i < 3; i++) {
-                  ctx.globalAlpha = glowIntensity * (0.3 - i * 0.1);
-                  ctx.strokeStyle = "#ff6b6b";
-                  ctx.lineWidth = (6 - i * 2);
-                  ctx.shadowColor = "#ff6b6b";
-                  ctx.shadowBlur = 15 + i * 5;
-                  
-                  ctx.beginPath();
-                  ctx.moveTo(fromPos.x, fromPos.y);
-                  ctx.lineTo(toPos.x, toPos.y);
-                  ctx.stroke();
-                }
-                
-                // Particules qui voyagent le long du chemin critique
-                const distance = Math.sqrt(Math.pow(toPos.x - fromPos.x, 2) + Math.pow(toPos.y - fromPos.y, 2));
-                const progress = (currentTime * 0.5) % 2; // Cycle de 2 secondes
-                
-                if (progress <= 1) {
-                  const particleX = fromPos.x + (toPos.x - fromPos.x) * progress;
-                  const particleY = fromPos.y + (toPos.y - fromPos.y) * progress;
-                  
-                  // Particule principale
-                  ctx.globalAlpha = 1 - Math.abs(progress - 0.5) * 2;
-                  ctx.fillStyle = "#fff";
-                  ctx.shadowColor = "#ff6b6b";
-                  ctx.shadowBlur = 20;
-                  ctx.beginPath();
-                  ctx.arc(particleX, particleY, 4, 0, 2 * Math.PI);
-                  ctx.fill();
-                  
-                  // Traînée de particules
-                  for (let j = 1; j <= 5; j++) {
-                    const trailProgress = Math.max(0, progress - j * 0.05);
-                    if (trailProgress > 0) {
-                      const trailX = fromPos.x + (toPos.x - fromPos.x) * trailProgress;
-                      const trailY = fromPos.y + (toPos.y - fromPos.y) * trailProgress;
-                      
-                      ctx.globalAlpha = (1 - Math.abs(trailProgress - 0.5) * 2) * (0.8 - j * 0.15);
-                      ctx.beginPath();
-                      ctx.arc(trailX, trailY, 2, 0, 2 * Math.PI);
-                      ctx.fill();
-                    }
-                  }
-                }
-                
-                // Reset des propriétés
-                ctx.globalAlpha = 1;
-                ctx.shadowColor = "transparent";
-                ctx.shadowBlur = 0;
-              }
-            }
-          });
-
-          // 2. Animation des nœuds critiques avec effet de respiration
-          tasks.forEach(task => {
-            if (task.slack === 0) {
-              const pos = nodePositions[task.id];
-              if (pos) {
-                // Effet de halo pulsant autour des nœuds critiques
-                const haloSize = 45 + 10 * Math.sin(currentTime * 2);
-                const haloAlpha = 0.2 + 0.1 * Math.sin(currentTime * 2);
-                
-                ctx.globalAlpha = haloAlpha;
-                ctx.fillStyle = "#ff6b6b";
+              // Dessiner l'effet glow en 3 couches
+              for (let i = 0; i < 3; i++) {
+                ctx.globalAlpha = glowIntensity * (0.3 - i * 0.1);
+                ctx.strokeStyle = "#ff6b6b";
+                ctx.lineWidth = (6 - i * 2);
                 ctx.shadowColor = "#ff6b6b";
-                ctx.shadowBlur = 30;
-                ctx.beginPath();
-                ctx.arc(pos.x, pos.y, haloSize, 0, 2 * Math.PI);
-                ctx.fill();
+                ctx.shadowBlur = 15 + i * 5;
                 
-                ctx.globalAlpha = 1;
-                ctx.shadowColor = "transparent";
-                ctx.shadowBlur = 0;
+                ctx.beginPath();
+                ctx.moveTo(fromPos.x, fromPos.y);
+                ctx.lineTo(toPos.x, toPos.y);
+                ctx.stroke();
               }
+              
+              // Particules voyageuses
+              const particleSpeed = 0.3;
+              const cycleDuration = 3;
+              const progress = ((currentTime * particleSpeed) % cycleDuration) / cycleDuration;
+              
+              const particleX = fromPos.x + (toPos.x - fromPos.x) * progress;
+              const particleY = fromPos.y + (toPos.y - fromPos.y) * progress;
+              
+              // Particule principale
+              ctx.globalAlpha = 0.8 + 0.2 * Math.sin(currentTime * 6);
+              ctx.fillStyle = "#fff";
+              ctx.shadowColor = "#ff6b6b";
+              ctx.shadowBlur = 20;
+              ctx.beginPath();
+              ctx.arc(particleX, particleY, 5, 0, 2 * Math.PI);
+              ctx.fill();
+              
+              // Traînée de particules
+              for (let j = 1; j <= 4; j++) {
+                const trailDelay = j * 0.08;
+                const trailProgress = ((currentTime * particleSpeed - trailDelay) % cycleDuration) / cycleDuration;
+                
+                if (trailProgress > 0) {
+                  const trailX = fromPos.x + (toPos.x - fromPos.x) * trailProgress;
+                  const trailY = fromPos.y + (toPos.y - fromPos.y) * trailProgress;
+                  
+                  ctx.globalAlpha = (0.6 - j * 0.12);
+                  ctx.beginPath();
+                  ctx.arc(trailX, trailY, 3 - j * 0.5, 0, 2 * Math.PI);
+                  ctx.fill();
+                }
+              }
+              
+              // Reset des propriétés
+              ctx.globalAlpha = 1;
+              ctx.shadowColor = "transparent";
+              ctx.shadowBlur = 0;
             }
           });
 
-          // 3. Nœuds start et end avec animation spéciale
+          // 2. Animation des nœuds critiques UNIQUEMENT
+          const criticalTasks = tasks.filter(task => task.slack === 0);
+          
+          criticalTasks.forEach(task => {
+            const pos = nodePositions[task.id];
+            if (pos) {
+              // Effet de halo pulsant
+              const haloSize = 45 + 12 * Math.sin(currentTime * 1.5);
+              const haloAlpha = 0.2 + 0.15 * Math.sin(currentTime * 1.5);
+              
+              ctx.globalAlpha = haloAlpha;
+              ctx.fillStyle = "#ff6b6b";
+              ctx.shadowColor = "#ff6b6b";
+              ctx.shadowBlur = 30;
+              ctx.beginPath();
+              ctx.arc(pos.x, pos.y, haloSize, 0, 2 * Math.PI);
+              ctx.fill();
+              
+              ctx.globalAlpha = 1;
+              ctx.shadowColor = "transparent";
+              ctx.shadowBlur = 0;
+            }
+          });
+
+          // 3. Animation spéciale pour start et end
           const startPos = nodePositions["start"];
           const endPos = nodePositions["end"];
           
           if (startPos) {
-            // Animation de rotation pour le nœud start
-            const rotationAngle = currentTime * 0.5;
+            // Rotation constante pour le nœud start
+            const rotationSpeed = 0.4;
+            const rotationAngle = currentTime * rotationSpeed;
             const rayLength = 50;
             
             for (let i = 0; i < 8; i++) {
@@ -678,7 +686,7 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
               const rayX = startPos.x + Math.cos(angle) * rayLength;
               const rayY = startPos.y + Math.sin(angle) * rayLength;
               
-              ctx.globalAlpha = 0.3 + 0.2 * Math.sin(currentTime * 3);
+              ctx.globalAlpha = 0.3 + 0.2 * Math.sin(currentTime * 2);
               ctx.strokeStyle = "#4f46e5";
               ctx.lineWidth = 2;
               ctx.shadowColor = "#4f46e5";
@@ -692,10 +700,11 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
           }
           
           if (endPos) {
-            // Animation de couronnes concentriques pour le nœud end
+            // Couronnes concentriques
             for (let ring = 0; ring < 3; ring++) {
-              const ringRadius = 50 + ring * 20 + 10 * Math.sin(currentTime * 2 - ring);
-              const ringAlpha = (0.3 - ring * 0.1) * (0.5 + 0.5 * Math.sin(currentTime * 1.5));
+              const pulsationSpeed = 1.2;
+              const ringRadius = 50 + ring * 20 + 10 * Math.sin(currentTime * pulsationSpeed - ring);
+              const ringAlpha = (0.3 - ring * 0.1) * (0.5 + 0.5 * Math.sin(currentTime * pulsationSpeed));
               
               ctx.globalAlpha = ringAlpha;
               ctx.strokeStyle = "#7c3aed";
@@ -709,12 +718,12 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
             }
           }
 
-          // Reset final
+          // Reset
           ctx.globalAlpha = 1;
           ctx.shadowColor = "transparent";
           ctx.shadowBlur = 0;
 
-          // 4. Badges slack (code existant)
+          // 4. Badges avec bondissement TRÈS ÉLÉGANT
           tasks.forEach(task => {
             const pos = nodePositions[task.id];
             if (pos) {
@@ -726,7 +735,7 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
               ctx.lineTo(pos.x + 37, pos.y);
               ctx.stroke();
 
-              // Badge slack
+              // Configuration du badge
               const badgeWidth = 36;
               const badgeHeight = 24;
               const cornerRadius = 12;
@@ -735,50 +744,139 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
 
               const isCritical = task.slack === 0;
               
-              // Animation subtile du badge pour les tâches critiques
+              // 🎯 BONDISSEMENT ÉLÉGANT pour les badges critiques
               let badgeYOffset = 0;
+              let badgeScale = 1;
+              let badgeAlpha = 1;
+              
               if (isCritical) {
-                badgeYOffset = 2 * Math.sin(currentTime * 4);
+                // Fonction d'easing élégante (ease-in-out cubic)
+                const rawSin = Math.sin(currentTime * 4); // Vitesse rapide
+                const normalizedSin = (rawSin + 1) / 2; // Normaliser entre 0 et 1
+                
+                // Courbe d'easing cubic pour un mouvement fluide
+                const easedValue = normalizedSin < 0.5 
+                  ? 4 * normalizedSin * normalizedSin * normalizedSin
+                  : 1 - Math.pow(-2 * normalizedSin + 2, 3) / 2;
+                
+                // Bondissement vertical élégant
+                badgeYOffset = -8 * easedValue; // Vers le haut (négatif)
+                
+                // Scaling subtil qui suit le bondissement
+                badgeScale = 1 + 0.15 * easedValue;
+                
+                // Effet de glow pulsant synchronisé
+                badgeAlpha = 0.9 + 0.1 * Math.sin(currentTime * 8);
+                
+                // Ajout d'un effet de rebond secondaire
+                const secondaryBounce = 0.3 * Math.sin(currentTime * 12) * easedValue;
+                badgeYOffset += secondaryBounce;
               }
               
-              // Fond du badge avec dégradé
-              const gradient = ctx.createLinearGradient(badgeX, badgeY + badgeYOffset, badgeX, badgeY + badgeHeight + badgeYOffset);
-              gradient.addColorStop(0, isCritical ? "#ef4444" : "#10b981");
-              gradient.addColorStop(1, isCritical ? "#dc2626" : "#059669");
+              // Sauvegarde du contexte pour les transformations
+              ctx.save();
+              
+              // Appliquer les transformations pour le scaling
+              ctx.translate(pos.x, badgeY + badgeHeight / 2 + badgeYOffset);
+              ctx.scale(badgeScale, badgeScale);
+              ctx.translate(-pos.x, -(badgeY + badgeHeight / 2 + badgeYOffset));
+              
+              // Effet de glow pour les badges critiques
+              if (isCritical) {
+                ctx.shadowColor = "#ff6b6b";
+                ctx.shadowBlur = 12 * badgeScale;
+                ctx.shadowOffsetX = 0;
+                ctx.shadowOffsetY = 2;
+              }
+              
+              // Fond du badge avec dégradé dynamique
+              const gradient = ctx.createLinearGradient(
+                badgeX, 
+                badgeY + badgeYOffset, 
+                badgeX, 
+                badgeY + badgeHeight + badgeYOffset
+              );
+              
+              if (isCritical) {
+                // Dégradé dynamique pour les badges critiques
+                const glowIntensity = 0.1 + 0.05 * Math.sin(currentTime * 6);
+                gradient.addColorStop(0, `rgba(239, 68, 68, ${badgeAlpha - glowIntensity})`);
+                gradient.addColorStop(0.5, `rgba(239, 68, 68, ${badgeAlpha})`);
+                gradient.addColorStop(1, `rgba(220, 38, 38, ${badgeAlpha})`);
+              } else {
+                gradient.addColorStop(0, "#10b981");
+                gradient.addColorStop(1, "#059669");
+              }
               
               ctx.fillStyle = gradient;
               ctx.strokeStyle = isCritical ? "#b91c1c" : "#047857";
-              ctx.lineWidth = 1.5;
+              ctx.lineWidth = isCritical ? 2 : 1.5;
+              ctx.globalAlpha = badgeAlpha;
 
-
+              // Dessin du badge arrondi
               ctx.beginPath();
-              ctx.moveTo(badgeX + cornerRadius, badgeY);
-              ctx.lineTo(badgeX + badgeWidth - cornerRadius, badgeY);
-              ctx.quadraticCurveTo(badgeX + badgeWidth, badgeY, badgeX + badgeWidth, badgeY + cornerRadius);
-              ctx.lineTo(badgeX + badgeWidth, badgeY + badgeHeight - cornerRadius);
-              ctx.quadraticCurveTo(badgeX + badgeWidth, badgeY + badgeHeight, badgeX + badgeWidth - cornerRadius, badgeY + badgeHeight);
-              ctx.lineTo(badgeX + cornerRadius, badgeY + badgeHeight);
-              ctx.quadraticCurveTo(badgeX, badgeY + badgeHeight, badgeX, badgeY + badgeHeight - cornerRadius);
-              ctx.lineTo(badgeX, badgeY + cornerRadius);
-              ctx.quadraticCurveTo(badgeX, badgeY, badgeX + cornerRadius, badgeY);
+              ctx.moveTo(badgeX + cornerRadius, badgeY + badgeYOffset);
+              ctx.lineTo(badgeX + badgeWidth - cornerRadius, badgeY + badgeYOffset);
+              ctx.quadraticCurveTo(
+                badgeX + badgeWidth, 
+                badgeY + badgeYOffset, 
+                badgeX + badgeWidth, 
+                badgeY + cornerRadius + badgeYOffset
+              );
+              ctx.lineTo(badgeX + badgeWidth, badgeY + badgeHeight - cornerRadius + badgeYOffset);
+              ctx.quadraticCurveTo(
+                badgeX + badgeWidth, 
+                badgeY + badgeHeight + badgeYOffset, 
+                badgeX + badgeWidth - cornerRadius, 
+                badgeY + badgeHeight + badgeYOffset
+              );
+              ctx.lineTo(badgeX + cornerRadius, badgeY + badgeHeight + badgeYOffset);
+              ctx.quadraticCurveTo(
+                badgeX, 
+                badgeY + badgeHeight + badgeYOffset, 
+                badgeX, 
+                badgeY + badgeHeight - cornerRadius + badgeYOffset
+              );
+              ctx.lineTo(badgeX, badgeY + cornerRadius + badgeYOffset);
+              ctx.quadraticCurveTo(
+                badgeX, 
+                badgeY + badgeYOffset, 
+                badgeX + cornerRadius, 
+                badgeY + badgeYOffset
+              );
               ctx.closePath();
               
               ctx.fill();
               ctx.stroke();
 
-              // Texte du badge
-              ctx.shadowColor = "rgba(0, 0, 0, 0.1)";
-              ctx.shadowBlur = 2;
-              ctx.shadowOffsetX = 0;
-              ctx.shadowOffsetY = 1;
+              // Texte du badge avec effet de rebond
+              if (isCritical) {
+                ctx.shadowColor = "rgba(0, 0, 0, 0.3)";
+                ctx.shadowBlur = 4;
+                ctx.shadowOffsetX = 0;
+                ctx.shadowOffsetY = 1;
+              } else {
+                ctx.shadowColor = "rgba(0, 0, 0, 0.1)";
+                ctx.shadowBlur = 2;
+                ctx.shadowOffsetX = 0;
+                ctx.shadowOffsetY = 1;
+              }
               
               ctx.fillStyle = "#ffffff";
-              ctx.font = "bold 12px Inter, -apple-system, BlinkMacSystemFont, sans-serif";
+              ctx.font = `bold ${12 * badgeScale}px Inter, -apple-system, BlinkMacSystemFont, sans-serif`;
               ctx.textAlign = "center";
               ctx.textBaseline = "middle";
-              ctx.fillText(task.slack.toString(), pos.x, badgeY + badgeHeight / 2 + badgeYOffset);
+              ctx.fillText(
+                task.slack.toString(), 
+                pos.x, 
+                badgeY + badgeHeight / 2 + badgeYOffset
+              );
               
-              // Reset shadow
+              // Restaurer le contexte
+              ctx.restore();
+              
+              // Reset des propriétés
+              ctx.globalAlpha = 1;
               ctx.shadowColor = "transparent";
               ctx.shadowBlur = 0;
               ctx.shadowOffsetX = 0;
