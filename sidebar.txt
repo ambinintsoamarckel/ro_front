@@ -9,19 +9,9 @@ import {
   BadgePlus, 
   User, 
   Settings, 
-  HeartIcon, 
-  ChevronDown, 
-  ChevronUp,
   Home,
   FolderOpen,
-  Star,
-  Search,
-  Image,
-  Type,
-  Shapes,
-  Upload,
-  Palette,
-  Layers
+  Star
 } from "lucide-react";
 
 const Sidebar = ({ setInitialTaskCount, setCurrentProject, setProjectPage, projects, setProjects }) => {
@@ -85,13 +75,10 @@ const Sidebar = ({ setInitialTaskCount, setCurrentProject, setProjectPage, proje
 
   const sidebarItems = [
     { id: 'home', icon: Home, label: 'Accueil', action: () => setActiveTab('home') },
+    { id: 'nouveau', icon: BadgePlus, label: 'Nouveau', action: () => setIsModalOpen(true) },
     { id: 'projects', icon: FolderOpen, label: 'Projets', action: () => setShowProjects(!showProjects) },
-    { id: 'templates', icon: Layers, label: 'Modèles', action: () => setActiveTab('templates') },
-    { id: 'elements', icon: Shapes, label: 'Éléments', action: () => setActiveTab('elements') },
-    { id: 'text', icon: Type, label: 'Texte', action: () => setActiveTab('text') },
-    { id: 'uploads', icon: Upload, label: 'Imports', action: () => setActiveTab('uploads') },
-    { id: 'photos', icon: Image, label: 'Photos', action: () => setActiveTab('photos') },
-    { id: 'colors', icon: Palette, label: 'Couleurs', action: () => setActiveTab('colors') },
+    { id: 'favoris', icon: Star, label: 'Favoris', action: () => setActiveTab('favoris') },
+    { id: 'parametres', icon: Settings, label: 'Paramètres', action: () => setActiveTab('parametres') },
   ];
 
   const SidebarIcon = ({ item, isActive }) => (
@@ -169,17 +156,55 @@ const Sidebar = ({ setInitialTaskCount, setCurrentProject, setProjectPage, proje
           </div>
         );
       
-      case 'templates':
+      case 'favoris':
         return (
           <div className="p-4">
-            <h3 className="text-xl font-bold text-slate-800 mb-6">Modèles</h3>
-            <div className="grid grid-cols-2 gap-4">
-              {['Présentation', 'Poster', 'Flyer', 'Logo', 'Carte de visite', 'Instagram'].map((template) => (
-                <div key={template} className="bg-white rounded-xl p-4 cursor-pointer hover:bg-gradient-to-br hover:from-blue-50 hover:to-slate-50 transition-all duration-300 shadow-sm hover:shadow-md border border-slate-100 hover:border-blue-200">
-                  <div className="w-full h-24 bg-gradient-to-br from-blue-400 to-blue-600 rounded-lg mb-3 shadow-md"></div>
-                  <p className="text-sm font-semibold text-slate-700">{template}</p>
+            <h3 className="text-xl font-bold text-slate-800 mb-6">Favoris</h3>
+            <div className="text-center py-12">
+              <Star size={64} className="mx-auto text-slate-300 mb-6" />
+              <p className="text-slate-500 text-lg mb-4">Aucun favori pour le moment</p>
+              <p className="text-slate-400 text-sm">Ajoutez vos projets préférés en cliquant sur l'étoile</p>
+            </div>
+          </div>
+        );
+      
+      case 'parametres':
+        return (
+          <div className="p-4">
+            <h3 className="text-xl font-bold text-slate-800 mb-6">Paramètres</h3>
+            <div className="space-y-4">
+              <div className="bg-white rounded-xl p-4 border border-slate-200">
+                <h4 className="font-semibold text-slate-700 mb-2">Général</h4>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-slate-600">Thème sombre</span>
+                    <button className="w-12 h-6 bg-slate-200 rounded-full relative">
+                      <div className="w-5 h-5 bg-white rounded-full absolute top-0.5 left-0.5 transition-transform"></div>
+                    </button>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-slate-600">Notifications</span>
+                    <button className="w-12 h-6 bg-blue-500 rounded-full relative">
+                      <div className="w-5 h-5 bg-white rounded-full absolute top-0.5 right-0.5 transition-transform"></div>
+                    </button>
+                  </div>
                 </div>
-              ))}
+              </div>
+              
+              <div className="bg-white rounded-xl p-4 border border-slate-200">
+                <h4 className="font-semibold text-slate-700 mb-2">Compte</h4>
+                <div className="space-y-3">
+                  <button className="w-full text-left text-sm text-slate-600 hover:text-blue-600 transition-colors">
+                    Modifier le profil
+                  </button>
+                  <button className="w-full text-left text-sm text-slate-600 hover:text-blue-600 transition-colors">
+                    Changer le mot de passe
+                  </button>
+                  <button className="w-full text-left text-sm text-red-600 hover:text-red-700 transition-colors">
+                    Déconnexion
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         );
@@ -198,16 +223,25 @@ const Sidebar = ({ setInitialTaskCount, setCurrentProject, setProjectPage, proje
               </button>
               
               <div className="border-t border-slate-200 pt-6">
-                <h4 className="font-bold text-slate-700 mb-4">Accès rapide</h4>
+                <h4 className="font-bold text-slate-700 mb-4">Récemment utilisés</h4>
                 <div className="space-y-3">
-                  <div className="flex items-center p-3 rounded-xl hover:bg-gradient-to-r hover:from-yellow-50 hover:to-orange-50 cursor-pointer transition-all duration-300 border border-slate-100 hover:border-yellow-200">
-                    <Star size={18} className="text-yellow-500 mr-4" />
-                    <span className="text-sm font-medium text-slate-600">Favoris</span>
-                  </div>
-                  <div className="flex items-center p-3 rounded-xl hover:bg-gradient-to-r hover:from-slate-50 hover:to-blue-50 cursor-pointer transition-all duration-300 border border-slate-100 hover:border-blue-200">
-                    <Settings size={18} className="text-slate-500 mr-4" />
-                    <span className="text-sm font-medium text-slate-600">Paramètres</span>
-                  </div>
+                  {projects.slice(0, 3).map((project) => (
+                    <div
+                      key={project.id}
+                      className="flex items-center p-3 rounded-xl hover:bg-gradient-to-r hover:from-blue-50 hover:to-slate-50 cursor-pointer transition-all duration-300 border border-slate-100 hover:border-blue-200"
+                      onClick={() => {
+                        setCurrentProject(project);
+                        setProjectPage(true);
+                      }}
+                    >
+                      <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-700 rounded-lg flex items-center justify-center mr-3">
+                        <span className="text-white font-bold text-sm">
+                          {project.name.charAt(0).toUpperCase()}
+                        </span>
+                      </div>
+                      <span className="text-sm font-medium text-slate-600">{project.name}</span>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
