@@ -426,15 +426,23 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
           // Enregistrer la taille
           setGraphSize({ width, height });
 
-          // ZOOM FIXE À 0.8 - Appliquer après le dimensionnement
-          setTimeout(() => {
+          // ZOOM FIXE À 0.8 - Application multiple pour garantir la constance
+          const applyFixedZoom = () => {
             if (networkRef.current) {
               networkRef.current.moveTo({
                 scale: 0.8,
                 animation: false
               });
             }
-          }, 50);
+          };
+
+          // Appliquer le zoom immédiatement
+          applyFixedZoom();
+          
+          // Puis plusieurs fois avec des délais pour s'assurer qu'il tient
+          setTimeout(applyFixedZoom, 50);
+          setTimeout(applyFixedZoom, 100);
+          setTimeout(applyFixedZoom, 200);
 
           // Limites pour le clamping
           const clampPadding = 40;
@@ -471,7 +479,24 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
               }
             });
 
-            // S'assurer que le zoom reste à 0.8
+            // S'assurer que le zoom reste à 0.8 - Application plus agressive
+            const ensureZoom = () => {
+              if (networkRef.current) {
+                networkRef.current.moveTo({
+                  scale: 0.8,
+                  animation: false
+                });
+              }
+            };
+            
+            setTimeout(ensureZoom, 10);
+            setTimeout(ensureZoom, 50);
+            setTimeout(ensureZoom, 100);
+          });
+
+          // Empêcher le zoom sur la molette et forcer 0.8
+          networkRef.current.on("zoom", (params) => {
+            // Force immédiatement le zoom à 0.8 sans condition
             setTimeout(() => {
               if (networkRef.current) {
                 networkRef.current.moveTo({
@@ -479,17 +504,19 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
                   animation: false
                 });
               }
-            }, 10);
+            }, 1);
           });
 
-          // Empêcher le zoom sur la molette
-          networkRef.current.on("zoom", (params) => {
-            if (Math.abs(params.scale - 0.8) > 0.001) {
-              networkRef.current.moveTo({
-                position: params.pointer,
-                scale: 0.8,
-                animation: false
-              });
+          // Gestionnaire supplémentaire pour les changements de vue
+          networkRef.current.on("afterDrawing", () => {
+            if (networkRef.current) {
+              const currentScale = networkRef.current.getScale();
+              if (Math.abs(currentScale - 0.8) > 0.01) {
+                networkRef.current.moveTo({
+                  scale: 0.8,
+                  animation: false
+                });
+              }
             }
           });
 
@@ -600,13 +627,18 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
     fitView: () => {
       if (networkRef.current) {
         networkRef.current.fit();
-        // Remettre le zoom à 0.8 après fit
+        // Remettre le zoom à 0.8 après fit - Application multiple
         setTimeout(() => {
           if (networkRef.current) {
-            networkRef.current.moveTo({
-              scale: 0.8,
-              animation: true
-            });
+            const ensureZoom = () => {
+              networkRef.current.moveTo({
+                scale: 0.8,
+                animation: true
+              });
+            };
+            ensureZoom();
+            setTimeout(ensureZoom, 100);
+            setTimeout(ensureZoom, 300);
           }
         }, 100);
       }
