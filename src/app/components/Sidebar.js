@@ -81,7 +81,17 @@ const Sidebar = ({ setInitialTaskCount, setCurrentProject, setProjectPage, proje
     setSecondSidebarOpen(true);
   };
 
+  // Fonction pour le bouton Menu
+  const handleMenuClick = () => {
+    if (secondSidebarOpen) {
+      setSecondSidebarOpen(false);
+    } else {
+      openSecondSidebar('recent');
+    }
+  };
+
   const sidebarItems = [
+    { id: 'menu', icon:Menu, label: 'Menu', action: () => handleMenuClick(true) },
     { id: 'nouveau', icon: BadgePlus, label: 'Nouveau', action: () => setIsModalOpen(true) },
     { id: 'home', icon: Home, label: 'Accueil', action: () => openSecondSidebar('home') },
     { id: 'projects', icon: FolderOpen, label: 'Projets', action: () => openSecondSidebar('projects') },
@@ -118,6 +128,61 @@ const Sidebar = ({ setInitialTaskCount, setCurrentProject, setProjectPage, proje
   // Contenu de la deuxième sidebar
   const renderSecondSidebarContent = () => {
     switch (secondSidebarContent) {
+      case 'recent':
+        return (
+          <div className="flex-1 overflow-y-auto p-4">
+            <h3 className="text-lg font-semibold text-slate-800 mb-4">Projets récents</h3>
+            <div className="space-y-4">
+              {projects.length > 0 ? (
+                <div className="space-y-2">
+                  {projects.map((project, index) => (
+                    <motion.div
+                      key={project.id}
+                      initial={{ x: -20, opacity: 0 }}
+                      animate={{ x: 0, opacity: 1 }}
+                      transition={{ delay: index * 0.1 }}
+                      whileHover={{ x: 4 }}
+                      className="flex items-center p-3 bg-white rounded-lg cursor-pointer transition-all duration-200 hover:bg-slate-50 hover:shadow-sm border border-slate-100"
+                      onClick={() => {
+                        setCurrentProject(project);
+                        setProjectPage(true);
+                        setSecondSidebarOpen(false);
+                      }}
+                    >
+                      <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center mr-3">
+                        <span className="text-white font-semibold text-xs">
+                          {project.name.charAt(0).toUpperCase()}
+                        </span>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-slate-800 text-sm truncate">{project.name}</p>
+                        <p className="text-xs text-slate-500">Modifié récemment</p>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              ) : (
+                <motion.div 
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="text-center py-8"
+                >
+                  <FolderOpen size={48} className="mx-auto text-slate-300 mb-4" />
+                  <p className="text-slate-500 text-sm mb-4">Aucun projet</p>
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => setIsModalOpen(true)}
+                    className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm"
+                  >
+                    Créer un projet
+                  </motion.button>
+                </motion.div>
+              )}
+            </div>
+          </div>
+        );
+      
       case 'projects':
         return (
           <div className="flex-1 overflow-y-auto">
@@ -300,11 +365,6 @@ const Sidebar = ({ setInitialTaskCount, setCurrentProject, setProjectPage, proje
         transition={{ duration: 0.4, ease: "easeInOut" }}
         className="fixed left-2 top-20 h-[calc(100vh-6rem)] w-20 z-40 flex flex-col"
       >
-        {/* Logo/Menu en haut */}
-        <div className="p-4 mb-2">
-          <Menu size={24} className="text-slate-600 cursor-pointer hover:text-indigo-600 transition-colors duration-300" />
-        </div>
-        
         {/* Icônes de navigation */}
         <div className="flex-1 py-4 space-y-1">
           {sidebarItems.map((item, index) => (
@@ -347,9 +407,8 @@ const Sidebar = ({ setInitialTaskCount, setCurrentProject, setProjectPage, proje
             animate={{ x: 0, opacity: 1 }}
             exit={{ x: -320, opacity: 0 }}
             transition={{ duration: 0.3, ease: "easeInOut" }}
-            className="fixed left-24 top-20 h-[calc(100vh-6rem)] w-80 bg-gradient-to-br from-white to-slate-50 border-r border-slate-200 shadow-xl z-30 overflow-y-auto flex flex-col"
+            className="fixed left-24 top-20 h-[calc(100vh-6rem)] w-80 z-30 overflow-y-auto flex flex-col"
           >
-            
             {/* Contenu de la deuxième sidebar */}
             {renderSecondSidebarContent()}
           </motion.div>
