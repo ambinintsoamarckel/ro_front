@@ -1,0 +1,294 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import TaskInitializerModal from "./TaskInitializerModal";
+import { 
+  Menu, 
+  X, 
+  BadgePlus, 
+  User, 
+  Settings, 
+  HeartIcon, 
+  ChevronDown, 
+  ChevronUp,
+  Home,
+  FolderOpen,
+  Star,
+  Search,
+  Image,
+  Type,
+  Shapes,
+  Upload,
+  Palette,
+  Layers
+} from "lucide-react";
+
+const Sidebar = ({ setInitialTaskCount, setCurrentProject, setProjectPage, projects, setProjects }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [showProjects, setShowProjects] = useState(false);
+  const [activeTab, setActiveTab] = useState('home');
+
+  // Charger les projets au montage
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        const response = await fetch("http://localhost:3001/projects", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setProjects(data);
+        } else if (response.status === 404) {
+          setProjects([]);
+          console.log("Aucun projet trouvé.");
+        } else {
+          console.error("Erreur serveur :", response.statusText);
+        }
+      } catch (error) {
+        console.error("Erreur API :", error);
+      }
+    };
+
+    fetchProjects();
+  }, [setProjects]);
+
+  const reload = async () => {
+    try {
+      const response = await fetch("http://localhost:3001/projects", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setProjects(data);
+      } else if (response.status === 404) {
+        setProjects([]);
+        console.log("Aucun projet trouvé.");
+      } else {
+        console.error("Erreur serveur :", response.statusText);
+      }
+    } catch (error) {
+      console.error("Erreur API :", error);
+    }
+  };
+
+  const sidebarItems = [
+    { id: 'home', icon: Home, label: 'Accueil', action: () => setActiveTab('home') },
+    { id: 'projects', icon: FolderOpen, label: 'Projets', action: () => setShowProjects(!showProjects) },
+    { id: 'templates', icon: Layers, label: 'Modèles', action: () => setActiveTab('templates') },
+    { id: 'elements', icon: Shapes, label: 'Éléments', action: () => setActiveTab('elements') },
+    { id: 'text', icon: Type, label: 'Texte', action: () => setActiveTab('text') },
+    { id: 'uploads', icon: Upload, label: 'Imports', action: () => setActiveTab('uploads') },
+    { id: 'photos', icon: Image, label: 'Photos', action: () => setActiveTab('photos') },
+    { id: 'colors', icon: Palette, label: 'Couleurs', action: () => setActiveTab('colors') },
+  ];
+
+  const SidebarIcon = ({ item, isActive }) => (
+    <div
+      className={`flex flex-col items-center justify-center p-3 cursor-pointer transition-all duration-300 rounded-xl group relative ${
+        isActive 
+          ? 'bg-gradient-to-br from-blue-50 to-blue-100 text-blue-800 shadow-md border border-blue-200' 
+          : 'text-slate-600 hover:bg-gradient-to-br hover:from-slate-50 hover:to-slate-100 hover:text-blue-700 hover:shadow-sm'
+      }`}
+      onClick={item.action}
+    >
+      <item.icon size={22} className="mb-1" />
+      <span className="text-xs font-semibold tracking-wide">{item.label}</span>
+      
+      {/* Tooltip pour les icônes */}
+      <div className="absolute left-full ml-3 px-3 py-2 bg-slate-800 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none whitespace-nowrap z-50 shadow-lg">
+        {item.label}
+        <div className="absolute left-0 top-1/2 transform -translate-x-1 -translate-y-1/2 w-2 h-2 bg-slate-800 rotate-45"></div>
+      </div>
+    </div>
+  );
+
+  const renderContent = () => {
+    switch (activeTab) {
+      case 'projects':
+        return (
+          <div className="p-4">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-bold text-slate-800">Mes Projets</h3>
+              <button
+                onClick={() => setIsModalOpen(true)}
+                className="flex items-center px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105"
+              >
+                <BadgePlus size={16} className="mr-2" />
+                Nouveau
+              </button>
+            </div>
+            
+            <div className="space-y-3 max-h-[400px] overflow-y-auto">
+              {projects.length > 0 ? (
+                projects.map((project) => (
+                  <div
+                    key={project.id}
+                    className="flex items-center p-4 bg-white rounded-xl cursor-pointer transition-all duration-300 hover:bg-gradient-to-r hover:from-blue-50 hover:to-slate-50 hover:shadow-md border border-slate-100 hover:border-blue-200"
+                    onClick={() => {
+                      setCurrentProject(project);
+                      setProjectPage(true);
+                      console.log("Projet sélectionné :", project.name);
+                    }}
+                  >
+                    <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-700 rounded-xl flex items-center justify-center mr-4 shadow-md">
+                      <span className="text-white font-bold text-lg">
+                        {project.name.charAt(0).toUpperCase()}
+                      </span>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-slate-800">{project.name}</p>
+                      <p className="text-sm text-slate-500">Modifié récemment</p>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="text-center py-12">
+                  <FolderOpen size={64} className="mx-auto text-slate-300 mb-6" />
+                  <p className="text-slate-500 text-lg mb-4">Aucun projet trouvé</p>
+                  <button
+                    onClick={() => setIsModalOpen(true)}
+                    className="px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105"
+                  >
+                    Créer un projet
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        );
+      
+      case 'templates':
+        return (
+          <div className="p-4">
+            <h3 className="text-xl font-bold text-slate-800 mb-6">Modèles</h3>
+            <div className="grid grid-cols-2 gap-4">
+              {['Présentation', 'Poster', 'Flyer', 'Logo', 'Carte de visite', 'Instagram'].map((template) => (
+                <div key={template} className="bg-white rounded-xl p-4 cursor-pointer hover:bg-gradient-to-br hover:from-blue-50 hover:to-slate-50 transition-all duration-300 shadow-sm hover:shadow-md border border-slate-100 hover:border-blue-200">
+                  <div className="w-full h-24 bg-gradient-to-br from-blue-400 to-blue-600 rounded-lg mb-3 shadow-md"></div>
+                  <p className="text-sm font-semibold text-slate-700">{template}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      
+      default:
+        return (
+          <div className="p-4">
+            <h3 className="text-xl font-bold text-slate-800 mb-6">Accueil</h3>
+            <div className="space-y-4">
+              <button
+                onClick={() => setIsModalOpen(true)}
+                className="w-full flex items-center justify-center px-6 py-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
+              >
+                <BadgePlus size={22} className="mr-3" />
+                <span className="font-semibold">Créer un nouveau projet</span>
+              </button>
+              
+              <div className="border-t border-slate-200 pt-6">
+                <h4 className="font-bold text-slate-700 mb-4">Accès rapide</h4>
+                <div className="space-y-3">
+                  <div className="flex items-center p-3 rounded-xl hover:bg-gradient-to-r hover:from-yellow-50 hover:to-orange-50 cursor-pointer transition-all duration-300 border border-slate-100 hover:border-yellow-200">
+                    <Star size={18} className="text-yellow-500 mr-4" />
+                    <span className="text-sm font-medium text-slate-600">Favoris</span>
+                  </div>
+                  <div className="flex items-center p-3 rounded-xl hover:bg-gradient-to-r hover:from-slate-50 hover:to-blue-50 cursor-pointer transition-all duration-300 border border-slate-100 hover:border-blue-200">
+                    <Settings size={18} className="text-slate-500 mr-4" />
+                    <span className="text-sm font-medium text-slate-600">Paramètres</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+    }
+  };
+
+  return (
+    <>
+      {/* Sidebar fixe style Canva */}
+      <div className="fixed left-0 top-0 h-screen w-20 bg-gradient-to-b from-slate-50 to-white border-r border-slate-200 shadow-lg z-40 flex flex-col">
+        {/* Logo/Menu en haut */}
+        <div className="p-4 border-b border-slate-200 bg-gradient-to-r from-blue-800 to-blue-900">
+          <Menu size={24} className="text-white cursor-pointer hover:text-blue-100 transition-colors duration-300" />
+        </div>
+        
+        {/* Icônes de navigation */}
+        <div className="flex-1 py-4 space-y-1">
+          {sidebarItems.map((item) => (
+            <SidebarIcon
+              key={item.id}
+              item={item}
+              isActive={activeTab === item.id || (item.id === 'projects' && showProjects)}
+            />
+          ))}
+        </div>
+        
+        {/* Profil utilisateur en bas */}
+        <div className="p-4 border-t border-slate-200 bg-gradient-to-r from-slate-50 to-slate-100">
+          <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-blue-800 rounded-full cursor-pointer hover:shadow-xl hover:scale-110 transition-all duration-300 flex items-center justify-center">
+            <User size={16} className="text-white" />
+          </div>
+        </div>
+      </div>
+
+      {/* Panel de contenu extensible */}
+      <AnimatePresence>
+        {(activeTab === 'projects' && showProjects) || activeTab !== 'home' ? (
+          <motion.div
+            initial={{ x: -320, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            exit={{ x: -320, opacity: 0 }}
+            transition={{ duration: 0.3, ease: "easeInOut" }}
+            className="fixed left-20 top-0 h-screen w-80 bg-gradient-to-br from-white to-slate-50 border-r border-slate-200 shadow-xl z-30 overflow-y-auto"
+          >
+            {/* Header du panel */}
+            <div className="sticky top-0 bg-gradient-to-r from-blue-800 to-blue-900 text-white border-b border-blue-700 p-4 flex items-center justify-between shadow-md">
+              <h2 className="font-bold text-lg tracking-wide">
+                {sidebarItems.find(item => item.id === activeTab)?.label || 'Contenu'}
+              </h2>
+              <button
+                onClick={() => {
+                  setActiveTab('home');
+                  setShowProjects(false);
+                }}
+                className="p-2 hover:bg-blue-700 rounded-lg transition-colors duration-300"
+              >
+                <X size={18} className="text-blue-100" />
+              </button>
+            </div>
+            
+            {/* Contenu du panel */}
+            {renderContent()}
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
+
+      {/* Modal pour créer un nouveau projet */}
+      <TaskInitializerModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onInitialize={async (count, project) => {
+          setInitialTaskCount(count);
+          setCurrentProject(project);
+          await reload();
+          setIsModalOpen(false);
+        }}
+      />
+    </>
+  );
+};
+
+export default Sidebar;
