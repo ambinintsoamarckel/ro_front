@@ -70,7 +70,7 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
               x: 0,
               y: 4
             },
-            fixed: { x: true, y: true } // Fixé - ne peut pas être déplacé
+
           },
           ...tasks.map(task => {
             const isCritical = task.slack === 0;
@@ -153,7 +153,7 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
               x: 0,
               y: 4
             },
-            fixed: { x: true, y: true } // Fixé - ne peut pas être déplacé
+
           }
         ]);
 
@@ -269,84 +269,66 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
           })
         ]);
 
-        const options = {
-          layout: {
-            hierarchical: {
-              direction: "LR",
-              nodeSpacing: 180,
-              levelSeparation: 220,
-              sortMethod: "directed",
-              shakeTowards: "leaves",
-              parentCentralization: true
-            }
-          },
-          edges: {
-            smooth: { type: "continuous", roundness: 0.3 },
-            arrows: { to: { enabled: true, scaleFactor: 1, type: "arrow" } }
-          },
-          physics: { 
-            enabled: false,
-            stabilization: { enabled: false }
-          },
-          interaction: {
-            dragNodes: true, // Permet de déplacer les nœuds individuellement
-            dragView: false, // Désactive le déplacement global du graphique
-            zoomView: false,
-            selectConnectedEdges: false,
-            hover: true,
-            navigationButtons: false,
-            keyboard: false,
-            hoverConnectedEdges: true
-          },
-          nodes: {
-            chosen: {
-              node: function (values, id, selected, hovering) {
-                if (id !== "start" && id !== "end") {
-                  values.shadow = true;
-                  values.shadowSize = 15;
-                  values.shadowColor = "rgba(0,0,0,0.1)";
-                  values.borderWidth = values.borderWidth + 1;
-                }
-              }
-            }
-          }
-        };
+      // 1. Options avec layout hiérarchique pour placement initial
+const initialOptions = {
+  layout: {
+    hierarchical: {
+      direction: "LR",
+      nodeSpacing: 180,
+      levelSeparation: 220,
+      sortMethod: "directed"
+    }
+  },
+  physics: { enabled: false },
+  interaction: {
+    dragNodes: false, // on empêche temporairement le drag
+    dragView: false,
+    zoomView: false
+  }
+};
 
-        if (networkRef.current) {
-          networkRef.current.destroy();
-        }
+// 2. Création temporaire du graph avec layout actif
+if (networkRef.current) {
+  networkRef.current.destroy();
+}
+networkRef.current = new Network(containerRef.current, { nodes, edges }, initialOptions);
 
-        networkRef.current = new Network(
-          containerRef.current,
-          { nodes, edges },
-          options
-        );
+// 3. Attendre que le layout soit appliqué
+setTimeout(() => {
+  const positions = networkRef.current.getPositions();
 
-        const positions = networkRef.current.getPositions();
-        let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
-    
-        Object.values(positions).forEach(pos => {
-          if (pos.x < minX) minX = pos.x;
-          if (pos.x > maxX) maxX = pos.x;
-          if (pos.y < minY) minY = pos.y;
-          if (pos.y > maxY) maxY = pos.y;
-        });
-    
-        const padding = 150;
-        const width = Math.max(1000, Math.abs(maxX - minX) + padding * 2);
-        const height = Math.max(800, Math.abs(maxY - minY) + padding * 2);
-    
-        setGraphSize({ width, height });
+  // 4. On désactive le layout hiérarchique, active le drag libre
+  const finalOptions = {
+    layout: { hierarchical: false },
+    physics: { enabled: false },
+    interaction: {
+      dragNodes: true,
+      dragView: false,
+      zoomView: false
+    }
+  };
 
-        networkRef.current.moveTo({
-          position: { x: 0, y: 0 },
-          scale: 0.8,
-          animation: false
-        });
+  // 5. Recréer le graphe avec nouvelle config (ou simplement setOptions)
+  networkRef.current.setOptions(finalOptions);
 
-        setTimeout(() => {
-          setIsGraphReady(true);
-        }, 100);
+  // 6. Réappliquer les positions manuellement
+  for (const [id, pos] of Object.entries(positions)) {
+    networkRef.current.moveNode(id, pos.x, pos.y);
+  }
+
+  // 7. Resize & setReady
+  const xs = Object.values(positions).map(p => p.x);
+  const ys = Object.values(positions).map(p => p.y);
+  const padding = 150;
+
+  const width = Math.max(1000, Math.abs(Math.max(...xs) - Math.min(...xs)) + padding * 2);
+  const height = Math.max(800, Math.abs(Math.max(...ys) - Math.min(...ys)) + padding * 2);
+
+  setGraphSize({ width, height });
+
+  setTimeout(() => setIsGraphReady(true), 100);
+}, 100);
+
 
         networkRef.current.on("afterDrawing", function (ctx) {
           const nodePositions = networkRef.current.getPositions();
