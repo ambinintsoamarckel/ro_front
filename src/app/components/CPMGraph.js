@@ -10,9 +10,37 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
   const networkRef = useRef(null);
   const dragStateRef = useRef({ isDragging: false, draggedNode: null });
   const autoscrollIntervalRef = useRef(null);
+  const animationRef = useRef(null);
+  const criticalPathRef = useRef([]);
+  const animationTimeRef = useRef(0);
   const [graphSize, setGraphSize] = React.useState({ width: 1400, height: 1000 });
   const [isGraphReady, setIsGraphReady] = React.useState(false);
   const [selectedNodeId, setSelectedNodeId] = React.useState(null);
+
+  // Animation du chemin critique
+  const animateCriticalPath = useCallback(() => {
+    if (!networkRef.current || criticalPathRef.current.length === 0) return;
+
+    const animate = () => {
+      animationTimeRef.current += 0.02;
+      
+      // Force le redraw pour déclencher afterDrawing
+      if (networkRef.current) {
+        networkRef.current.redraw();
+      }
+      
+      animationRef.current = requestAnimationFrame(animate);
+    };
+    
+    animate();
+  }, []);
+
+  const stopAnimation = useCallback(() => {
+    if (animationRef.current) {
+      cancelAnimationFrame(animationRef.current);
+      animationRef.current = null;
+    }
+  }, []);
 
   // Fonction d'autoscroll continue et fluide
   const startAutoscroll = useCallback((mouseX, mouseY) => {
@@ -25,15 +53,13 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
 
     const container = scrollContainerRef.current;
     const containerRect = container.getBoundingClientRect();
-    const scrollZone = 80; // Zone de déclenchement élargie
-    const maxScrollSpeed = 8; // Vitesse maximale réduite pour plus de contrôle
+    const scrollZone = 80;
+    const maxScrollSpeed = 8;
     const minScrollSpeed = 2;
 
-    // Calculer les vitesses de scroll
     let scrollSpeedX = 0;
     let scrollSpeedY = 0;
 
-    // Autoscroll horizontal
     if (mouseX < containerRect.left + scrollZone) {
       const distance = Math.max(0, containerRect.left + scrollZone - mouseX);
       const normalizedDistance = Math.min(1, distance / scrollZone);
@@ -44,7 +70,6 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
       scrollSpeedX = minScrollSpeed + normalizedDistance * (maxScrollSpeed - minScrollSpeed);
     }
 
-    // Autoscroll vertical
     if (mouseY < containerRect.top + scrollZone) {
       const distance = Math.max(0, containerRect.top + scrollZone - mouseY);
       const normalizedDistance = Math.min(1, distance / scrollZone);
@@ -55,7 +80,6 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
       scrollSpeedY = minScrollSpeed + normalizedDistance * (maxScrollSpeed - minScrollSpeed);
     }
 
-    // Démarrer l'autoscroll continu si nécessaire
     if (scrollSpeedX !== 0 || scrollSpeedY !== 0) {
       autoscrollIntervalRef.current = setInterval(() => {
         if (!dragStateRef.current.isDragging || !scrollContainerRef.current) {
@@ -66,7 +90,6 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
         const currentScrollLeft = container.scrollLeft;
         const currentScrollTop = container.scrollTop;
 
-        // Appliquer le scroll
         container.scrollLeft = Math.max(0, Math.min(
           container.scrollWidth - container.clientWidth,
           currentScrollLeft + scrollSpeedX
@@ -76,7 +99,7 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
           container.scrollHeight - container.clientHeight,
           currentScrollTop + scrollSpeedY
         ));
-      }, 16); // ~60fps
+      }, 16);
     }
   }, []);
 
@@ -87,14 +110,12 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
     }
   }, []);
 
-  // Gestionnaire de mouvement de souris global
   const handleGlobalMouseMove = useCallback((e) => {
     if (dragStateRef.current.isDragging) {
       startAutoscroll(e.clientX, e.clientY);
     }
   }, [startAutoscroll]);
 
-  // Gestionnaire de fin de drag global
   const handleGlobalMouseUp = useCallback(() => {
     if (dragStateRef.current.isDragging) {
       dragStateRef.current.isDragging = false;
@@ -102,6 +123,36 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
       stopAutoscroll();
     }
   }, [stopAutoscroll]);
+
+  // Fonction pour trouver le chemin critique
+  const findCriticalPath = useCallback((tasks, edges) => {
+    const criticalNodes = ['start'];
+    const criticalEdges = [];
+    
+    // Trouver tous les nœuds critiques
+    tasks.forEach(task => {
+      if (task.slack === 0) {
+        criticalNodes.push(task.id);
+      }
+    });
+    criticalNodes.push('end');
+
+    // Trouver tous les edges critiques
+    edges.forEach(edge => {
+      const fromTask = tasks.find(t => t.id === edge.from);
+      const toTask = tasks.find(t => t.id === edge.to);
+      
+      // Edge critique si les deux nœuds sont critiques et connectés logiquement
+      if ((edge.from === 'start' && toTask && toTask.slack === 0) ||
+          (edge.to === 'end' && fromTask && fromTask.slack === 0) ||
+          (fromTask && toTask && fromTask.slack === 0 && toTask.slack === 0 && 
+           fromTask.earlyFinish === toTask.earlyStart)) {
+        criticalEdges.push(edge);
+      }
+    });
+
+    return { nodes: criticalNodes, edges: criticalEdges };
+  }, []);
 
   const loadCriticalPathData = useCallback(() => {
     setIsGraphReady(false);
@@ -312,7 +363,8 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
                   size: 5,
                   x: 0,
                   y: 2
-                }
+                },
+                isCritical: isCritical
               };
             })
           ),
@@ -353,10 +405,14 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
                 size: 5,
                 x: 0,
                 y: 2
-              }
+              },
+              isCritical: isCritical
             };
           })
         ]);
+
+        // Trouver le chemin critique
+        criticalPathRef.current = findCriticalPath(tasks, edges.get());
 
         // Options avec layout hiérarchique pour placement initial
         const initialOptions = {
@@ -406,27 +462,23 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
             networkRef.current.moveNode(id, pos.x, pos.y);
           }
 
-          // Calcul du nouveau width/height du canvas avec tailles minimales garanties
+          // Calcul du nouveau width/height du canvas
           const xs = Object.values(positions).map(p => p.x);
           const ys = Object.values(positions).map(p => p.y);
-          const padding = 200; // Padding augmenté pour plus d'espace
+          const padding = 200;
           
-          // Calcul de la taille basée sur le contenu
           const contentWidth = Math.abs(Math.max(...xs) - Math.min(...xs)) + padding * 2;
           const contentHeight = Math.abs(Math.max(...ys) - Math.min(...ys)) + padding * 2;
           
-          // Tailles minimales garanties même avec peu de nœuds
-          const minWidth = 1400;  // Taille minimum augmentée
-          const minHeight = 1000; // Taille minimum augmentée
+          const minWidth = 1400;
+          const minHeight = 1000;
           
-          // Utiliser la plus grande valeur entre le contenu et le minimum
           const width = Math.max(minWidth, contentWidth);
           const height = Math.max(minHeight, contentHeight);
 
-          // Enregistrer la taille
           setGraphSize({ width, height });
 
-          // ZOOM FIXE À 0.8 - Application multiple pour garantir la constance
+          // ZOOM FIXE À 0.8
           const applyFixedZoom = () => {
             if (networkRef.current) {
               networkRef.current.moveTo({
@@ -436,10 +488,7 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
             }
           };
 
-          // Appliquer le zoom immédiatement
           applyFixedZoom();
-          
-          // Puis plusieurs fois avec des délais pour s'assurer qu'il tient
           setTimeout(applyFixedZoom, 50);
           setTimeout(applyFixedZoom, 100);
           setTimeout(applyFixedZoom, 200);
@@ -451,7 +500,7 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
           const minY = -height / 2 + clampPadding;
           const maxY = height / 2 - clampPadding;
 
-          // Gestionnaire de début de drag
+          // Gestionnaires de drag
           networkRef.current.on("dragStart", (params) => {
             if (params.nodes && params.nodes.length > 0) {
               dragStateRef.current.isDragging = true;
@@ -459,7 +508,6 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
             }
           });
 
-          // Gestionnaire de fin de drag
           networkRef.current.on("dragEnd", (params) => {
             dragStateRef.current.isDragging = false;
             dragStateRef.current.draggedNode = null;
@@ -467,7 +515,6 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
 
             if (!params.nodes || params.nodes.length === 0) return;
             
-            // Clamping final
             if (!networkRef.current) return;
             const posAfter = networkRef.current.getPositions(params.nodes);
             params.nodes.forEach(id => {
@@ -479,7 +526,6 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
               }
             });
 
-            // S'assurer que le zoom reste à 0.8 - Application plus agressive
             const ensureZoom = () => {
               if (networkRef.current) {
                 networkRef.current.moveTo({
@@ -494,9 +540,8 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
             setTimeout(ensureZoom, 100);
           });
 
-          // Empêcher le zoom sur la molette et forcer 0.8
+          // Empêcher le zoom
           networkRef.current.on("zoom", (params) => {
-            // Force immédiatement le zoom à 0.8 sans condition
             setTimeout(() => {
               if (networkRef.current) {
                 networkRef.current.moveTo({
@@ -507,7 +552,6 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
             }, 1);
           });
 
-          // Gestionnaire supplémentaire pour les changements de vue
           networkRef.current.on("afterDrawing", () => {
             if (networkRef.current) {
               const currentScale = networkRef.current.getScale();
@@ -520,14 +564,157 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
             }
           });
 
-          // Affichage une fois prêt
+          // Démarrer l'animation du chemin critique
+          animateCriticalPath();
+
           setTimeout(() => setIsGraphReady(true), 150);
         }, 100);
 
-        // Dessin des badges slack
+        // Dessin avec animations du chemin critique
         networkRef.current.on("afterDrawing", function (ctx) {
           const nodePositions = networkRef.current.getPositions();
+          const currentTime = animationTimeRef.current;
 
+          // 1. Animation des arêtes critiques avec particules de lumière
+          const edges = networkRef.current.body.data.edges.get();
+          edges.forEach(edge => {
+            if (edge.isCritical) {
+              const fromPos = nodePositions[edge.from];
+              const toPos = nodePositions[edge.to];
+              
+              if (fromPos && toPos) {
+                // Effet de glow pulsant sur les arêtes critiques
+                const glowIntensity = 0.5 + 0.3 * Math.sin(currentTime * 3);
+                
+                // Dessiner plusieurs couches pour l'effet glow
+                for (let i = 0; i < 3; i++) {
+                  ctx.globalAlpha = glowIntensity * (0.3 - i * 0.1);
+                  ctx.strokeStyle = "#ff6b6b";
+                  ctx.lineWidth = (6 - i * 2);
+                  ctx.shadowColor = "#ff6b6b";
+                  ctx.shadowBlur = 15 + i * 5;
+                  
+                  ctx.beginPath();
+                  ctx.moveTo(fromPos.x, fromPos.y);
+                  ctx.lineTo(toPos.x, toPos.y);
+                  ctx.stroke();
+                }
+                
+                // Particules qui voyagent le long du chemin critique
+                const distance = Math.sqrt(Math.pow(toPos.x - fromPos.x, 2) + Math.pow(toPos.y - fromPos.y, 2));
+                const progress = (currentTime * 0.5) % 2; // Cycle de 2 secondes
+                
+                if (progress <= 1) {
+                  const particleX = fromPos.x + (toPos.x - fromPos.x) * progress;
+                  const particleY = fromPos.y + (toPos.y - fromPos.y) * progress;
+                  
+                  // Particule principale
+                  ctx.globalAlpha = 1 - Math.abs(progress - 0.5) * 2;
+                  ctx.fillStyle = "#fff";
+                  ctx.shadowColor = "#ff6b6b";
+                  ctx.shadowBlur = 20;
+                  ctx.beginPath();
+                  ctx.arc(particleX, particleY, 4, 0, 2 * Math.PI);
+                  ctx.fill();
+                  
+                  // Traînée de particules
+                  for (let j = 1; j <= 5; j++) {
+                    const trailProgress = Math.max(0, progress - j * 0.05);
+                    if (trailProgress > 0) {
+                      const trailX = fromPos.x + (toPos.x - fromPos.x) * trailProgress;
+                      const trailY = fromPos.y + (toPos.y - fromPos.y) * trailProgress;
+                      
+                      ctx.globalAlpha = (1 - Math.abs(trailProgress - 0.5) * 2) * (0.8 - j * 0.15);
+                      ctx.beginPath();
+                      ctx.arc(trailX, trailY, 2, 0, 2 * Math.PI);
+                      ctx.fill();
+                    }
+                  }
+                }
+                
+                // Reset des propriétés
+                ctx.globalAlpha = 1;
+                ctx.shadowColor = "transparent";
+                ctx.shadowBlur = 0;
+              }
+            }
+          });
+
+          // 2. Animation des nœuds critiques avec effet de respiration
+          tasks.forEach(task => {
+            if (task.slack === 0) {
+              const pos = nodePositions[task.id];
+              if (pos) {
+                // Effet de halo pulsant autour des nœuds critiques
+                const haloSize = 45 + 10 * Math.sin(currentTime * 2);
+                const haloAlpha = 0.2 + 0.1 * Math.sin(currentTime * 2);
+                
+                ctx.globalAlpha = haloAlpha;
+                ctx.fillStyle = "#ff6b6b";
+                ctx.shadowColor = "#ff6b6b";
+                ctx.shadowBlur = 30;
+                ctx.beginPath();
+                ctx.arc(pos.x, pos.y, haloSize, 0, 2 * Math.PI);
+                ctx.fill();
+                
+                ctx.globalAlpha = 1;
+                ctx.shadowColor = "transparent";
+                ctx.shadowBlur = 0;
+              }
+            }
+          });
+
+          // 3. Nœuds start et end avec animation spéciale
+          const startPos = nodePositions["start"];
+          const endPos = nodePositions["end"];
+          
+          if (startPos) {
+            // Animation de rotation pour le nœud start
+            const rotationAngle = currentTime * 0.5;
+            const rayLength = 50;
+            
+            for (let i = 0; i < 8; i++) {
+              const angle = rotationAngle + (i * Math.PI / 4);
+              const rayX = startPos.x + Math.cos(angle) * rayLength;
+              const rayY = startPos.y + Math.sin(angle) * rayLength;
+              
+              ctx.globalAlpha = 0.3 + 0.2 * Math.sin(currentTime * 3);
+              ctx.strokeStyle = "#4f46e5";
+              ctx.lineWidth = 2;
+              ctx.shadowColor = "#4f46e5";
+              ctx.shadowBlur = 10;
+              
+              ctx.beginPath();
+              ctx.moveTo(startPos.x, startPos.y);
+              ctx.lineTo(rayX, rayY);
+              ctx.stroke();
+            }
+          }
+          
+          if (endPos) {
+            // Animation de couronnes concentriques pour le nœud end
+            for (let ring = 0; ring < 3; ring++) {
+              const ringRadius = 50 + ring * 20 + 10 * Math.sin(currentTime * 2 - ring);
+              const ringAlpha = (0.3 - ring * 0.1) * (0.5 + 0.5 * Math.sin(currentTime * 1.5));
+              
+              ctx.globalAlpha = ringAlpha;
+              ctx.strokeStyle = "#7c3aed";
+              ctx.lineWidth = 3 - ring;
+              ctx.shadowColor = "#7c3aed";
+              ctx.shadowBlur = 15;
+              
+              ctx.beginPath();
+              ctx.arc(endPos.x, endPos.y, ringRadius, 0, 2 * Math.PI);
+              ctx.stroke();
+            }
+          }
+
+          // Reset final
+          ctx.globalAlpha = 1;
+          ctx.shadowColor = "transparent";
+          ctx.shadowBlur = 0;
+
+          // 4. Badges slack (code existant)
           tasks.forEach(task => {
             const pos = nodePositions[task.id];
             if (pos) {
@@ -548,14 +735,21 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
 
               const isCritical = task.slack === 0;
               
+              // Animation subtile du badge pour les tâches critiques
+              let badgeYOffset = 0;
+              if (isCritical) {
+                badgeYOffset = 2 * Math.sin(currentTime * 4);
+              }
+              
               // Fond du badge avec dégradé
-              const gradient = ctx.createLinearGradient(badgeX, badgeY, badgeX, badgeY + badgeHeight);
+              const gradient = ctx.createLinearGradient(badgeX, badgeY + badgeYOffset, badgeX, badgeY + badgeHeight + badgeYOffset);
               gradient.addColorStop(0, isCritical ? "#ef4444" : "#10b981");
               gradient.addColorStop(1, isCritical ? "#dc2626" : "#059669");
               
               ctx.fillStyle = gradient;
               ctx.strokeStyle = isCritical ? "#b91c1c" : "#047857";
               ctx.lineWidth = 1.5;
+
 
               ctx.beginPath();
               ctx.moveTo(badgeX + cornerRadius, badgeY);
@@ -568,7 +762,7 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
               ctx.lineTo(badgeX, badgeY + cornerRadius);
               ctx.quadraticCurveTo(badgeX, badgeY, badgeX + cornerRadius, badgeY);
               ctx.closePath();
-
+              
               ctx.fill();
               ctx.stroke();
 
@@ -582,7 +776,7 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
               ctx.font = "bold 12px Inter, -apple-system, BlinkMacSystemFont, sans-serif";
               ctx.textAlign = "center";
               ctx.textBaseline = "middle";
-              ctx.fillText(task.slack.toString(), pos.x, badgeY + badgeHeight / 2);
+              ctx.fillText(task.slack.toString(), pos.x, badgeY + badgeHeight / 2 + badgeYOffset);
               
               // Reset shadow
               ctx.shadowColor = "transparent";
@@ -598,7 +792,7 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
         console.error("Erreur lors du chargement des données:", err);
         setIsGraphReady(true);
       });
-  }, [projectId, onDataLoaded, stopAutoscroll]);
+  }, [projectId, onDataLoaded, stopAutoscroll, findCriticalPath, animateCriticalPath]);
 
   useEffect(() => {
     loadCriticalPathData();
@@ -612,13 +806,14 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
       document.removeEventListener('mouseup', handleGlobalMouseUp);
       
       stopAutoscroll();
+      stopAnimation();
       
       if (networkRef.current) {
         networkRef.current.destroy();
         networkRef.current = null;
       }
     };
-  }, [loadCriticalPathData, handleGlobalMouseMove, handleGlobalMouseUp, stopAutoscroll]);
+  }, [loadCriticalPathData, handleGlobalMouseMove, handleGlobalMouseUp, stopAutoscroll, stopAnimation]);
 
   useImperativeHandle(ref, () => ({
     getNodes: () => networkRef.current?.body.data.nodes || null,
@@ -627,7 +822,7 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
     fitView: () => {
       if (networkRef.current) {
         networkRef.current.fit();
-        // Remettre le zoom à 0.8 après fit - Application multiple
+        // Remettre le zoom à 0.8 après fit
         setTimeout(() => {
           if (networkRef.current) {
             const ensureZoom = () => {
@@ -641,6 +836,13 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
             setTimeout(ensureZoom, 300);
           }
         }, 100);
+      }
+    },
+    toggleAnimation: () => {
+      if (animationRef.current) {
+        stopAnimation();
+      } else {
+        animateCriticalPath();
       }
     }
   }));
@@ -705,6 +907,46 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
           </div>
         </div>
       )}
+      
+      {/* Bouton pour contrôler l'animation */}
+      {isGraphReady && (
+        <button
+          onClick={() => {
+            if (animationRef.current) {
+              stopAnimation();
+            } else {
+              animateCriticalPath();
+            }
+          }}
+          style={{
+            position: "absolute",
+            top: "16px",
+            right: "16px",
+            zIndex: 5,
+            padding: "8px 16px",
+            backgroundColor: animationRef.current ? "#ef4444" : "#10b981",
+            color: "#ffffff",
+            border: "none",
+            borderRadius: "8px",
+            fontSize: "12px",
+            fontWeight: "600",
+            cursor: "pointer",
+            boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
+            transition: "all 0.2s ease"
+          }}
+          onMouseEnter={(e) => {
+            e.target.style.transform = "translateY(-1px)";
+            e.target.style.boxShadow = "0 6px 16px rgba(0, 0, 0, 0.2)";
+          }}
+          onMouseLeave={(e) => {
+            e.target.style.transform = "translateY(0)";
+            e.target.style.boxShadow = "0 4px 12px rgba(0, 0, 0, 0.15)";
+          }}
+        >
+          {animationRef.current ? "🛑 Arrêter" : "✨ Animer"}
+        </button>
+      )}
+      
       <div
         ref={containerRef}
         style={{
