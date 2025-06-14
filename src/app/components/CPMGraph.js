@@ -11,14 +11,13 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
   const [isGraphReady, setIsGraphReady] = React.useState(false);
 
   const loadCriticalPathData = useCallback(() => {
-    setIsGraphReady(false); // Masquer le graphique pendant le chargement
+    setIsGraphReady(false);
     fetch(`http://localhost:3001/critical-path/${projectId}`)
       .then(res => res.json())
       .then(data => {
-        // Vérifier si les données sont valides
         if (!data || !Array.isArray(data) || data.length === 0) {
           console.warn("Aucune donnée de tâches disponible");
-          setIsGraphReady(true); // Afficher même s'il n'y a pas de données
+          setIsGraphReady(true);
           return;
         }
         
@@ -37,26 +36,38 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
         const nodes = new DataSet([
           {
             id: "start",
-            label: "START",
+            label: "DEBUT",
             shape: "circle",
             size: 50,
             color: { 
-              background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-              border: "#4c63d2"
+              background: "#4f46e5",
+              border: "#3730a3",
+              highlight: {
+                background: "#6366f1",
+                border: "#4f46e5"
+              }
             },
             borderWidth: 3,
             font: { 
               color: "#ffffff", 
-              size: 13, 
+              size: 16, 
               face: "Inter, -apple-system, BlinkMacSystemFont, sans-serif", 
               bold: true 
             },
-            shadow: { 
-              enabled: true, 
-              color: "rgba(102, 126, 234, 0.3)", 
-              size: 8, 
-              x: 0, 
-              y: 4 
+            widthConstraint: {
+              minimum: 75,
+              maximum: 75
+            },
+            heightConstraint: {
+              minimum: 75,
+              maximum: 75
+            },
+            shadow: {
+              enabled: true,
+              color: "rgba(79, 70, 229, 0.3)",
+              size: 10,
+              x: 0,
+              y: 4
             }
           },
           ...tasks.map(task => {
@@ -68,13 +79,17 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
               label: label,
               shape: "circle",
               color: {
-                background: isCritical ? "#fecaca" : "#bfdbfe",
-                border: isCritical ? "#ef4444" : "#3b82f6"
+                background: isCritical ? "#fee2e2" : "#e0e7ff",
+                border: isCritical ? "#dc2626" : "#4f46e5",
+                highlight: {
+                  background: isCritical ? "#fecaca" : "#c7d2fe",
+                  border: isCritical ? "#ef4444" : "#4338ca"
+                }
               },
               borderWidth: isCritical ? 3 : 2,
               font: {
-                color: isCritical ? "#dc2626" : "#1d4ed8",
-                size: 13,
+                color: isCritical ? "#b91c1c" : "#312e81",
+                size: 16,
                 face: "Inter, -apple-system, BlinkMacSystemFont, sans-serif",
                 bold: true,
                 multi: true,
@@ -91,8 +106,8 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
               },
               shadow: {
                 enabled: true,
-                color: isCritical ? "rgba(239, 68, 68, 0.2)" : "rgba(59, 130, 246, 0.2)",
-                size: 6,
+                color: isCritical ? "rgba(220, 38, 38, 0.15)" : "rgba(79, 70, 229, 0.15)",
+                size: 8,
                 x: 0,
                 y: 3
               },
@@ -101,26 +116,38 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
           }),
           {
             id: "end",
-            label: `END\n${maxEarlyFinish}`,
+            label: `FIN\n${maxEarlyFinish}`,
             shape: "circle",
             size: 70,
             color: { 
-              background: "#f472b6",
-              border: "#e11d48"
+              background: "#7c3aed",
+              border: "#5b21b6",
+              highlight: {
+                background: "#8b5cf6",
+                border: "#7c3aed"
+              }
             },
             borderWidth: 3,
             font: {
               color: "#ffffff",
-              size: 14,
+              size: 16,
               face: "Inter, -apple-system, BlinkMacSystemFont, sans-serif",
               bold: true,
               multi: true,
               align: "center"
             },
+            widthConstraint: {
+              minimum: 75,
+              maximum: 75
+            },
+            heightConstraint: {
+              minimum: 75,
+              maximum: 75
+            },            
             shadow: {
               enabled: true,
-              color: "rgba(244, 114, 182, 0.3)",
-              size: 10,
+              color: "rgba(124, 58, 237, 0.3)",
+              size: 12,
               x: 0,
               y: 4
             }
@@ -131,7 +158,11 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
           ...Array.from(startTaskIds).map(taskId => ({
             from: "start",
             to: taskId,
-            color: { color: "#8b5cf6" },
+            color: { 
+              color: "#7c3aed",
+              highlight: "#8b5cf6",
+              hover: "#8b5cf6"
+            },
             width: 2.5,
             smooth: { type: "continuous", roundness: 0.3 },
             arrows: { 
@@ -141,10 +172,11 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
                 type: "arrow" 
               } 
             },
+            
             shadow: {
               enabled: true,
-              color: "rgba(139, 92, 246, 0.2)",
-              size: 3,
+              color: "rgba(124, 58, 237, 0.15)",
+              size: 5,
               x: 0,
               y: 2
             }
@@ -159,11 +191,15 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
                 from: task.id,
                 to: succ,
                 label: task.duration.toString(),
-                color: { color: isCritical ? "#ef4444" : "#3b82f6" },
+                color: { 
+                  color: isCritical ? "#dc2626" : "#4f46e5",
+                  highlight: isCritical ? "#ef4444" : "#6366f1",
+                  hover: isCritical ? "#ef4444" : "#6366f1"
+                },
                 width: isCritical ? 3 : 2,
                 font: {
-                  color: "#374151",
-                  size: 13,
+                  color: "#1e293b",
+                  size: 16,
                   face: "Inter, -apple-system, BlinkMacSystemFont, sans-serif",
                   bold: true,
                   background: "rgba(255, 255, 255, 0.95)",
@@ -180,8 +216,8 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
                 },
                 shadow: {
                   enabled: true,
-                  color: isCritical ? "rgba(239, 68, 68, 0.2)" : "rgba(59, 130, 246, 0.2)",
-                  size: 3,
+                  color: isCritical ? "rgba(220, 38, 38, 0.15)" : "rgba(79, 70, 229, 0.15)",
+                  size: 5,
                   x: 0,
                   y: 2
                 }
@@ -196,11 +232,15 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
               from: taskId,
               to: "end",
               label: task.duration.toString(),
-              color: { color: isCritical ? "#ef4444" : "#f472b6" },
+              color: { 
+                color: isCritical ? "#dc2626" : "#7c3aed",
+                highlight: isCritical ? "#ef4444" : "#8b5cf6",
+                hover: isCritical ? "#ef4444" : "#8b5cf6"
+              },
               width: isCritical ? 3 : 2,
               font: {
-                color: "#374151",
-                size: 13,
+                color: "#1e293b",
+                size: 16,
                 face: "Inter, -apple-system, BlinkMacSystemFont, sans-serif",
                 bold: true,
                 background: "rgba(255, 255, 255, 0.95)",
@@ -217,8 +257,8 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
               },
               shadow: {
                 enabled: true,
-                color: isCritical ? "rgba(239, 68, 68, 0.2)" : "rgba(244, 114, 182, 0.2)",
-                size: 3,
+                color: isCritical ? "rgba(220, 38, 38, 0.15)" : "rgba(124, 58, 237, 0.15)",
+                size: 5,
                 x: 0,
                 y: 2
               }
@@ -252,16 +292,16 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
             selectConnectedEdges: false,
             hover: true,
             navigationButtons: false,
-            keyboard: false
+            keyboard: false,
+            hoverConnectedEdges: true
           },
           nodes: {
             chosen: {
               node: function (values, id, selected, hovering) {
-                // Ne pas appliquer d'effet hover aux nœuds START et END
                 if (id !== "start" && id !== "end") {
                   values.shadow = true;
-                  values.shadowSize = 12;
-                  values.shadowColor = "rgba(0,0,0,0.2)";
+                  values.shadowSize = 15;
+                  values.shadowColor = "rgba(0,0,0,0.1)";
                   values.borderWidth = values.borderWidth + 1;
                 }
               }
@@ -279,7 +319,6 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
           options
         );
 
-        // Calculer immédiatement la taille pour éviter les changements visuels
         const positions = networkRef.current.getPositions();
         let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
     
@@ -290,21 +329,18 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
           if (pos.y > maxY) maxY = pos.y;
         });
     
-        // Ajouter une marge pour les badges et les ombres
         const padding = 150;
         const width = Math.max(1000, Math.abs(maxX - minX) + padding * 2);
         const height = Math.max(800, Math.abs(maxY - minY) + padding * 2);
     
         setGraphSize({ width, height });
 
-        // Fixer le zoom et la position une seule fois
         networkRef.current.moveTo({
           position: { x: 0, y: 0 },
           scale: 0.8,
           animation: false
         });
 
-        // Attendre que tout soit complètement rendu avant d'afficher
         setTimeout(() => {
           setIsGraphReady(true);
         }, 100);
@@ -315,20 +351,15 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
           tasks.forEach(task => {
             const pos = nodePositions[task.id];
             if (pos) {
-              // Ligne de séparation avec style moderne
-              const gradient = ctx.createLinearGradient(pos.x - 40, pos.y, pos.x + 40, pos.y);
-              gradient.addColorStop(0, "rgba(148, 163, 184, 0.1)");
-              gradient.addColorStop(0.5, "rgba(148, 163, 184, 0.6)");
-              gradient.addColorStop(1, "rgba(148, 163, 184, 0.1)");
-              
+              // Ligne de séparation plus subtile
               ctx.beginPath();
-              ctx.strokeStyle = gradient;
-              ctx.lineWidth = 1.5;
+              ctx.strokeStyle = "rgba(203, 213, 225, 0.5)";
+              ctx.lineWidth = 1;
               ctx.moveTo(pos.x - 40, pos.y);
               ctx.lineTo(pos.x + 40, pos.y);
               ctx.stroke();
 
-              // Badge slack avec design moderne
+              // Badge slack redessiné
               const badgeWidth = 36;
               const badgeHeight = 24;
               const cornerRadius = 12;
@@ -337,15 +368,14 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
 
               const isCritical = task.slack === 0;
               
-              ctx.fillStyle = isCritical ? "#ef4444" : "#22c55e";
-              ctx.strokeStyle = isCritical ? "#dc2626" : "#16a34a";
-              ctx.lineWidth = 2;
-
-              // Ombre du badge
-              ctx.shadowColor = isCritical ? "rgba(239, 68, 68, 0.3)" : "rgba(34, 197, 94, 0.3)";
-              ctx.shadowBlur = 6;
-              ctx.shadowOffsetX = 0;
-              ctx.shadowOffsetY = 2;
+              // Fond du badge avec dégradé
+              const gradient = ctx.createLinearGradient(badgeX, badgeY, badgeX, badgeY + badgeHeight);
+              gradient.addColorStop(0, isCritical ? "#ef4444" : "#10b981");
+              gradient.addColorStop(1, isCritical ? "#dc2626" : "#059669");
+              
+              ctx.fillStyle = gradient;
+              ctx.strokeStyle = isCritical ? "#b91c1c" : "#047857";
+              ctx.lineWidth = 1.5;
 
               ctx.beginPath();
               ctx.moveTo(badgeX + cornerRadius, badgeY);
@@ -362,18 +392,23 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
               ctx.fill();
               ctx.stroke();
 
+              // Texte du badge avec ombre légère
+              ctx.shadowColor = "rgba(0, 0, 0, 0.1)";
+              ctx.shadowBlur = 2;
+              ctx.shadowOffsetX = 0;
+              ctx.shadowOffsetY = 1;
+              
+              ctx.fillStyle = "#ffffff";
+              ctx.font = "bold 12px Inter, -apple-system, BlinkMacSystemFont, sans-serif";
+              ctx.textAlign = "center";
+              ctx.textBaseline = "middle";
+              ctx.fillText(task.slack.toString(), pos.x, badgeY + badgeHeight / 2);
+              
               // Reset shadow
               ctx.shadowColor = "transparent";
               ctx.shadowBlur = 0;
               ctx.shadowOffsetX = 0;
               ctx.shadowOffsetY = 0;
-
-              // Text du badge
-              ctx.fillStyle = "#ffffff";
-              ctx.font = "bold 13px Inter, -apple-system, BlinkMacSystemFont, sans-serif";
-              ctx.textAlign = "center";
-              ctx.textBaseline = "middle";
-              ctx.fillText(task.slack.toString(), pos.x, badgeY + badgeHeight / 2);
             }
           });
         });
@@ -381,8 +416,7 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
       })
       .catch(err => {
         console.error("Erreur lors du chargement des données:", err);
-        setIsGraphReady(true); // Afficher même en cas d'erreur
-        // Optionnel : afficher un état d'erreur à l'utilisateur
+        setIsGraphReady(true);
       });
   }, [projectId, onDataLoaded]);
 
@@ -416,8 +450,8 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
         overflow: "auto",
         border: "1px solid #e2e8f0",
         borderRadius: "16px",
-        boxShadow: "0 10px 40px rgba(0, 0, 0, 0.05), 0 4px 16px rgba(0, 0, 0, 0.08)",
-        background: "linear-gradient(135deg, #f8fafc 0%, #ffffff 100%)",
+        boxShadow: "0 10px 30px rgba(0, 0, 0, 0.04), 0 4px 12px rgba(0, 0, 0, 0.06)",
+        background: "#ffffff",
         position: "relative"
       }}
     >
@@ -432,7 +466,7 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            backgroundColor: "rgba(248, 250, 252, 0.9)",
+            backgroundColor: "rgba(255, 255, 255, 0.9)",
             zIndex: 10
           }}
         >
@@ -448,8 +482,8 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
               style={{
                 width: "40px",
                 height: "40px",
-                border: "4px solid #e2e8f0",
-                borderTop: "4px solid #3b82f6",
+                border: "4px solid #f1f5f9",
+                borderTop: "4px solid #4f46e5",
                 borderRadius: "50%",
                 animation: "spin 1s linear infinite"
               }}
