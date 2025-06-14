@@ -9,6 +9,7 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
   const networkRef = useRef(null);
   const [graphSize, setGraphSize] = React.useState({ width: 1000, height: 800 });
   const [isGraphReady, setIsGraphReady] = React.useState(false);
+  const [selectedNodeId, setSelectedNodeId] = React.useState(null); // Pour suivre le nœud sélectionné (si nécessaire pour futures fonctionnalités)
 
   const loadCriticalPathData = useCallback(() => {
     setIsGraphReady(false);
@@ -68,7 +69,8 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
               size: 10,
               x: 0,
               y: 4
-            }
+            },
+            fixed: { x: true, y: true } // Fixé - ne peut pas être déplacé
           },
           ...tasks.map(task => {
             const isCritical = task.slack === 0;
@@ -111,7 +113,7 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
                 x: 0,
                 y: 3
               },
-              fixed: { x: false, y: false }
+              fixed: { x: false, y: false } // Les nœuds de tâches peuvent être déplacés individuellement
             };
           }),
           {
@@ -150,7 +152,8 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
               size: 12,
               x: 0,
               y: 4
-            }
+            },
+            fixed: { x: true, y: true } // Fixé - ne peut pas être déplacé
           }
         ]);
 
@@ -286,8 +289,8 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
             stabilization: { enabled: false }
           },
           interaction: {
-            dragNodes: true,
-            dragView: true,
+            dragNodes: true, // Permet de déplacer les nœuds individuellement
+            dragView: false, // Désactive le déplacement global du graphique
             zoomView: false,
             selectConnectedEdges: false,
             hover: true,
@@ -351,12 +354,12 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
           tasks.forEach(task => {
             const pos = nodePositions[task.id];
             if (pos) {
-              // Ligne de séparation plus subtile
+              // Ligne de séparation plus visible
               ctx.beginPath();
-              ctx.strokeStyle = "rgba(203, 213, 225, 0.5)";
-              ctx.lineWidth = 1;
-              ctx.moveTo(pos.x - 40, pos.y);
-              ctx.lineTo(pos.x + 40, pos.y);
+              ctx.strokeStyle = "#64748b"; // Couleur plus foncée et visible
+              ctx.lineWidth = 2; // Épaisseur augmentée
+              ctx.moveTo(pos.x - 37, pos.y); // Ligne légèrement plus longue
+              ctx.lineTo(pos.x + 37, pos.y);
               ctx.stroke();
 
               // Badge slack redessiné
