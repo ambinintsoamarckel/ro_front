@@ -349,20 +349,6 @@ const Sidebar = ({ setInitialTaskCount, setCurrentProject, setProjectPage, proje
             transition={{ duration: 0.3, ease: "easeInOut" }}
             className="fixed left-24 top-20 h-[calc(100vh-6rem)] w-80 bg-gradient-to-br from-white to-slate-50 border-r border-slate-200 shadow-xl z-30 overflow-y-auto flex flex-col"
           >
-            {/* Header de la deuxième sidebar */}
-            <div className="sticky top-0 bg-gradient-to-r from-indigo-700 to-indigo-800 text-white border-b border-indigo-600 p-4 flex items-center justify-between shadow-md">
-              <h2 className="font-bold text-lg tracking-wide">
-                {sidebarItems.find(item => item.id === secondSidebarContent)?.label || 'Contenu'}
-              </h2>
-              <motion.button
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-                onClick={() => setSecondSidebarOpen(false)}
-                className="p-2 hover:bg-indigo-600 rounded-lg transition-colors duration-300"
-              >
-                <X size={18} className="text-indigo-100" />
-              </motion.button>
-            </div>
             
             {/* Contenu de la deuxième sidebar */}
             {renderSecondSidebarContent()}
