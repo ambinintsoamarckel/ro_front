@@ -9,11 +9,17 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
   const networkRef = useRef(null);
   const [graphSize, setGraphSize] = React.useState({ width: 1000, height: 800 });
 
-
   const loadCriticalPathData = useCallback(() => {
     fetch(`http://localhost:3001/critical-path/${projectId}`)
       .then(res => res.json())
-      .then(tasks => {
+      .then(data => {
+        // Vérifier si les données sont valides
+        if (!data || !Array.isArray(data) || data.length === 0) {
+          console.warn("Aucune donnée de tâches disponible");
+          return;
+        }
+        
+        const tasks = data;
         const maxEarlyFinish = Math.max(...tasks.map(t => t.earlyFinish), 0);
 
         const startTaskIds = new Set(tasks.map(task => task.id));
@@ -33,11 +39,7 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
             size: 50,
             color: { 
               background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-              border: "#4c63d2",
-              highlight: {
-                background: "linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)",
-                border: "#3d52c0"
-              }
+              border: "#4c63d2"
             },
             borderWidth: 3,
             font: { 
@@ -98,19 +100,15 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
             id: "end",
             label: `END\n${maxEarlyFinish}`,
             shape: "circle",
-            size: 50,
+            size: 70,
             color: { 
-              background: "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
-              border: "#e11d48",
-              highlight: {
-                background: "linear-gradient(135deg, #ed7de3 0%, #f0445a 100%)",
-                border: "#be123c"
-              }
+              background: "#f472b6",
+              border: "#e11d48"
             },
             borderWidth: 3,
             font: {
               color: "#ffffff",
-              size: 13,
+              size: 14,
               face: "Inter, -apple-system, BlinkMacSystemFont, sans-serif",
               bold: true,
               multi: true,
@@ -118,8 +116,8 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
             },
             shadow: {
               enabled: true,
-              color: "rgba(240, 147, 251, 0.3)",
-              size: 8,
+              color: "rgba(244, 114, 182, 0.3)",
+              size: 10,
               x: 0,
               y: 4
             }
@@ -162,7 +160,7 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
                 width: isCritical ? 3 : 2,
                 font: {
                   color: "#374151",
-                  size: 12,
+                  size: 13,
                   face: "Inter, -apple-system, BlinkMacSystemFont, sans-serif",
                   bold: true,
                   background: "rgba(255, 255, 255, 0.95)",
@@ -199,7 +197,7 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
               width: isCritical ? 3 : 2,
               font: {
                 color: "#374151",
-                size: 12,
+                size: 13,
                 face: "Inter, -apple-system, BlinkMacSystemFont, sans-serif",
                 bold: true,
                 background: "rgba(255, 255, 255, 0.95)",
@@ -240,7 +238,10 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
             smooth: { type: "continuous", roundness: 0.3 },
             arrows: { to: { enabled: true, scaleFactor: 1, type: "arrow" } }
           },
-          physics: { enabled: false },
+          physics: { 
+            enabled: false,
+            stabilization: { enabled: false }
+          },
           interaction: {
             dragNodes: true,
             dragView: true,
@@ -253,10 +254,13 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
           nodes: {
             chosen: {
               node: function (values, id, selected, hovering) {
-                values.shadow = true;
-                values.shadowSize = 12;
-                values.shadowColor = "rgba(0,0,0,0.2)";
-                values.borderWidth = values.borderWidth + 1;
+                // Ne pas appliquer d'effet hover aux nœuds START et END
+                if (id !== "start" && id !== "end") {
+                  values.shadow = true;
+                  values.shadowSize = 12;
+                  values.shadowColor = "rgba(0,0,0,0.2)";
+                  values.borderWidth = values.borderWidth + 1;
+                }
               }
             }
           }
@@ -271,34 +275,31 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
           { nodes, edges },
           options
         );
-        // Fixer le zoom et la position
+
+        // Calculer immédiatement la taille pour éviter les changements visuels
+        const positions = networkRef.current.getPositions();
+        let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+    
+        Object.values(positions).forEach(pos => {
+          if (pos.x < minX) minX = pos.x;
+          if (pos.x > maxX) maxX = pos.x;
+          if (pos.y < minY) minY = pos.y;
+          if (pos.y > maxY) maxY = pos.y;
+        });
+    
+        // Ajouter une marge pour les badges et les ombres
+        const padding = 150;
+        const width = Math.max(1000, Math.abs(maxX - minX) + padding * 2);
+        const height = Math.max(800, Math.abs(maxY - minY) + padding * 2);
+    
+        setGraphSize({ width, height });
+
+        // Fixer le zoom et la position une seule fois
         networkRef.current.moveTo({
-          position: { x: 0, y: 0 },  // point central
-          scale: 0.8,                // zoom constant pour tous les graphes
+          position: { x: 0, y: 0 },
+          scale: 0.8,
           animation: false
         });
-
-        setTimeout(() => {
-          if (networkRef.current) {
-            const positions = networkRef.current.getPositions();
-            let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
-        
-            Object.values(positions).forEach(pos => {
-              if (pos.x < minX) minX = pos.x;
-              if (pos.x > maxX) maxX = pos.x;
-              if (pos.y < minY) minY = pos.y;
-              if (pos.y > maxY) maxY = pos.y;
-            });
-        
-            // Ajouter une marge
-            const padding = 100;
-            const width = Math.abs(maxX - minX) + padding * 2;
-            const height = Math.abs(maxY - minY) + padding * 2;
-        
-            setGraphSize({ width, height });
-          }
-        }, 500); // attendre que le graphe soit bien dessiné
-        
 
         networkRef.current.on("afterDrawing", function (ctx) {
           const nodePositions = networkRef.current.getPositions();
@@ -368,22 +369,11 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
             }
           });
         });
-        /*
-        setTimeout(() => {
-          if (networkRef.current) {
-            networkRef.current.fit({
-              animation: {
-                duration: 1000,
-                easingFunction: "easeInOutCubic"
-              }
-            });
-          }
-        }, 300);*/
 
-        if (onDataLoaded) onDataLoaded(tasks);
       })
       .catch(err => {
         console.error("Erreur lors du chargement des données:", err);
+        // Optionnel : afficher un état d'erreur à l'utilisateur
       });
   }, [projectId, onDataLoaded]);
 
@@ -408,12 +398,13 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
       }
     }
   }));
+
   return (
     <div
       style={{
         width: "100%",
         height: "80vh",
-        overflow: "auto", // <-- scroll horizontal + vertical
+        overflow: "auto",
         border: "1px solid #e2e8f0",
         borderRadius: "16px",
         boxShadow: "0 10px 40px rgba(0, 0, 0, 0.05), 0 4px 16px rgba(0, 0, 0, 0.08)",
@@ -423,16 +414,15 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
       <div
         ref={containerRef}
         style={{
-          width: "2000px", // largeur fixe plus grande pour déclencher le scroll horizontal
-          height: "1500px", // hauteur fixe plus grande pour déclencher le scroll vertical
+          width: `${graphSize.width}px`,
+          height: `${graphSize.height}px`,
           position: "relative"
         }}
       />
     </div>
   );
-  
 });
 
 CPMGraph.displayName = "CPMGraph";
 
-export default CPMGraph;  
+export default CPMGraph;
