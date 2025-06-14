@@ -10,7 +10,7 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
   const networkRef = useRef(null);
   const dragStateRef = useRef({ isDragging: false, draggedNode: null });
   const autoscrollIntervalRef = useRef(null);
-  const [graphSize, setGraphSize] = React.useState({ width: 1000, height: 800 });
+  const [graphSize, setGraphSize] = React.useState({ width: 1400, height: 1000 });
   const [isGraphReady, setIsGraphReady] = React.useState(false);
   const [selectedNodeId, setSelectedNodeId] = React.useState(null);
 
@@ -406,12 +406,22 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
             networkRef.current.moveNode(id, pos.x, pos.y);
           }
 
-          // Calcul du nouveau width/height du canvas
+          // Calcul du nouveau width/height du canvas avec tailles minimales garanties
           const xs = Object.values(positions).map(p => p.x);
           const ys = Object.values(positions).map(p => p.y);
-          const padding = 150;
-          const width = Math.max(1000, Math.abs(Math.max(...xs) - Math.min(...xs)) + padding * 2);
-          const height = Math.max(800, Math.abs(Math.max(...ys) - Math.min(...ys)) + padding * 2);
+          const padding = 200; // Padding augmenté pour plus d'espace
+          
+          // Calcul de la taille basée sur le contenu
+          const contentWidth = Math.abs(Math.max(...xs) - Math.min(...xs)) + padding * 2;
+          const contentHeight = Math.abs(Math.max(...ys) - Math.min(...ys)) + padding * 2;
+          
+          // Tailles minimales garanties même avec peu de nœuds
+          const minWidth = 1400;  // Taille minimum augmentée
+          const minHeight = 1000; // Taille minimum augmentée
+          
+          // Utiliser la plus grande valeur entre le contenu et le minimum
+          const width = Math.max(minWidth, contentWidth);
+          const height = Math.max(minHeight, contentHeight);
 
           // Enregistrer la taille
           setGraphSize({ width, height });
