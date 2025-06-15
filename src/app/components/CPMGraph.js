@@ -890,7 +890,7 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
         console.error("Erreur lors du chargement des données:", err);
         setIsGraphReady(true);
       });
-  }, [projectId, onDataLoaded, stopAutoscroll, findCriticalPath, animateCriticalPath]);
+  }, [projectId,  stopAutoscroll, findCriticalPath, animateCriticalPath]);
 
   useEffect(() => {
     loadCriticalPathData();

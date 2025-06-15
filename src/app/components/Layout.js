@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Header from "./Header";
 import Sidebar from "./Sidebar";
-import Dashboard from "./Dashboard";
+//import Dashboard from "./Dashboard";
 
 const Layout = ({ children, setInitialTaskCount, setCurrentProject, setProjectPage, projects, setProjects }) => {
   // État pour savoir si la deuxième sidebar est ouverte
