@@ -8,7 +8,7 @@ import CPMGraph from "./CPMGraph";
 import { ReactFlowProvider } from "reactflow";
 import { colors } from "../colors";
 
-const TaskScheduler = ({ currentProject, initialTaskCount , isSecondSidebarOpen }) => {
+const TaskScheduler = ({ currentProject, initialTaskCount , isSecondSidebarOpen, setProjects }) => {
   const [tasks, setTasks] = useState([{ name: "", duration: "", projectId: currentProject.id }]);
   const [fetchedTasks, setFetchedTasks] = useState([]);
   const [isInitialEntry, setIsInitialEntry] = useState(true);
@@ -19,6 +19,31 @@ const TaskScheduler = ({ currentProject, initialTaskCount , isSecondSidebarOpen 
   const [tableHeight, setTableHeight] = useState(0);
   const cpmGraphRef = useRef(null);
   const [hoveredColumnIndex, setHoveredColumnIndex] = useState(null);
+
+  const fetchProjects = async () => {
+    try {
+      const response = await fetch("http://localhost:3001/projects", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setProjects(data);
+      } else if (response.status === 404) {
+        setProjects([]);
+        console.log("Aucun projet trouvé.");
+      } else {
+        console.error("Erreur serveur :", response.statusText);
+      }
+    } catch (error) {
+      console.error("Erreur API :", error);
+    }
+  };
+
 
   const fetchTasksFromBackend = async () => {
     try {
@@ -76,6 +101,7 @@ const TaskScheduler = ({ currentProject, initialTaskCount , isSecondSidebarOpen 
       }
 
       const data = await response.json();
+      await fetchProjects();
     } catch (err) {
       console.error(err);
     }
@@ -221,12 +247,6 @@ const TaskScheduler = ({ currentProject, initialTaskCount , isSecondSidebarOpen 
     } catch (error) {
       console.error("Erreur API :", error);
     }
-  };
-
-  const handleDependencyValidation = async (type) => {
-    setDependencyType(type);
-    await fetchProject(currentProject.id);
-    setIsDependencyModalOpen(false);
   };
 
   return (
