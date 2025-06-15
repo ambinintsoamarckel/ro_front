@@ -18,7 +18,7 @@ const TaskListTable = ({
   onTaskUpdate = () => {}, 
   onTaskDelete = () => {},
   onTaskCreate = () => {},
-  onProjectUpdate = () => {}
+
 }) => {
   const [editingTaskIndex, setEditingTaskIndex] = useState(null);
   const [editedTask, setEditedTask] = useState(null);
@@ -33,6 +33,27 @@ const TaskListTable = ({
 
   // Utiliser isSuccessor du projet pour déterminer le type de dépendance
   const dependencyType = currentProject.isSuccessor ? "successeur" : "antérieur";
+  const onProjectUpdate = async (updatedProject) => {
+    try {
+      const response = await fetch(`http://localhost:3001/projects/${updatedProject.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(updatedProject),
+      });
+  
+      if (!response.ok) {
+        throw new Error("Erreur lors de la mise à jour du projet");
+      }
+  
+      const data = await response.json();
+      // Optionnel : mettre à jour localement
+    } catch (err) {
+      console.error(err);
+    }
+  };
+  
 
   useEffect(() => {
     if (tableRef.current) {
@@ -151,7 +172,7 @@ const TaskListTable = ({
   };
 
   return (
-    <div className={`relative bg-gradient-to-br ${colors.background.main} min-h-screen`}>
+    <div className={`relative bg-gradient-to-br ${colors.background.main} `}>
       {/* Header compact */}
       <motion.div 
         initial={{ y: -20, opacity: 0 }}
@@ -204,7 +225,7 @@ const TaskListTable = ({
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.6, delay: 0.4 }}
-        className="max-w-full mx-auto px-4 py-4"
+        className="max-w-full mx-auto px-2 py-2"
       >
         <div className="flex justify-center">
           <div className="relative">
@@ -220,7 +241,7 @@ const TaskListTable = ({
               />
               <label
                 htmlFor="anterieur"
-                className={`px-4 py-2 rounded-full text-sm font-semibold cursor-pointer transition-all duration-300 ${
+                className={`px-2 py-2 rounded-full text-sm font-semibold cursor-pointer transition-all duration-300 ${
                   dependencyType === "antérieur"
                     ? `bg-gradient-to-r ${colors.primary.gradientButton} text-white shadow-lg transform scale-105`
                     : `${colors.text.secondary} hover:${colors.primary.text}`
@@ -240,7 +261,7 @@ const TaskListTable = ({
               />
               <label
                 htmlFor="successeur"
-                className={`px-4 py-2 rounded-full text-sm font-semibold cursor-pointer transition-all duration-300 ${
+                className={`px-2 py-2 rounded-full text-sm font-semibold cursor-pointer transition-all duration-300 ${
                   dependencyType === "successeur"
                     ? `bg-gradient-to-r ${colors.primary.gradientButton} text-white shadow-lg transform scale-105`
                     : `${colors.text.secondary} hover:${colors.primary.text}`
@@ -254,7 +275,7 @@ const TaskListTable = ({
       </motion.div>
 
       {/* Container principal */}
-      <div className="max-w-full mx-auto px-4 pb-4">
+      <div className="max-w-full mx-auto px-2 pb-2">
         <motion.div 
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
