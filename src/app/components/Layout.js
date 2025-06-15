@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import React,{ useState } from "react";
 import Header from "./Header";
 import Sidebar from "./Sidebar";
 //import Dashboard from "./Dashboard";
@@ -40,7 +40,10 @@ const Layout = ({ children, setInitialTaskCount, setCurrentProject, setProjectPa
 
         {/* Contenu principal - Marge dynamique */}
         <main className={`flex-1 ${getMainContentMargin()} px-2 sm:px-4 lg:px-6 py-4 transition-all duration-300 ease-in-out`}>
-          {children}
+        {React.isValidElement(children)
+          ? React.cloneElement(children, { isSecondSidebarOpen })
+          : children}
+
         </main>
       </div>
     </div>

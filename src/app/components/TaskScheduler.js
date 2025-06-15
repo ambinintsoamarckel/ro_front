@@ -8,7 +8,7 @@ import CPMGraph from "./CPMGraph";
 import { ReactFlowProvider } from "reactflow";
 import { colors } from "../colors";
 
-const TaskScheduler = ({ currentProject, initialTaskCount }) => {
+const TaskScheduler = ({ currentProject, initialTaskCount , isSecondSidebarOpen }) => {
   const [tasks, setTasks] = useState([{ name: "", duration: "", projectId: currentProject.id }]);
   const [fetchedTasks, setFetchedTasks] = useState([]);
   const [isInitialEntry, setIsInitialEntry] = useState(true);
@@ -230,7 +230,11 @@ const TaskScheduler = ({ currentProject, initialTaskCount }) => {
   };
 
   return (
-    <div className={`w-full max-w-[1600px] mx-auto bg-gradient p-8 shadow-md rounded-lg mt-10${colors.background.main}`}>
+<div
+  className={`w-full mx-auto p-8 shadow-md rounded-lg mt-10 transition-all duration-300 ease-in-out ${colors.background.main} ${
+    isSecondSidebarOpen ? 'max-w-[1400px]' : 'max-w-[1600px]'
+  }`}
+> 
       {isInitialEntry ? (
         <div className="w-full max-w-[1600px] mx-auto">
           {/* Header moderne comme TaskListTable */}
