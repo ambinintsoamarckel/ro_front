@@ -29,15 +29,15 @@ export const colors = {
         base: 'bg-white/20 hover:bg-red-500/80',
         text: 'text-white'
       },
-      save: {
-        gradient: 'from-green-500 to-emerald-500',
-        hover: 'hover:from-green-600 hover:to-emerald-600',
-        text: 'text-white'
-      },
       cancel: {
-        gradient: 'from-red-500 to-pink-500',
-        hover: 'hover:from-red-600 hover:to-pink-600',
-        text: 'text-white'
+        gradient: "from-slate-400 to-slate-500",
+        hover: "hover:from-slate-500 hover:to-slate-600",
+        text: "text-white"
+      },
+      save: {
+        gradient: "from-indigo-500 to-purple-500",
+        hover: "hover:from-indigo-600 hover:to-purple-600", 
+        text: "text-white"
       },
       favorite: {
         active: 'text-yellow-500',
