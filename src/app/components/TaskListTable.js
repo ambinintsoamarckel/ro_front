@@ -1,11 +1,10 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Edit2, Trash2, X, Check, ArrowRight, Plus, Save, CheckSquare2, SquareX, CheckCircle2, CircleX } from "lucide-react";
+import { Edit2, Trash2, X, Check, ArrowRight, Plus, Save, CheckSquare2, SquareX, CheckCircle2, CircleX, Star } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import TaskDetailsModal from "./TaskDetailsModal";
-
-
+import { colors } from "../colors";
 
 const TaskListTable = ({ 
   tasks = [
@@ -14,11 +13,12 @@ const TaskListTable = ({
     { id: 3, name: "Tests", duration: 8, dependencies: [{ dependsOnId: 2 }], successors: [] }
   ],
   setTasks, 
-  currentProject = { id: 1, name: "Projet Demo", description: "Un projet de démonstration", isSuccessor: false },
+  currentProject = { id: 1, name: "Projet Demo", description: "Un projet de démonstration", isSuccessor: false, isFavorite: false },
   setProject, 
   onTaskUpdate = () => {}, 
   onTaskDelete = () => {},
-  onTaskCreate = () => {}
+  onTaskCreate = () => {},
+  onProjectUpdate = () => {}
 }) => {
   const [editingTaskIndex, setEditingTaskIndex] = useState(null);
   const [editedTask, setEditedTask] = useState(null);
@@ -28,9 +28,11 @@ const TaskListTable = ({
   const [tempTask, setTempTask] = useState(null);
   const [tableHeight, setTableHeight] = useState(0);
   const [activeTaskIndex, setActiveTaskIndex] = useState(null);
-  const [dependencyType, setDependencyType] = useState("antérieur");
   const [hoveredColumnIndex, setHoveredColumnIndex] = useState(null);
   const tableRef = useRef(null);
+
+  // Utiliser isSuccessor du projet pour déterminer le type de dépendance
+  const dependencyType = currentProject.isSuccessor ? "successeur" : "antérieur";
 
   useEffect(() => {
     if (tableRef.current) {
@@ -39,8 +41,26 @@ const TaskListTable = ({
   }, [tasks]);
   
   const fetchTasksFromBackend = async () => {
-  await setTasks ();
+    await setTasks();
   };
+
+  // Fonction pour calculer la largeur dynamique d'une colonne
+  const getColumnWidth = (task) => {
+    const baseName = task.name || "";
+    const dependencies = dependencyType === "antérieur" ? task.dependencies : task.successors;
+    const depCount = dependencies.length;
+    
+    // Largeur de base minimale
+    let width = Math.max(180, baseName.length * 8 + 60);
+    
+    // Augmenter la largeur si beaucoup de dépendances
+    if (depCount > 2) {
+      width += depCount * 25;
+    }
+    
+    return Math.min(width, 350); // Largeur maximale
+  };
+
   const handleAddColumn = () => {
     if (!tempTask) {
       setTempTask({ name: "", duration: "", dependencies: [], successors: [] });
@@ -107,29 +127,72 @@ const TaskListTable = ({
     setIsTaskModalOpen(true);
   };
 
+  // Gestion des favoris
+  const handleToggleFavorite = async () => {
+    try {
+      const updatedProject = { ...currentProject, isFavorite: !currentProject.isFavorite };
+      await onProjectUpdate(updatedProject);
+      setProject(updatedProject);
+    } catch (error) {
+      console.error("Erreur lors de la mise à jour des favoris", error);
+    }
+  };
+
+  // Gestion du changement de type de dépendance
+  const handleDependencyTypeChange = async (newType) => {
+    try {
+      const isSuccessor = newType === "successeur";
+      const updatedProject = { ...currentProject, isSuccessor };
+      await onProjectUpdate(updatedProject);
+      setProject(updatedProject);
+    } catch (error) {
+      console.error("Erreur lors de la mise à jour du type de dépendance", error);
+    }
+  };
+
   return (
-    <div className="relative bg-gradient-to-br from-slate-50 via-indigo-50/30 to-purple-50/20 min-h-screen">
+    <div className={`relative bg-gradient-to-br ${colors.background.main} min-h-screen`}>
       {/* Header compact */}
       <motion.div 
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.6 }}
-        className="sticky top-0 left-0 w-full z-10 backdrop-blur-xl bg-white/80 border-b border-white/20 shadow-lg"
+        className={`sticky top-0 left-0 w-full z-10 backdrop-blur-xl ${colors.background.header} border-b border-white/20 shadow-lg`}
       >
-        <div className="max-w-full mx-auto px-6 py-4">
-          <motion.h1 
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            className="text-center text-3xl font-bold bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-800 bg-clip-text text-transparent"
-          >
-            {currentProject.name}
-          </motion.h1>
+        <div className="max-w-full mx-auto px-4 py-3">
+          <div className="flex items-center justify-center space-x-4">
+            <motion.h1 
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className={`text-center text-2xl font-bold bg-gradient-to-r ${colors.primary.gradient} bg-clip-text text-transparent`}
+            >
+              {currentProject.name}
+            </motion.h1>
+            
+            {/* Bouton favoris */}
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              onClick={handleToggleFavorite}
+              className={`p-2 rounded-full transition-all duration-300 ${
+                currentProject.isFavorite 
+                  ? colors.buttons.favorite.active 
+                  : `${colors.buttons.favorite.inactive} ${colors.buttons.favorite.hover}`
+              }`}
+            >
+              <Star 
+                size={24} 
+                fill={currentProject.isFavorite ? "currentColor" : "none"}
+              />
+            </motion.button>
+          </div>
+          
           <motion.p 
             initial={{ y: 10, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ duration: 0.5, delay: 0.3 }}
-            className="text-center text-slate-600 italic mt-1"
+            className={`text-center ${colors.text.secondary} italic mt-1 text-sm`}
           >
             {currentProject.description}
           </motion.p>
@@ -141,26 +204,26 @@ const TaskListTable = ({
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.6, delay: 0.4 }}
-        className="max-w-full mx-auto px-6 py-6"
+        className="max-w-full mx-auto px-4 py-4"
       >
         <div className="flex justify-center">
           <div className="relative">
-            <div className="flex items-center bg-white/80 backdrop-blur-sm rounded-full p-1 shadow-lg border border-white/30">
+            <div className={`flex items-center ${colors.background.card} backdrop-blur-sm rounded-full p-1 shadow-lg border border-white/30`}>
               <input
                 type="radio"
                 id="anterieur"
                 name="dependencyType"
                 value="antérieur"
                 checked={dependencyType === "antérieur"}
-                onChange={(e) => setDependencyType(e.target.value)}
+                onChange={(e) => handleDependencyTypeChange(e.target.value)}
                 className="sr-only"
               />
               <label
                 htmlFor="anterieur"
-                className={`px-6 py-3 rounded-full text-sm font-semibold cursor-pointer transition-all duration-300 ${
+                className={`px-4 py-2 rounded-full text-sm font-semibold cursor-pointer transition-all duration-300 ${
                   dependencyType === "antérieur"
-                    ? "bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow-lg transform scale-105"
-                    : "text-slate-600 hover:text-indigo-600"
+                    ? `bg-gradient-to-r ${colors.primary.gradientButton} text-white shadow-lg transform scale-105`
+                    : `${colors.text.secondary} hover:${colors.primary.text}`
                 }`}
               >
                 Tâches antérieures
@@ -172,15 +235,15 @@ const TaskListTable = ({
                 name="dependencyType"
                 value="successeur"
                 checked={dependencyType === "successeur"}
-                onChange={(e) => setDependencyType(e.target.value)}
+                onChange={(e) => handleDependencyTypeChange(e.target.value)}
                 className="sr-only"
               />
               <label
                 htmlFor="successeur"
-                className={`px-6 py-3 rounded-full text-sm font-semibold cursor-pointer transition-all duration-300 ${
+                className={`px-4 py-2 rounded-full text-sm font-semibold cursor-pointer transition-all duration-300 ${
                   dependencyType === "successeur"
-                    ? "bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow-lg transform scale-105"
-                    : "text-slate-600 hover:text-indigo-600"
+                    ? `bg-gradient-to-r ${colors.primary.gradientButton} text-white shadow-lg transform scale-105`
+                    : `${colors.text.secondary} hover:${colors.primary.text}`
                 }`}
               >
                 Tâches successeurs
@@ -190,8 +253,8 @@ const TaskListTable = ({
         </div>
       </motion.div>
 
-      {/* Container principal - largeur augmentée */}
-      <div className="max-w-full mx-auto px-6 pb-4">
+      {/* Container principal */}
+      <div className="max-w-full mx-auto px-4 pb-4">
         <motion.div 
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
@@ -200,82 +263,88 @@ const TaskListTable = ({
         >
           {/* Table avec scrollbars visibles */}
           <div className="overflow-x-auto" style={{ scrollbarWidth: 'thin', scrollbarColor: '#a5b4fc #f1f5f9' }}>
-            <div className="backdrop-blur-xl bg-white/90 rounded-3xl shadow-2xl border border-white/30 overflow-hidden min-w-max">
+            <div className={`backdrop-blur-xl ${colors.background.card} rounded-2xl shadow-2xl border border-white/30 overflow-hidden min-w-max`}>
               <table ref={tableRef} className="w-full">
                 <thead>
                   {/* Header des tâches */}
-                  <tr className="bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-600 text-white">
-                    <th className="p-6 text-left font-semibold tracking-wide min-w-[300px]">
+                  <tr className={`bg-gradient-to-r ${colors.primary.gradientBg} text-white`}>
+                    <th className="p-4 text-left font-semibold tracking-wide min-w-[200px]">
                       <div className="flex items-center space-x-2">
                         <div className="w-2 h-2 bg-white rounded-full"></div>
                         <span>Tâches</span>
                       </div>
                     </th>
-                    {tasks.map((task, index) => (
-                      <th 
-                        key={index} 
-                        className="p-6 relative w-[320px] min-w-[320px] group"
-                        onMouseEnter={() => setHoveredColumnIndex(index)}
-                        onMouseLeave={() => setHoveredColumnIndex(null)}
-                      >
-                        <div className="flex flex-col items-center space-y-2">
-                          {editingTaskIndex === index ? (
-                            <motion.input
-                              initial={{ scale: 0.95 }}
-                              animate={{ scale: 1 }}
-                              type="text"
-                              value={editedTask.name}
-                              onChange={(e) => setEditedTask({...editedTask, name: e.target.value})}
-                              className="w-full p-3 text-center bg-white/20 text-white placeholder-indigo-200 outline-none border border-white/30 rounded-xl focus:border-white focus:bg-white/30 transition-all backdrop-blur-sm"
-                              placeholder="Nom de la tâche"
-                            />
-                          ) : (
-                            <span className="text-center font-medium text-lg">{task.name}</span>
-                          )}
-                          
-                          {/* Boutons d'action - apparaissent au survol de la colonne */}
-                          {editingTaskIndex !== index && deleteConfirmIndex !== index && activeTaskIndex === null && hoveredColumnIndex === index && (
-                            <>
-                              <motion.button
-                                initial={{ opacity: 0, scale: 0.8, y: -10 }}
-                                animate={{ opacity: 1, scale: 1, y: 0 }}
-                                exit={{ opacity: 0, scale: 0.8, y: -10 }}
-                                whileHover={{ scale: 1.1 }}
-                                whileTap={{ scale: 0.9 }}
-                                className="absolute top-3 left-3 p-2 bg-white/20 hover:bg-white/30 rounded-xl backdrop-blur-sm border border-white/30 transition-all duration-300"
-                                onClick={() => handleEditStart(task, index)}
-                              >
-                                <Edit2 size={18} className="text-white" />
-                              </motion.button>
-                              <motion.button
-                                initial={{ opacity: 0, scale: 0.8, y: -10 }}
-                                animate={{ opacity: 1, scale: 1, y: 0 }}
-                                exit={{ opacity: 0, scale: 0.8, y: -10 }}
-                                whileHover={{ scale: 1.1 }}
-                                whileTap={{ scale: 0.9 }}
-                                className="absolute top-3 right-3 p-2 bg-white/20 hover:bg-red-500/80 rounded-xl backdrop-blur-sm border border-white/30 transition-all duration-300"
-                                onClick={() => {
-                                  setDeleteConfirmIndex(index);
-                                  setActiveTaskIndex(index);
-                                }}
-                              >
-                                <Trash2 size={18} className="text-white" />
-                              </motion.button>
-                            </>
-                          )}
-                        </div>
-                      </th>
-                    ))}
+                    {tasks.map((task, index) => {
+                      const columnWidth = getColumnWidth(task);
+                      return (
+                        <th 
+                          key={index} 
+                          className="p-4 relative group"
+                          style={{ width: `${columnWidth}px`, minWidth: `${columnWidth}px` }}
+                          onMouseEnter={() => setHoveredColumnIndex(index)}
+                          onMouseLeave={() => setHoveredColumnIndex(null)}
+                        >
+                          <div className="flex flex-col items-center space-y-2">
+                            {editingTaskIndex === index ? (
+                              <motion.input
+                                initial={{ scale: 0.95 }}
+                                animate={{ scale: 1 }}
+                                type="text"
+                                value={editedTask.name}
+                                onChange={(e) => setEditedTask({...editedTask, name: e.target.value})}
+                                className={`w-full p-2 text-center ${colors.background.overlay} text-white placeholder-indigo-200 outline-none border border-white/30 rounded-lg focus:border-white focus:bg-white/30 transition-all backdrop-blur-sm text-sm`}
+                                placeholder="Nom de la tâche"
+                              />
+                            ) : (
+                              <span className="text-center font-medium text-base leading-tight">{task.name}</span>
+                            )}
+                            
+                            {/* Boutons d'action - apparition simple */}
+                            {editingTaskIndex !== index && deleteConfirmIndex !== index && activeTaskIndex === null && hoveredColumnIndex === index && (
+                              <>
+                                <motion.button
+                                  initial={{ opacity: 0 }}
+                                  animate={{ opacity: 1 }}
+                                  exit={{ opacity: 0 }}
+                                  transition={{ duration: 0.2 }}
+                                  whileHover={{ scale: 1.05 }}
+                                  whileTap={{ scale: 0.95 }}
+                                  className={`absolute top-2 left-2 p-1.5 ${colors.buttons.edit.base} rounded-lg backdrop-blur-sm border border-white/30 transition-all duration-300`}
+                                  onClick={() => handleEditStart(task, index)}
+                                >
+                                  <Edit2 size={16} className={colors.buttons.edit.text} />
+                                </motion.button>
+                                <motion.button
+                                  initial={{ opacity: 0 }}
+                                  animate={{ opacity: 1 }}
+                                  exit={{ opacity: 0 }}
+                                  transition={{ duration: 0.2 }}
+                                  whileHover={{ scale: 1.05 }}
+                                  whileTap={{ scale: 0.95 }}
+                                  className={`absolute top-2 right-2 p-1.5 ${colors.buttons.delete.base} rounded-lg backdrop-blur-sm border border-white/30 transition-all duration-300`}
+                                  onClick={() => {
+                                    setDeleteConfirmIndex(index);
+                                    setActiveTaskIndex(index);
+                                  }}
+                                >
+                                  <Trash2 size={16} className={colors.buttons.delete.text} />
+                                </motion.button>
+                              </>
+                            )}
+                          </div>
+                        </th>
+                      );
+                    })}
                     
                     {tempTask && (
-                      <th className="p-6 w-[320px] min-w-[320px]">
+                      <th className="p-4" style={{ width: '200px', minWidth: '200px' }}>
                         <motion.input
                           initial={{ opacity: 0, x: 20 }}
                           animate={{ opacity: 1, x: 0 }}
                           type="text"
                           value={tempTask.name}
                           onChange={(e) => setTempTask({ ...tempTask, name: e.target.value })}
-                          className="w-full p-3 text-center bg-white/20 text-white placeholder-indigo-200 outline-none border border-white/30 rounded-xl focus:border-white focus:bg-white/30 transition-all backdrop-blur-sm"
+                          className={`w-full p-2 text-center ${colors.background.overlay} text-white placeholder-indigo-200 outline-none border border-white/30 rounded-lg focus:border-white focus:bg-white/30 transition-all backdrop-blur-sm text-sm`}
                           placeholder="Nouvelle tâche"
                         />
                       </th>
@@ -284,128 +353,132 @@ const TaskListTable = ({
 
                   {/* Row des durées */}
                   <tr className="bg-gradient-to-r from-white to-indigo-50/50 border-b border-indigo-100">
-                    <th className="p-6 text-left font-semibold text-slate-700">
+                    <th className={`p-4 text-left font-semibold ${colors.text.primary}`}>
                       <div className="flex items-center space-x-2">
-                        <div className="w-2 h-2 bg-indigo-500 rounded-full"></div>
+                        <div className={`w-2 h-2 ${colors.primary.bg} rounded-full`}></div>
                         <span>Durée (jours)</span>
                       </div>
                     </th>
-                    {tasks.map((task, index) => (
-                      <td 
-                        key={index} 
-                        className="p-6 w-[320px] min-w-[320px] group"
-                        onMouseEnter={() => setHoveredColumnIndex(index)}
-                        onMouseLeave={() => setHoveredColumnIndex(null)}
-                      >
-                        <div className="flex flex-col items-center space-y-3">
-                          {editingTaskIndex === index ? (
-                            <motion.input
-                              initial={{ scale: 0.95 }}
-                              animate={{ scale: 1 }}
-                              type="number"
-                              value={editedTask.duration}
-                              onChange={(e) => {
-                                const value = e.target.value === "" ? "" : Math.max(1, parseInt(e.target.value, 10));
-                                setEditedTask({ ...editedTask, duration: value });
-                              }}
-                              className="w-24 p-3 text-center bg-indigo-50 text-slate-800 outline-none border border-indigo-200 rounded-xl focus:border-indigo-400 focus:bg-white transition-all"
-                              min="1"
-                            />
-                          ) : (
-                            <div className="px-4 py-2 bg-gradient-to-r from-indigo-100 to-purple-100 text-indigo-800 font-semibold rounded-xl text-lg">
-                              {task.duration}
-                            </div>
-                          )}
-
-                          {/* Boutons de confirmation pour édition */}
-                          {editingTaskIndex === index && (
-                            <motion.div 
-                              initial={{ opacity: 0, y: 10 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              className="flex space-x-2"
-                            >
-                              <motion.button
-                                whileHover={{ scale: 1.1 }}
-                                whileTap={{ scale: 0.9 }}
-                                onClick={handleEditSave}
-                                className="p-2 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-xl hover:from-green-600 hover:to-emerald-600 transition-all shadow-lg"
-                              >
-                                <CheckSquare2 size={20} />
-                              </motion.button>
-                              <motion.button
-                                whileHover={{ scale: 1.1 }}
-                                whileTap={{ scale: 0.9 }}
-                                onClick={handleEditCancel}
-                                className="p-2 bg-gradient-to-r from-red-500 to-pink-500 text-white rounded-xl hover:from-red-600 hover:to-pink-600 transition-all shadow-lg"
-                              >
-                                <SquareX size={20} />
-                              </motion.button>
-                            </motion.div>
-                          )}
-
-                          {/* Boutons de confirmation pour suppression */}
-                          {deleteConfirmIndex === index && (
-                            <motion.div 
-                              initial={{ opacity: 0, y: 10 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              className="flex flex-col space-y-2 items-center"
-                            >
-                              <span className="text-sm text-red-600 font-medium">Confirmer ?</span>
-                              <div className="flex space-x-2">
-                                <motion.button
-                                  whileHover={{ scale: 1.1 }}
-                                  whileTap={{ scale: 0.9 }}
-                                  onClick={() => handleDeleteConfirm(task.id)}
-                                  className="p-2 bg-gradient-to-r from-red-500 to-pink-500 text-white rounded-xl hover:from-red-600 hover:to-pink-600 transition-all shadow-lg"
-                                >
-                                  <CheckSquare2 size={20} />
-                                </motion.button>
-                                <motion.button
-                                  whileHover={{ scale: 1.1 }}
-                                  whileTap={{ scale: 0.9 }}
-                                  onClick={handleDeleteCancel}
-                                  className="p-2 bg-gradient-to-r from-slate-400 to-slate-500 text-white rounded-xl hover:from-slate-500 hover:to-slate-600 transition-all shadow-lg"
-                                >
-                                  <SquareX size={20} />
-                                </motion.button>
+                    {tasks.map((task, index) => {
+                      const columnWidth = getColumnWidth(task);
+                      return (
+                        <td 
+                          key={index} 
+                          className="p-4 group"
+                          style={{ width: `${columnWidth}px`, minWidth: `${columnWidth}px` }}
+                          onMouseEnter={() => setHoveredColumnIndex(index)}
+                          onMouseLeave={() => setHoveredColumnIndex(null)}
+                        >
+                          <div className="flex flex-col items-center space-y-2">
+                            {editingTaskIndex === index ? (
+                              <motion.input
+                                initial={{ scale: 0.95 }}
+                                animate={{ scale: 1 }}
+                                type="number"
+                                value={editedTask.duration}
+                                onChange={(e) => {
+                                  const value = e.target.value === "" ? "" : Math.max(1, parseInt(e.target.value, 10));
+                                  setEditedTask({ ...editedTask, duration: value });
+                                }}
+                                className={`w-20 p-2 text-center bg-indigo-50 text-slate-800 outline-none border ${colors.primary.border} rounded-lg ${colors.primary.focus} focus:bg-white transition-all text-sm`}
+                                min="1"
+                              />
+                            ) : (
+                              <div className={`px-3 py-1.5 bg-gradient-to-r ${colors.duration.bg} ${colors.duration.text} font-semibold rounded-lg text-sm`}>
+                                {task.duration}
                               </div>
-                            </motion.div>
-                          )}
-                        </div>
-                      </td>
-                    ))}
+                            )}
+
+                            {/* Boutons de confirmation pour édition */}
+                            {editingTaskIndex === index && (
+                              <motion.div 
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                className="flex space-x-1"
+                              >
+                                <motion.button
+                                  whileHover={{ scale: 1.05 }}
+                                  whileTap={{ scale: 0.95 }}
+                                  onClick={handleEditSave}
+                                  className={`p-1.5 bg-gradient-to-r ${colors.buttons.save.gradient} ${colors.buttons.save.text} rounded-lg ${colors.buttons.save.hover} transition-all shadow-lg`}
+                                >
+                                  <CheckSquare2 size={18} />
+                                </motion.button>
+                                <motion.button
+                                  whileHover={{ scale: 1.05 }}
+                                  whileTap={{ scale: 0.95 }}
+                                  onClick={handleEditCancel}
+                                  className={`p-1.5 bg-gradient-to-r ${colors.buttons.cancel.gradient} ${colors.buttons.cancel.text} rounded-lg ${colors.buttons.cancel.hover} transition-all shadow-lg`}
+                                >
+                                  <SquareX size={18} />
+                                </motion.button>
+                              </motion.div>
+                            )}
+
+                            {/* Boutons de confirmation pour suppression */}
+                            {deleteConfirmIndex === index && (
+                              <motion.div 
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                className="flex flex-col space-y-2 items-center"
+                              >
+                                <span className="text-xs text-red-600 font-medium">Confirmer ?</span>
+                                <div className="flex space-x-1">
+                                  <motion.button
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
+                                    onClick={() => handleDeleteConfirm(task.id)}
+                                    className={`p-1.5 bg-gradient-to-r ${colors.buttons.cancel.gradient} ${colors.buttons.cancel.text} rounded-lg ${colors.buttons.cancel.hover} transition-all shadow-lg`}
+                                  >
+                                    <CheckSquare2 size={18} />
+                                  </motion.button>
+                                  <motion.button
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
+                                    onClick={handleDeleteCancel}
+                                    className="p-1.5 bg-gradient-to-r from-slate-400 to-slate-500 text-white rounded-lg hover:from-slate-500 hover:to-slate-600 transition-all shadow-lg"
+                                  >
+                                    <SquareX size={18} />
+                                  </motion.button>
+                                </div>
+                              </motion.div>
+                            )}
+                          </div>
+                        </td>
+                      );
+                    })}
                     
                     {tempTask && (
-                      <td className="p-6 w-[320px] min-w-[320px]">
+                      <td className="p-4" style={{ width: '200px', minWidth: '200px' }}>
                         <motion.div 
                           initial={{ opacity: 0, x: 20 }}
                           animate={{ opacity: 1, x: 0 }}
-                          className="flex flex-col items-center space-y-3"
+                          className="flex flex-col items-center space-y-2"
                         >
                           <input
                             type="number"
                             value={tempTask.duration}
                             onChange={(e) => setTempTask({ ...tempTask, duration: Math.max(1, parseInt(e.target.value, 10) || 1) })}
-                            className="w-24 p-3 text-center bg-indigo-50 text-slate-800 outline-none border border-indigo-200 rounded-xl focus:border-indigo-400 focus:bg-white transition-all"
+                            className={`w-20 p-2 text-center bg-indigo-50 text-slate-800 outline-none border ${colors.primary.border} rounded-lg ${colors.primary.focus} focus:bg-white transition-all text-sm`}
                             placeholder="Durée"
                           />
-                          <div className="flex space-x-2">
+                          <div className="flex space-x-1">
                             <motion.button
-                              whileHover={{ scale: 1.1 }}
-                              whileTap={{ scale: 0.9 }}
+                              whileHover={{ scale: 1.05 }}
+                              whileTap={{ scale: 0.95 }}
                               onClick={handleSaveTempColumn}
                               disabled={!tempTask.name.trim() || tempTask.duration <= 0}
-                              className="p-2 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-xl hover:from-green-600 hover:to-emerald-600 transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                              className={`p-1.5 bg-gradient-to-r ${colors.buttons.save.gradient} ${colors.buttons.save.text} rounded-lg ${colors.buttons.save.hover} transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed`}
                             >
-                              <Save size={20} />
+                              <Save size={18} />
                             </motion.button>
                             <motion.button
-                              whileHover={{ scale: 1.1 }}
-                              whileTap={{ scale: 0.9 }}
+                              whileHover={{ scale: 1.05 }}
+                              whileTap={{ scale: 0.95 }}
                               onClick={handleCancelTempColumn}
-                              className="p-2 bg-gradient-to-r from-red-500 to-pink-500 text-white rounded-xl hover:from-red-600 hover:to-pink-600 transition-all shadow-lg"
+                              className={`p-1.5 bg-gradient-to-r ${colors.buttons.cancel.gradient} ${colors.buttons.cancel.text} rounded-lg ${colors.buttons.cancel.hover} transition-all shadow-lg`}
                             >
-                              <SquareX size={20} />
+                              <SquareX size={18} />
                             </motion.button>
                           </div>
                         </motion.div>
@@ -415,58 +488,62 @@ const TaskListTable = ({
 
                   {/* Row des dépendances */}
                   <tr className="bg-gradient-to-r from-slate-50 to-indigo-50/30 border-b border-indigo-100">
-                    <th className="p-6 text-left font-semibold text-slate-700">
+                    <th className={`p-4 text-left font-semibold ${colors.text.primary}`}>
                       <div className="flex items-center space-x-2">
                         <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
                         <span>Tâches {dependencyType}</span>
                       </div>
                     </th>
-                    {tasks.map((task, index) => (
-                      <td
-                        key={index}
-                        className="p-6 cursor-pointer hover:bg-indigo-50/70 transition-all duration-300 group w-[320px] min-w-[320px]"
-                        onClick={() => openTaskModal(index)}
-                        onMouseEnter={() => setHoveredColumnIndex(index)}
-                        onMouseLeave={() => setHoveredColumnIndex(null)}
-                      >
-                        <motion.div
-                          whileHover={{ scale: 1.02 }}
-                          className="min-h-[60px] flex items-center justify-center"
+                    {tasks.map((task, index) => {
+                      const columnWidth = getColumnWidth(task);
+                      return (
+                        <td
+                          key={index}
+                          className="p-4 cursor-pointer hover:bg-indigo-50/70 transition-all duration-300 group"
+                          style={{ width: `${columnWidth}px`, minWidth: `${columnWidth}px` }}
+                          onClick={() => openTaskModal(index)}
+                          onMouseEnter={() => setHoveredColumnIndex(index)}
+                          onMouseLeave={() => setHoveredColumnIndex(null)}
                         >
-                          {dependencyType === "antérieur" && task.dependencies.length > 0 ? (
-                            <div className="flex flex-wrap gap-2 justify-center">
-                              {task.dependencies
-                                .map(dep => {
-                                  const dependentTask = tasks.find(t => t.id === dep.dependsOnId);
-                                  return dependentTask ? dependentTask.name : "Tâche inconnue";
-                                })
-                                .map((name, idx) => (
-                                  <span key={idx} className="px-3 py-1.5 bg-gradient-to-r from-amber-100 to-orange-100 text-amber-800 text-sm font-medium rounded-full border border-amber-200">
-                                    {name}
-                                  </span>
-                                ))}
-                            </div>
-                          ) : dependencyType === "successeur" && task.successors.length > 0 ? (
-                            <div className="flex flex-wrap gap-2 justify-center">
-                              {task.successors
-                                .map(succ => {
-                                  const successorTask = tasks.find(t => t.id === succ.taskId);
-                                  return successorTask ? successorTask.name : "Tâche inconnue";
-                                })
-                                .map((name, idx) => (
-                                  <span key={idx} className="px-3 py-1.5 bg-gradient-to-r from-emerald-100 to-teal-100 text-emerald-800 text-sm font-medium rounded-full border border-emerald-200">
-                                    {name}
-                                  </span>
-                                ))}
-                            </div>
-                          ) : (
-                            <div className="text-slate-400 italic text-center group-hover:text-indigo-400 transition-colors">
-                              Cliquez pour modifier
-                            </div>
-                          )}
-                        </motion.div>
-                      </td>
-                    ))}
+                          <motion.div
+                            whileHover={{ scale: 1.01 }}
+                            className="min-h-[50px] flex items-center justify-center"
+                          >
+                            {dependencyType === "antérieur" && task.dependencies.length > 0 ? (
+                              <div className="flex flex-wrap gap-1 justify-center">
+                                {task.dependencies
+                                  .map(dep => {
+                                    const dependentTask = tasks.find(t => t.id === dep.dependsOnId);
+                                    return dependentTask ? dependentTask.name : "Tâche inconnue";
+                                  })
+                                  .map((name, idx) => (
+                                    <span key={idx} className={`px-2 py-1 bg-gradient-to-r ${colors.dependencies.anterior.bg} ${colors.dependencies.anterior.text} text-xs font-medium rounded-full border ${colors.dependencies.anterior.border}`}>
+                                      {name}
+                                    </span>
+                                  ))}
+                              </div>
+                            ) : dependencyType === "successeur" && task.successors.length > 0 ? (
+                              <div className="flex flex-wrap gap-1 justify-center">
+                                {task.successors
+                                  .map(succ => {
+                                    const successorTask = tasks.find(t => t.id === succ.taskId);
+                                    return successorTask ? successorTask.name : "Tâche inconnue";
+                                  })
+                                  .map((name, idx) => (
+                                    <span key={idx} className={`px-2 py-1 bg-gradient-to-r ${colors.dependencies.successor.bg} ${colors.dependencies.successor.text} text-xs font-medium rounded-full border ${colors.dependencies.successor.border}`}>
+                                      {name}
+                                    </span>
+                                  ))}
+                              </div>
+                            ) : (
+                              <div className={`${colors.text.muted} italic text-center group-hover:${colors.text.placeholder} transition-colors text-sm`}>
+                                Cliquez pour modifier
+                              </div>
+                            )}
+                          </motion.div>
+                        </td>
+                      );
+                    })}
                   </tr>
                 </thead>
               </table>
