@@ -18,6 +18,7 @@ const TaskListTable = ({
   onTaskUpdate = () => {}, 
   onTaskDelete = () => {},
   onTaskCreate = () => {},
+  setProjects
 
 }) => {
   const [editingTaskIndex, setEditingTaskIndex] = useState(null);
@@ -48,12 +49,36 @@ const TaskListTable = ({
       }
   
       const data = await response.json();
+      await fetchProjects();
       // Optionnel : mettre à jour localement
     } catch (err) {
       console.error(err);
     }
   };
-  
+  const fetchProjects = async () => {
+    try {
+      const response = await fetch("http://localhost:3001/projects", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setProjects(data);
+      } else if (response.status === 404) {
+        setProjects([]);
+        console.log("Aucun projet trouvé.");
+      } else {
+        console.error("Erreur serveur :", response.statusText);
+      }
+    } catch (error) {
+      console.error("Erreur API :", error);
+    }
+  };
+
 
   useEffect(() => {
     if (tableRef.current) {

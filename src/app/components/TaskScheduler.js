@@ -446,6 +446,7 @@ const TaskScheduler = ({ currentProject, initialTaskCount , isSecondSidebarOpen,
           setTasks={fetchTasksFromBackend} 
           currentProject={project}
           setProject={setProject}
+          setProjects={setProjects}
           onTaskUpdate={handleTaskUpdate}
           onTaskDelete={handleTaskDelete}
           onTaskCreate={handleTaskCreate}
