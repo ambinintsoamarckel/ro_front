@@ -12,9 +12,9 @@ const Layout = ({ children, setInitialTaskCount, setCurrentProject, setProjectPa
   // Calcul dynamique de la marge gauche
   const getMainContentMargin = () => {
     if (isSecondSidebarOpen) {
-      return 'ml-[376px]'; // 24px (première sidebar) + 320px (deuxième sidebar) + 32px (espacement réduit)
+      return 'ml-[376px]'; 
     }
-    return 'ml-[0px]'; // 24px (première sidebar) + 32px (espacement réduit)
+    return 'ml-[0px]'; 
   };
 
   return (
