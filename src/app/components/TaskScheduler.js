@@ -1,13 +1,12 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Plus ,Minus} from "lucide-react";
-import { motion } from "framer-motion";
-import DependanceModal from "./DependanceModal";
+import { Plus, Minus, Star, Save } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import TaskListTable from "./TaskListTable";
 import CPMGraph from "./CPMGraph";
-import { ReactFlowProvider } from "reactflow"; // <-- ajoute cette ligne
-
+import { ReactFlowProvider } from "reactflow";
+import { colors } from "../colors";
 
 const TaskScheduler = ({ currentProject, initialTaskCount }) => {
   const [tasks, setTasks] = useState([{ name: "", duration: "", projectId: currentProject.id }]);
@@ -16,9 +15,10 @@ const TaskScheduler = ({ currentProject, initialTaskCount }) => {
   const [isDependencyModalOpen, setIsDependencyModalOpen] = useState(false);
   const [dependencyType, setDependencyType] = useState("");
   const tableRef = useRef(null);
-  const [project ,setProject] = useState({});
+  const [project, setProject] = useState({});
   const [tableHeight, setTableHeight] = useState(0);
   const cpmGraphRef = useRef(null);
+  const [hoveredColumnIndex, setHoveredColumnIndex] = useState(null);
 
   const fetchTasksFromBackend = async () => {
     try {
@@ -27,10 +27,8 @@ const TaskScheduler = ({ currentProject, initialTaskCount }) => {
         const data = await response.json();
         setFetchedTasks(data);
         if (cpmGraphRef.current && typeof cpmGraphRef.current.reloadData === 'function') {
-          cpmGraphRef.current.reloadData();
-
+          cpmGraphRef.current.reloadData(); // Correct
         }
-
         
       } else {
         console.error("Erreur de récupération des tâches.");
@@ -39,9 +37,9 @@ const TaskScheduler = ({ currentProject, initialTaskCount }) => {
       console.error("Erreur API :", error);
     }
   };
+
   const fetchProject = async (projectId) => {
     try {
-      const isSuccessor=false;
       const response = await fetch(`http://localhost:3001/projects/${projectId}`, {
         method: "GET",
         headers: {
@@ -57,16 +55,42 @@ const TaskScheduler = ({ currentProject, initialTaskCount }) => {
       const createdProject = await response.json();
       console.log(createdProject);
       setProject(createdProject);
-
-      // Appel la fonction parent avec le nom et le nombre de tâches
-   
-
     } catch (error) {
       console.error(error.message);
       alert("Erreur lors de la création du projet.");
-    } 
-  }
-  
+    }
+  };
+
+  const onProjectUpdate = async (updatedProject) => {
+    try {
+      const response = await fetch(`http://localhost:3001/projects/${updatedProject.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(updatedProject),
+      });
+
+      if (!response.ok) {
+        throw new Error("Erreur lors de la mise à jour du projet");
+      }
+
+      const data = await response.json();
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleToggleFavorite = async () => {
+    try {
+      const updatedProject = { ...project, isFavorite: !project.isFavorite };
+      await onProjectUpdate(updatedProject);
+      setProject(updatedProject);
+    } catch (error) {
+      console.error("Erreur lors de la mise à jour des favoris", error);
+    }
+  };
+
   useEffect(() => {
     if (tableRef.current) {
       setTableHeight(tableRef.current.offsetHeight);
@@ -75,14 +99,14 @@ const TaskScheduler = ({ currentProject, initialTaskCount }) => {
 
   useEffect(() => {
     const fetchTasks = async () => {
-      if (!currentProject?.id) return; // Vérifie que currentProject existe
-  
+      if (!currentProject?.id) return;
+
       const initialTasks = Array.from({ length: initialTaskCount || 3 }, () => ({
         name: "",
         duration: "",
         projectId: currentProject.id
       }));
-  
+
       try {
         const response = await fetch(`http://localhost:3001/tasks/project/${currentProject.id}`);
         if (response.ok) {
@@ -92,22 +116,18 @@ const TaskScheduler = ({ currentProject, initialTaskCount }) => {
           setIsInitialEntry(false);
         } else {
           setTasks(initialTasks);
-          
           setIsInitialEntry(true);
         }
       } catch (error) {
         console.error("Erreur API :", error);
         setTasks(initialTasks);
-        
         setIsInitialEntry(true);
       }
     };
-  
+
     fetchTasks();
-    fetch
     fetchProject(currentProject.id);
-  }, [currentProject, initialTaskCount]); // Dépendance sur currentProject
-  
+  }, [currentProject, initialTaskCount]);
 
   const addColumn = () => {
     setTasks([...tasks, { name: "", duration: "", projectId: currentProject.id }]);
@@ -145,7 +165,6 @@ const TaskScheduler = ({ currentProject, initialTaskCount }) => {
       if (response.ok) {
         const data = await response.json();
         setIsInitialEntry(false);
-        setIsDependencyModalOpen(true);
         await fetchTasksFromBackend();
       } else {
         alert("Erreur lors de l'enregistrement.");
@@ -192,7 +211,7 @@ const TaskScheduler = ({ currentProject, initialTaskCount }) => {
       const response = await fetch(`http://localhost:3001/tasks/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ tasks: [{ name: task.name, duration: task.duration, projectId: currentProject.id }] }), 
+        body: JSON.stringify({ tasks: [{ name: task.name, duration: task.duration, projectId: currentProject.id }] }),
       });
       if (response.ok) {
         await fetchTasksFromBackend();
@@ -211,86 +230,190 @@ const TaskScheduler = ({ currentProject, initialTaskCount }) => {
   };
 
   return (
-  <div className="w-full max-w-[1600px] mx-auto bg-white p-8 shadow-md rounded-lg mt-10">
+    <div className={`w-full max-w-[1600px] mx-auto bg-gradient p-8 shadow-md rounded-lg mt-10${colors.background.main}`}>
       {isInitialEntry ? (
-        <div className="relative"> 
-          <div className="sticky top-0 left-0 w-full ">
-            <h1 className="text-center text-3xl font-bold">{project.name}</h1>
-            <p className="text-center text-gray-500 italic mt-1">{project.description}</p>
-          </div>
-          <div className="overflow-x-scroll scrollbar-hidden shadow-md mt-5">
-            <table ref={tableRef} className="min-w-full text-center border-collapse shadow-lg overflow-hidden mt-5 mb-5">
-              <thead>
-                <tr className="bg-orange-100 text-gray-800 text-xl font-semibold">
-                  <th className="p-3 border border-orange-200">Tâches</th>
-                  {tasks.map((task, index) => (
-                    <th key={index} className="p-3">
-                      <input
-                        type="text"
-                        value={task.name}
-                        onChange={(e) => handleNameChange(index, e.target.value)}
-                        placeholder={`Tâche ${index + 1}`}
-                        className="w-full p-3 text-center bg-transparent text-gray-900 placeholder-gray-400 outline-none border-b border-transparent focus:border-gray-600 transition-all w-[200px] min-w-[200px] whitespace-nowrap"
-                      />
-                    </th>
-                  ))}
-                </tr>
-                <tr className="bg-white text-xl">
-                  <th className="p-3 font-bold border-orange-200 text-gray-700">Durée</th>
-                  {tasks.map((task, index) => (
-                    <td key={index} className="p-3 border border-orange-200 w-[200px] min-w-[200px] whitespace-nowrap">
-                      <input
-                        type="number"
-                        value={task.duration}
-                        onChange={(e) => handleDurationChange(index, e.target.value)}
-                        className="w-full text-center bg-transparent text-gray-900 outline-none border-b border-transparent focus:border-gray-600 transition-all"
-                        min="1"
-                      />
-                    </td>
-                  ))}
-                </tr>
-              </thead>
-            </table>
-          </div>
-
-          <div
-            className="absolute top-0 right-0 w-8"
-            style={{ height: tableHeight }}
+        <div className="w-full max-w-[1600px] mx-auto">
+          {/* Header moderne comme TaskListTable */}
+          <motion.div 
+            initial={{ y: -20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.6 }}
+            className={`sticky top-0 left-0 w-full z-10 backdrop-blur-xl ${colors.background.header} border-b border-white/20 shadow-lg`}
           >
-            <div className="relative h-full group">
-              <button
-                onClick={addColumn}
-                className="absolute top-0 right-0 w-8 h-8 text-blue-500 rounded-full shadow-md border border-blue-500 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-blue-500 hover:text-white"
+            <div className="max-w-full mx-auto px-4 py-3">
+              <div className="flex items-center justify-center space-x-4">
+                <motion.h1 
+                  initial={{ scale: 0.9, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ duration: 0.5, delay: 0.2 }}
+                  className={`text-center text-2xl font-bold bg-gradient-to-r ${colors.primary.gradient} bg-clip-text text-transparent`}
+                >
+                  {project.name || "Nouveau Projet"}
+                </motion.h1>
+                
+                {/* Bouton favoris */}
+                <motion.button
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                  onClick={handleToggleFavorite}
+                  className={`p-2 rounded-full transition-all duration-300 ${
+                    project.isFavorite 
+                      ? colors.buttons.favorite.active 
+                      : `${colors.buttons.favorite.inactive} ${colors.buttons.favorite.hover}`
+                  }`}
+                >
+                  <Star 
+                    size={24} 
+                    fill={project.isFavorite ? "currentColor" : "none"}
+                  />
+                </motion.button>
+              </div>
+              
+              <motion.p 
+                initial={{ y: 10, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ duration: 0.5, delay: 0.3 }}
+                className={`text-center ${colors.text.secondary} italic mt-1 text-sm`}
               >
-                <Plus size={20} className="mx-auto" />
-              </button>
+                {project.description || "Configuration initiale des tâches"}
+              </motion.p>
+            </div>
+          </motion.div>
 
-              <button
-                onClick={removeColumn}
-                disabled={tasks.length === 1}
-                className={`absolute bottom-0 right-0 w-8 h-8 rounded-full shadow-md border opacity-0 group-hover:opacity-100 transition-opacity ${
-                  tasks.length === 1
-                    ? "border-gray-300 text-gray-300 cursor-not-allowed"
-                    : "border-red-500 text-red-500 hover:bg-red-500 hover:text-white"
+          {/* Container principal */}
+          <div className="max-w-full mx-auto px-2 pb-2">
+            <motion.div
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ duration: 0.6, delay: 0.4 }}
+              className="relative mt-6"
+            >
+              {/* Table avec scrollbars visibles */}
+              <div className="overflow-x-auto" style={{ scrollbarWidth: 'thin', scrollbarColor: '#a5b4fc #f1f5f9' }}>
+                <div className={`backdrop-blur-xl ${colors.background.card} rounded-2xl shadow-2xl border border-white/30 overflow-hidden min-w-max`}>
+                  <table ref={tableRef} className="w-full">
+                    <thead>
+                      {/* Header des tâches */}
+                      <tr className={`bg-gradient-to-r ${colors.primary.gradientBg} text-white`}>
+                        <th className="p-4 text-left font-semibold tracking-wide min-w-[200px]">
+                          <div className="flex items-center space-x-2">
+                            <div className="w-2 h-2 bg-white rounded-full"></div>
+                            <span>Tâches</span>
+                          </div>
+                        </th>
+                        {tasks.map((task, index) => (
+                          <th 
+                            key={index} 
+                            className="p-4 relative group"
+                            style={{ width: '250px', minWidth: '250px' }}
+                            onMouseEnter={() => setHoveredColumnIndex(index)}
+                            onMouseLeave={() => setHoveredColumnIndex(null)}
+                          >
+                            <motion.input
+                              initial={{ scale: 0.95 }}
+                              animate={{ scale: 1 }}
+                              type="text"
+                              value={task.name}
+                              onChange={(e) => handleNameChange(index, e.target.value)}
+                              placeholder={`Tâche ${index + 1}`}
+                              className={`w-full p-2 text-center ${colors.background.overlay} text-white placeholder-indigo-200 outline-none border border-white/30 rounded-lg focus:border-white focus:bg-white/30 transition-all backdrop-blur-sm text-sm`}
+                            />
+                          </th>
+                        ))}
+                      </tr>
+
+                      {/* Row des durées */}
+                      <tr className="bg-gradient-to-r from-white to-indigo-50/50 border-b border-indigo-100">
+                        <th className={`p-4 text-left font-semibold ${colors.text.primary}`}>
+                          <div className="flex items-center space-x-2">
+                            <div className={`w-2 h-2 ${colors.primary.bg} rounded-full`}></div>
+                            <span>Durée (jours)</span>
+                          </div>
+                        </th>
+                        {tasks.map((task, index) => (
+                          <td 
+                            key={index} 
+                            className="p-4 group"
+                            style={{ width: '250px', minWidth: '250px' }}
+                            onMouseEnter={() => setHoveredColumnIndex(index)}
+                            onMouseLeave={() => setHoveredColumnIndex(null)}
+                          >
+                            <div className="flex flex-col items-center space-y-2">
+                              <motion.input
+                                initial={{ scale: 0.95 }}
+                                animate={{ scale: 1 }}
+                                type="number"
+                                value={task.duration}
+                                onChange={(e) => handleDurationChange(index, e.target.value)}
+                                className={`w-20 p-2 text-center bg-indigo-50 text-slate-800 outline-none border ${colors.primary.border} rounded-lg ${colors.primary.focus} focus:bg-white transition-all text-sm`}
+                                min="1"
+                                placeholder="Durée"
+                              />
+                            </div>
+                          </td>
+                        ))}
+                      </tr>
+                    </thead>
+                  </table>
+                </div>
+              </div>
+
+              {/* Boutons d'action repositionnés comme TaskListTable */}
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.6 }}
+                className="absolute top-6 -right-20 flex flex-col items-center space-y-3"
+              >
+                <motion.button
+                  whileHover={{ scale: 1.1, rotate: 90 }}
+                  whileTap={{ scale: 0.9 }}
+                  onClick={addColumn}
+                  className="w-12 h-12 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 border-2 border-white backdrop-blur-sm"
+                >
+                  <Plus size={24} className="mx-auto" />
+                </motion.button>
+
+                <motion.button
+                  whileHover={{ scale: 1.1, rotate: -90 }}
+                  whileTap={{ scale: 0.9 }}
+                  onClick={removeColumn}
+                  disabled={tasks.length === 1}
+                  className={`w-12 h-12 rounded-full shadow-xl transition-all duration-300 border-2 border-white backdrop-blur-sm ${
+                    tasks.length === 1
+                      ? "bg-gray-400 text-gray-200 cursor-not-allowed"
+                      : "bg-gradient-to-r from-red-500 to-pink-500 text-white hover:shadow-2xl"
+                  }`}
+                >
+                  <Minus size={24} className="mx-auto" />
+                </motion.button>
+              </motion.div>
+            </motion.div>
+
+            {/* Bouton de validation moderne */}
+            <motion.div
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.8 }}
+              className="flex justify-center mt-8"
+            >
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={handleSaveAndOpenModal}
+                disabled={!allTasksValid}
+                className={`px-8 py-4 rounded-xl font-semibold text-lg shadow-xl transition-all duration-300 ${
+                  allTasksValid 
+                    ? `bg-gradient-to-r ${colors.buttons.save.gradient} ${colors.buttons.save.text} ${colors.buttons.save.hover} transform hover:scale-105`
+                    : "bg-gray-400 text-gray-200 cursor-not-allowed"
                 }`}
               >
-                <Minus size={20} className="mx-auto" />
-              </button>
-            </div>
-          </div>
-
-          <div className="flex justify-end mt-4">
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={handleSaveAndOpenModal}
-              disabled={!allTasksValid}
-              className={`px-4 py-2 rounded-lg text-white mt-5 ${
-                allTasksValid ? "bg-green-500 hover:bg-green-700" : "bg-gray-400 cursor-not-allowed"
-              }`}
-            >
-              Ajouter dépendance
-            </motion.button>
+                <div className="flex items-center space-x-2">
+                  <Save size={20} />
+                  <span>Ajouter dépendances</span>
+                </div>
+              </motion.button>
+            </motion.div>
           </div>
         </div>
       ) : (
@@ -306,27 +429,52 @@ const TaskScheduler = ({ currentProject, initialTaskCount }) => {
         />
       )}
 
-      <DependanceModal
-        isModalOpen={isDependencyModalOpen}
-        setIsModalOpen={setIsDependencyModalOpen}
-        dependencyType={dependencyType}
-        projectId={currentProject.id}
-        setDependencyType={handleDependencyValidation} 
-      />
-                    {/* Graphe CPM */}
-    <h2 className="text-xl font-bold mt-8 mb-4">Diagramme du chemin critique</h2>
 
-  <CPMGraph 
-    ref={cpmGraphRef}
-    projectId={currentProject.id} 
-    onDataLoaded={(data) => {
-      console.log("Données du chemin critique chargées", data);
-    }}
-  />
+      {/* Section CPM avec styling moderne */}
+      {!isInitialEntry && (
+        <motion.div
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 1 }}
+          className={`mt-8 backdrop-blur-xl ${colors.background.card} rounded-2xl shadow-2xl border border-white/30 p-6`}
+        >
+          <motion.h2 
+            initial={{ x: -20, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            transition={{ delay: 1.2 }}
+            className={`text-2xl font-bold bg-gradient-to-r ${colors.primary.gradient} bg-clip-text text-transparent mb-6`}
+          >
+            Diagramme du chemin critique
+          </motion.h2>
 
+          <CPMGraph 
+            ref={cpmGraphRef}
+            projectId={currentProject.id} 
+            onDataLoaded={(data) => {
+              console.log("Données du chemin critique chargées", data);
+            }}
+          />
+        </motion.div>
+      )}
+
+      {/* Styles pour scrollbars webkit */}
+      <style jsx>{`
+        .overflow-x-auto::-webkit-scrollbar {
+          height: 8px;
+        }
+        .overflow-x-auto::-webkit-scrollbar-track {
+          background: #f1f5f9;
+          border-radius: 4px;
+        }
+        .overflow-x-auto::-webkit-scrollbar-thumb {
+          background: #a5b4fc;
+          border-radius: 4px;
+        }
+        .overflow-x-auto::-webkit-scrollbar-thumb:hover {
+          background: #8b5cf6;
+        }
+      `}</style>
     </div>
-
-    
   );
 };
 
