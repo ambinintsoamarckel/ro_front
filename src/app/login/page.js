@@ -4,8 +4,6 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { User, Lock, Eye, EyeOff, Loader2, Sparkles, Shield, ArrowRight } from "lucide-react";
-import { colors } from "../colors"; // adapte le chemin si nécessaire
-
 
 export default function LoginPage() {
   const router = useRouter();
@@ -17,7 +15,6 @@ export default function LoginPage() {
   const [isSuccess, setIsSuccess] = useState(false);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [isFormValid, setIsFormValid] = useState(false);
-
   const [hasMounted, setHasMounted] = useState(false);
 
   useEffect(() => {
@@ -74,8 +71,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center p-4 relative overflow-hidden bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-      
+    <div className="min-h-screen w-full flex items-center justify-center p-4 relative overflow-hidden bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">   
       {/* Animated background particles */}
       <div className="absolute inset-0 overflow-hidden">
       {hasMounted && [...Array(50)].map((_, i) => (
@@ -117,19 +113,6 @@ export default function LoginPage() {
           <div className="absolute inset-0 rounded-3xl">
             <div className="absolute inset-0 rounded-3xl bg-gradient-to-r from-transparent via-white/30 to-transparent animate-border-flow" />
           </div>
-
-          {/* Success overlay */}
-          {isSuccess && (
-            <div className="absolute inset-0 bg-gradient-to-br from-green-500/90 to-emerald-500/90 backdrop-blur-sm rounded-3xl flex items-center justify-center z-50 animate-success-overlay">
-              <div className="text-center text-white animate-bounce-in">
-                <div className="w-16 h-16 mx-auto mb-4 bg-white/20 rounded-full flex items-center justify-center">
-                  <Shield size={32} className="animate-check-mark" />
-                </div>
-                <h3 className="text-xl font-bold mb-2">Connexion réussie !</h3>
-                <p className="text-sm opacity-90">Redirection en cours...</p>
-              </div>
-            </div>
-          )}
 
           {/* Header section */}
           <div className="relative p-8 text-center">
