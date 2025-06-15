@@ -289,15 +289,46 @@ const Sidebar = ({ setInitialTaskCount, setCurrentProject, setProjectPage, proje
                 <X size={18} className="text-slate-500" />
               </button>
             </div>
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="text-center py-8"
-            >
-              <Star size={48} className="mx-auto text-amber-300 mb-4" />
-              <p className="text-slate-500 text-sm mb-2">Aucun favori</p>
-              <p className="text-slate-400 text-xs">Ajoutez vos projets préférés</p>
-            </motion.div>
+            <div className="space-y-2">
+              {projects.filter(p => p.isFavorite).length > 0 ? (
+                projects
+                  .filter(project => project.isFavorite)
+                  .map((project, index) => (
+                    <motion.div
+                      key={project.id}
+                      initial={{ x: -20, opacity: 0 }}
+                      animate={{ x: 0, opacity: 1 }}
+                      transition={{ delay: index * 0.1 }}
+                      whileHover={{ x: 4 }}
+                      className="flex items-center p-3 bg-white rounded-lg cursor-pointer transition-all duration-200 hover:bg-slate-50 hover:shadow-sm border border-slate-100"
+                      onClick={() => {
+                        setCurrentProject(project);
+                        setProjectPage(true);
+                        closeSecondSidebar();
+                      }}
+                    >
+                      <div className="w-8 h-8 bg-gradient-to-br from-amber-400 to-yellow-500 rounded-lg flex items-center justify-center mr-3">
+                        <Star size={14} className="text-white" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-slate-800 text-sm truncate">{project.name}</p>
+                        <p className="text-xs text-slate-500">Favori</p>
+                      </div>
+                    </motion.div>
+                  ))
+              ) : (
+                <motion.div 
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="text-center py-8"
+                >
+                  <Star size={48} className="mx-auto text-amber-300 mb-4" />
+                  <p className="text-slate-500 text-sm mb-2">Aucun favori</p>
+                  <p className="text-slate-400 text-xs">Ajoutez vos projets préférés</p>
+                </motion.div>
+              )}
+            </div>
+
           </div>
         );
       
