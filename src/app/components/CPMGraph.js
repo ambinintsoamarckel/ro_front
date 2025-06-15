@@ -978,7 +978,7 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
             style={{
               display: "flex",
               flexDirection: "column",
-              alignItems: "center",
+              alignItems: "center", 
               gap: "16px"
             }}
           >
@@ -1006,45 +1006,7 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
         </div>
       )}
       
-      {/* Bouton pour contrôler l'animation */}
-      {isGraphReady && (
-        <button
-          onClick={() => {
-            if (animationRef.current) {
-              stopAnimation();
-            } else {
-              animateCriticalPath();
-            }
-          }}
-          style={{
-            position: "absolute",
-            top: "16px",
-            right: "16px",
-            zIndex: 5,
-            padding: "8px 16px",
-            backgroundColor: animationRef.current ? "#ef4444" : "#10b981",
-            color: "#ffffff",
-            border: "none",
-            borderRadius: "8px",
-            fontSize: "12px",
-            fontWeight: "600",
-            cursor: "pointer",
-            boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
-            transition: "all 0.2s ease"
-          }}
-          onMouseEnter={(e) => {
-            e.target.style.transform = "translateY(-1px)";
-            e.target.style.boxShadow = "0 6px 16px rgba(0, 0, 0, 0.2)";
-          }}
-          onMouseLeave={(e) => {
-            e.target.style.transform = "translateY(0)";
-            e.target.style.boxShadow = "0 4px 12px rgba(0, 0, 0, 0.15)";
-          }}
-        >
-          {animationRef.current ? "🛑 Arrêter" : "✨ Animer"}
-        </button>
-      )}
-      
+
       <div
         ref={containerRef}
         style={{
