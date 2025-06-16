@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Trash2, Plus, CheckCircle, Users, AlertCircle, CheckCircle2, Wifi, WifiOff } from 'lucide-react';
+import Image from "next/image";
 import { colors } from "../colors";
 
 // Composant de notification réutilisable
@@ -219,9 +220,22 @@ const TaskDetailsModal = ({ isOpen, onClose, task, allTasks, dependencyType, pro
             <div className="absolute inset-0 bg-white/10 backdrop-blur-sm"></div>
             <div className="relative z-10 flex justify-between items-center">
               <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
-                  <Users className="w-5 h-5" />
-                </div>
+          <div className="relative">
+            <motion.div
+              whileHover={{ rotate: 360 }}
+              transition={{ duration: 0.6 }}
+              className={`w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 rounded-full bg-gradient-to-br ${colors.primary.gradient} p-1.5 sm:p-2 shadow-lg`}
+            >
+              <Image 
+                src="/logo.png" 
+                alt="Logo" 
+                width={40}  
+                height={40} 
+                className="w-full h-full object-contain filter brightness-0 invert"
+              />
+            </motion.div>
+            <div className={`absolute -top-0.5 -right-0.5 sm:-top-1 sm:-right-1 w-3 h-3 sm:w-4 sm:h-4 bg-gradient-to-r ${colors.buttons.add.gradient} rounded-full animate-pulse`}></div>
+          </div>
                 <div>
                   <h2 className="text-2xl font-bold">Gestion des dépendances</h2>
                   <p className="text-white/80 text-sm">
