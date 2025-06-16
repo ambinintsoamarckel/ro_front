@@ -12,14 +12,19 @@ const TaskListTable = ({
     { id: 2, name: "Développement", duration: 15, dependencies: [{ dependsOnId: 1 }], successors: [] },
     { id: 3, name: "Tests", duration: 8, dependencies: [{ dependsOnId: 2 }], successors: [] }
   ],
-  setTasks, 
-  currentProject = { id: 1, name: "Projet Demo", description: "Un projet de démonstration", isSuccessor: false, isFavorite: false },
-  setProject, 
+  setTasks = () => {}, 
+  currentProject = { 
+    id: 1, 
+    name: "Projet Démonstration", 
+    description: "Un projet élégant avec un design sophistiqué", 
+    isSuccessor: false, 
+    isFavorite: false 
+  },
+  setProject = () => {}, 
   onTaskUpdate = () => {}, 
   onTaskDelete = () => {},
   onTaskCreate = () => {},
-  setProjects
-
+  setProjects = () => {}
 }) => {
   const [editingTaskIndex, setEditingTaskIndex] = useState(null);
   const [editedTask, setEditedTask] = useState(null);
@@ -32,8 +37,8 @@ const TaskListTable = ({
   const [hoveredColumnIndex, setHoveredColumnIndex] = useState(null);
   const tableRef = useRef(null);
 
-  // Utiliser isSuccessor du projet pour déterminer le type de dépendance
   const dependencyType = currentProject.isSuccessor ? "successeur" : "antérieur";
+
   const onProjectUpdate = async (updatedProject) => {
     try {
       const response = await fetch(`http://localhost:3001/projects/${updatedProject.id}`, {
@@ -197,7 +202,7 @@ const TaskListTable = ({
   };
 
   return (
-    <div className={`relative bg-gradient-to-br ${colors.background.main} `}>
+    <div className={`relative ${colors.background.main} `}>
       {/* Header compact */}
       <motion.div 
         initial={{ y: -20, opacity: 0 }}
@@ -211,7 +216,7 @@ const TaskListTable = ({
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ duration: 0.5, delay: 0.2 }}
-              className={`text-center text-2xl font-bold bg-gradient-to-r ${colors.primary.gradient} bg-clip-text text-transparent`}
+              className={`text-center text-2xl font-bold bg-gradient-to-r ${colors.header.title.gradient} bg-clip-text text-transparent`}
             >
               {currentProject.name}
             </motion.h1>
@@ -238,7 +243,7 @@ const TaskListTable = ({
             initial={{ y: 10, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ duration: 0.5, delay: 0.3 }}
-            className={`text-center ${colors.text.secondary} italic mt-1 text-sm`}
+            className={`text-center ${colors.header.title.subtitle} italic mt-1 text-sm`}
           >
             {currentProject.description}
           </motion.p>
@@ -250,11 +255,11 @@ const TaskListTable = ({
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.6, delay: 0.4 }}
-        className="max-w-full mx-auto px-2 py-2"
+        className="max-w-full mx-auto px-2 py-4"
       >
         <div className="flex justify-center">
           <div className="relative">
-            <div className={`flex items-center ${colors.background.card} backdrop-blur-sm rounded-full p-1 shadow-lg border border-white/30`}>
+            <div className={`flex items-center ${colors.toggle.container} rounded-full p-1 shadow-lg border`}>
               <input
                 type="radio"
                 id="anterieur"
@@ -266,10 +271,10 @@ const TaskListTable = ({
               />
               <label
                 htmlFor="anterieur"
-                className={`px-2 py-2 rounded-full text-sm font-semibold cursor-pointer transition-all duration-300 ${
+                className={`px-4 py-2 rounded-full text-sm font-semibold cursor-pointer transition-all duration-300 ${
                   dependencyType === "antérieur"
-                    ? `bg-gradient-to-r ${colors.primary.gradientButton} text-white shadow-lg transform scale-105`
-                    : `${colors.text.secondary} hover:${colors.primary.text}`
+                    ? colors.toggle.active
+                    : colors.toggle.inactive
                 }`}
               >
                 Tâches antérieures
@@ -286,10 +291,10 @@ const TaskListTable = ({
               />
               <label
                 htmlFor="successeur"
-                className={`px-2 py-2 rounded-full text-sm font-semibold cursor-pointer transition-all duration-300 ${
+                className={`px-4 py-2 rounded-full text-sm font-semibold cursor-pointer transition-all duration-300 ${
                   dependencyType === "successeur"
-                    ? `bg-gradient-to-r ${colors.primary.gradientButton} text-white shadow-lg transform scale-105`
-                    : `${colors.text.secondary} hover:${colors.primary.text}`
+                    ? colors.toggle.active
+                    : colors.toggle.inactive
                 }`}
               >
                 Tâches successeurs
@@ -300,7 +305,7 @@ const TaskListTable = ({
       </motion.div>
 
       {/* Container principal */}
-      <div className="max-w-full mx-auto px-2 pb-2">
+      <div className="max-w-full mx-auto px-4 pb-6">
         <motion.div 
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
@@ -308,12 +313,12 @@ const TaskListTable = ({
           className="relative"
         >
           {/* Table avec scrollbars visibles */}
-          <div className="overflow-x-auto" style={{ scrollbarWidth: 'thin', scrollbarColor: '#a5b4fc #f1f5f9' }}>
+          <div className="overflow-x-auto" style={{ scrollbarWidth: 'thin', scrollbarColor: '#d4a574 #f1f5f9' }}>
             <div className={`backdrop-blur-xl ${colors.background.card} rounded-2xl shadow-2xl border border-white/30 overflow-hidden min-w-max`}>
               <table ref={tableRef} className="w-full">
                 <thead>
                   {/* Header des tâches */}
-                  <tr className={`bg-gradient-to-r ${colors.primary.gradientBg} text-white`}>
+                  <tr className={`${colors.table.header.primary} ${colors.table.header.text}`}>
                     <th className="p-4 text-left font-semibold tracking-wide min-w-[200px]">
                       <div className="flex items-center space-x-2">
                         <div className="w-2 h-2 bg-white rounded-full"></div>
@@ -338,14 +343,14 @@ const TaskListTable = ({
                                 type="text"
                                 value={editedTask.name}
                                 onChange={(e) => setEditedTask({...editedTask, name: e.target.value})}
-                                className={`w-full p-2 text-center ${colors.background.overlay} text-white placeholder-indigo-200 outline-none border border-white/30 rounded-lg focus:border-white focus:bg-white/30 transition-all backdrop-blur-sm text-sm`}
+                                className={`w-full p-2 text-center ${colors.table.input.primary} outline-none border border-white/30 rounded-lg ${colors.table.input.focus} transition-all backdrop-blur-sm text-sm`}
                                 placeholder="Nom de la tâche"
                               />
                             ) : (
                               <span className="text-center font-medium text-base leading-tight">{task.name}</span>
                             )}
                             
-                            {/* Boutons d'action - apparition simple */}
+                            {/* Boutons d'action */}
                             {editingTaskIndex !== index && deleteConfirmIndex !== index && activeTaskIndex === null && hoveredColumnIndex === index && (
                               <>
                                 <motion.button
@@ -390,7 +395,7 @@ const TaskListTable = ({
                           type="text"
                           value={tempTask.name}
                           onChange={(e) => setTempTask({ ...tempTask, name: e.target.value })}
-                          className={`w-full p-2 text-center ${colors.background.overlay} text-white placeholder-indigo-200 outline-none border border-white/30 rounded-lg focus:border-white focus:bg-white/30 transition-all backdrop-blur-sm text-sm`}
+                          className={`w-full p-2 text-center ${colors.table.input.primary} outline-none border border-white/30 rounded-lg ${colors.table.input.focus} transition-all backdrop-blur-sm text-sm`}
                           placeholder="Nouvelle tâche"
                         />
                       </th>
@@ -398,8 +403,8 @@ const TaskListTable = ({
                   </tr>
 
                   {/* Row des durées */}
-                  <tr className="bg-gradient-to-r from-white to-indigo-50/50 border-b border-indigo-100">
-                    <th className={`p-4 text-left font-semibold ${colors.text.primary}`}>
+                  <tr className={`${colors.table.header.secondary} border-b ${colors.table.border}`}>
+                    <th className={`p-4 text-left font-semibold ${colors.table.header.textSecondary}`}>
                       <div className="flex items-center space-x-2">
                         <div className={`w-2 h-2 ${colors.primary.bg} rounded-full`}></div>
                         <span>Durée (jours)</span>
@@ -426,11 +431,11 @@ const TaskListTable = ({
                                   const value = e.target.value === "" ? "" : Math.max(1, parseInt(e.target.value, 10));
                                   setEditedTask({ ...editedTask, duration: value });
                                 }}
-                                className={`w-20 p-2 text-center bg-indigo-50 text-slate-800 outline-none border ${colors.primary.border} rounded-lg ${colors.primary.focus} focus:bg-white transition-all text-sm`}
+                                className={`w-20 p-2 text-center ${colors.table.input.secondary} outline-none border ${colors.primary.border} rounded-lg ${colors.table.input.focusSecondary} transition-all text-sm`}
                                 min="1"
                               />
                             ) : (
-                              <div className={`px-3 py-1.5 bg-gradient-to-r ${colors.duration.bg} ${colors.duration.text} font-semibold rounded-lg text-sm`}>
+                              <div className={`px-3 py-1.5 bg-gradient-to-r ${colors.duration.bg} ${colors.duration.text} font-semibold rounded-lg text-sm shadow-sm`}>
                                 {task.duration}
                               </div>
                             )}
@@ -468,13 +473,13 @@ const TaskListTable = ({
                                 animate={{ opacity: 1, y: 0 }}
                                 className="flex flex-col space-y-2 items-center"
                               >
-                                <span className="text-xs text-red-600 font-medium">Confirmer ?</span>
+                                <span className={`text-xs ${colors.text.secondary} font-medium`}>Confirmer ?</span>
                                 <div className="flex space-x-1">
                                   <motion.button
                                     whileHover={{ scale: 1.05 }}
                                     whileTap={{ scale: 0.95 }}
                                     onClick={() => handleDeleteConfirm(task.id)}
-                                    className={`p-1.5 bg-gradient-to-r ${colors.buttons.cancel.gradient} ${colors.buttons.cancel.text} rounded-lg ${colors.buttons.cancel.hover} transition-all shadow-lg`}
+                                    className={`p-1.5 bg-gradient-to-r ${colors.buttons.delete.base.replace('bg-rose-100/40 hover:bg-rose-400/70', colors.buttons.cancel.gradient)} ${colors.buttons.cancel.text} rounded-lg ${colors.buttons.cancel.hover} transition-all shadow-lg`}
                                   >
                                     <CheckSquare2 size={18} />
                                   </motion.button>
@@ -482,7 +487,7 @@ const TaskListTable = ({
                                     whileHover={{ scale: 1.05 }}
                                     whileTap={{ scale: 0.95 }}
                                     onClick={handleDeleteCancel}
-                                    className="p-1.5 bg-gradient-to-r from-slate-400 to-slate-500 text-white rounded-lg hover:from-slate-500 hover:to-slate-600 transition-all shadow-lg"
+                                    className={`p-1.5 bg-gradient-to-r ${colors.buttons.remove.gradient} ${colors.buttons.remove.text} rounded-lg ${colors.buttons.remove.hover} transition-all shadow-lg`}
                                   >
                                     <SquareX size={18} />
                                   </motion.button>
@@ -505,7 +510,7 @@ const TaskListTable = ({
                             type="number"
                             value={tempTask.duration}
                             onChange={(e) => setTempTask({ ...tempTask, duration: Math.max(1, parseInt(e.target.value, 10) || 1) })}
-                            className={`w-20 p-2 text-center bg-indigo-50 text-slate-800 outline-none border ${colors.primary.border} rounded-lg ${colors.primary.focus} focus:bg-white transition-all text-sm`}
+                            className={`w-20 p-2 text-center ${colors.table.input.secondary} outline-none border ${colors.primary.border} rounded-lg ${colors.table.input.focusSecondary} transition-all text-sm`}
                             placeholder="Durée"
                           />
                           <div className="flex space-x-1">
@@ -608,7 +613,7 @@ const TaskListTable = ({
               whileTap={{ scale: 0.9 }}
               onClick={handleAddColumn}
               disabled={!!tempTask}
-              className="w-12 h-12 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 border-2 border-white disabled:opacity-50 disabled:cursor-not-allowed backdrop-blur-sm"
+              className={`w-14 h-14 bg-gradient-to-r ${colors.buttons.add.gradient} ${colors.buttons.add.text} rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 border-2 border-white/50 backdrop-blur-sm ${colors.buttons.add.hover}`}
             >
               <Plus size={24} className="mx-auto" />
             </motion.button>
@@ -630,19 +635,26 @@ const TaskListTable = ({
 
       {/* Styles pour scrollbars webkit */}
       <style jsx>{`
-        .overflow-x-auto::-webkit-scrollbar {
-          height: 8px;
+        .custom-scrollbar::-webkit-scrollbar {
+          height: 10px;
         }
-        .overflow-x-auto::-webkit-scrollbar-track {
-          background: #f1f5f9;
-          border-radius: 4px;
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: ${colors.scrollbar.track};
+          border-radius: 6px;
         }
-        .overflow-x-auto::-webkit-scrollbar-thumb {
-          background: #a5b4fc;
-          border-radius: 4px;
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: ${colors.scrollbar.thumb};
+          border-radius: 6px;
+          border: 2px solid ${colors.scrollbar.track};
         }
-        .overflow-x-auto::-webkit-scrollbar-thumb:hover {
-          background: #8b5cf6;
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+          background: ${colors.scrollbar.thumbHover};
+        }
+        
+        /* Firefox */
+        .custom-scrollbar {
+          scrollbar-width: thin;
+          scrollbar-color: ${colors.scrollbar.thumb} ${colors.scrollbar.track};
         }
       `}</style>
     </div>

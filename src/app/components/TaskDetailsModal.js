@@ -2,58 +2,26 @@ import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Trash2, Plus, CheckCircle, Users, AlertCircle, CheckCircle2, Wifi, WifiOff } from 'lucide-react';
 import { colors } from "../colors";
+
 // Composant de notification réutilisable
 const NotificationSystem = ({ notification, onClose }) => {
   if (!notification) return null;
 
   const getNotificationStyles = (type) => {
-    switch (type) {
-      case 'success':
-        return {
-          bg: 'bg-gradient-to-r from-emerald-50/95 to-green-50/95',
-          border: 'border-emerald-200/80',
-          text: 'text-emerald-800',
-          iconBg: 'bg-emerald-100/80',
-          iconColor: 'text-emerald-600',
-          icon: CheckCircle2
-        };
-      case 'error':
-        return {
-          bg: 'bg-gradient-to-r from-red-50/95 to-rose-50/95',
-          border: 'border-red-200/80',
-          text: 'text-red-800',
-          iconBg: 'bg-red-100/80',
-          iconColor: 'text-red-600',
-          icon: AlertCircle
-        };
-      case 'warning':
-        return {
-          bg: 'bg-gradient-to-r from-amber-50/95 to-yellow-50/95',
-          border: 'border-amber-200/80',
-          text: 'text-amber-800',
-          iconBg: 'bg-amber-100/80',
-          iconColor: 'text-amber-600',
-          icon: AlertCircle
-        };
-      case 'network':
-        return {
-          bg: 'bg-gradient-to-r from-slate-50/95 to-gray-50/95',
-          border: 'border-slate-200/80',
-          text: 'text-slate-800',
-          iconBg: 'bg-slate-100/80',
-          iconColor: 'text-slate-600',
-          icon: WifiOff
-        };
-      default:
-        return {
-          bg: 'bg-gradient-to-r from-indigo-50/95 to-purple-50/95',
-          border: 'border-indigo-200/80',
-          text: 'text-indigo-800',
-          iconBg: 'bg-indigo-100/80',
-          iconColor: 'text-indigo-600',
-          icon: CheckCircle
-        };
-    }
+    const iconMap = {
+      success: CheckCircle2,
+      error: AlertCircle,
+      warning: AlertCircle,
+      network: WifiOff,
+      info: CheckCircle
+    };
+
+    const notificationColors = colors.notifications[type] || colors.notifications.info;
+    
+    return {
+      ...notificationColors,
+      icon: iconMap[type] || CheckCircle
+    };
   };
 
   const styles = getNotificationStyles(notification.type);
@@ -147,16 +115,11 @@ const TaskDetailsModal = ({ isOpen, onClose, task, allTasks, dependencyType, pro
     const newTasks = selectedTaskIndices.map(index => allTasks[index]);
     setAddedTasks(prev => [...prev, ...newTasks]);
     setSelectedTaskIndices([]);
-    
-    // Notification de succès pour l'ajout
-
   };
 
   const handleRemoveTask = (indexToRemove) => {
     const removedTask = addedTasks[indexToRemove];
     setAddedTasks(prev => prev.filter((_, i) => i !== indexToRemove));
-    
-
   };
   
   const handleValidate = async () => {
@@ -236,7 +199,7 @@ const TaskDetailsModal = ({ isOpen, onClose, task, allTasks, dependencyType, pro
       <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
         {/* Backdrop avec effet de flou */}
         <motion.div
-          className="fixed inset-0 bg-gradient-to-br from-indigo-900/30 via-purple-900/30 to-slate-900/40 backdrop-blur-sm"
+          className="fixed inset-0 bg-gradient-to-br from-slate-900/30 via-zinc-900/30 to-stone-900/40 backdrop-blur-sm"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -245,7 +208,7 @@ const TaskDetailsModal = ({ isOpen, onClose, task, allTasks, dependencyType, pro
         
         {/* Modal principale */}
         <motion.div
-          className="bg-white/95 backdrop-blur-md border border-white/20 shadow-2xl rounded-2xl w-full max-w-4xl relative z-50 overflow-hidden"
+          className={`${colors.background.card} backdrop-blur-md border border-stone-200/20 shadow-2xl rounded-2xl w-full max-w-4xl relative z-50 overflow-hidden`}
           initial={{ opacity: 0, scale: 0.9, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.9, y: 20 }}
@@ -283,36 +246,36 @@ const TaskDetailsModal = ({ isOpen, onClose, task, allTasks, dependencyType, pro
               
               {/* Section de sélection */}
               <motion.div 
-                className="bg-gradient-to-br from-white to-slate-50/50 border border-slate-200/50 rounded-xl p-6 shadow-sm"
+                className={`bg-gradient-to-br ${colors.background.main} border border-stone-200/50 rounded-xl p-6 shadow-sm`}
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.1 }}
               >
                 <div className="flex items-center space-x-2 mb-4">
-                  <Plus className="w-5 h-5 text-indigo-600" />
-                  <h3 className="font-semibold text-slate-800">Tâches disponibles</h3>
+                  <Plus className="w-5 h-5 text-amber-600" />
+                  <h3 className={`font-semibold ${colors.text.primary}`}>Tâches disponibles</h3>
                 </div>
                 
-                <div className="max-h-64 overflow-y-auto space-y-2 mb-4 custom-scrollbar">
+                <div className="max-h-64 overflow-y-auto space-y-2 mb-4 custom-scrollbar overflow-x-hidden ">
                   {otherTasks.length === 0 ? (
-                    <div className="text-center py-8 text-slate-500">
-                      <Users className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                      <p>Aucune tâche disponible</p>
+                    <div className="text-center py-8">
+                      <Users className={`w-12 h-12 mx-auto mb-2 ${colors.text.muted}`} />
+                      <p className={colors.text.secondary}>Aucune tâche disponible</p>
                     </div>
                   ) : (
                     otherTasks.map(({ task: t, index }) => (
                       <motion.label 
                         key={index} 
-                        className="flex items-center space-x-3 p-3 rounded-lg hover:bg-indigo-50/50 cursor-pointer transition-all duration-200 group"
+                        className="flex items-center space-x-3 p-3 rounded-lg hover:bg-amber-50/50 cursor-pointer transition-all duration-200 group"
                         whileHover={{ scale: 1.02 }}
                       >
                         <input
                           type="checkbox"
                           checked={selectedTaskIndices.includes(index)}
                           onChange={() => handleCheckboxChange(index)}
-                          className="w-4 h-4 text-indigo-600 border-2 border-slate-300 rounded focus:ring-indigo-500 focus:ring-2"
+                          className="w-4 h-4 text-amber-600 border-2 border-stone-300 rounded focus:ring-amber-500 focus:ring-2"
                         />
-                        <span className="text-slate-700 group-hover:text-indigo-700 font-medium">
+                        <span className={`${colors.text.secondary} group-hover:text-amber-700 font-medium`}>
                           {t.name || `Tâche ${index + 1}`}
                         </span>
                       </motion.label>
@@ -328,7 +291,7 @@ const TaskDetailsModal = ({ isOpen, onClose, task, allTasks, dependencyType, pro
                   className={`w-full py-3 px-4 rounded-lg font-medium transition-all duration-200 flex items-center justify-center space-x-2 ${
                     selectedTaskIndices.length > 0 
                       ? `bg-gradient-to-r ${colors.primary.gradientButton} text-white shadow-lg hover:shadow-xl` 
-                      : "bg-slate-200 text-slate-400 cursor-not-allowed"
+                      : "bg-stone-200 text-stone-400 cursor-not-allowed"
                   }`}
                 >
                   <Plus className="w-4 h-4" />
@@ -352,9 +315,9 @@ const TaskDetailsModal = ({ isOpen, onClose, task, allTasks, dependencyType, pro
                 
                 <div className="max-h-64 overflow-y-auto space-y-2 custom-scrollbar">
                   {addedTasks.length === 0 ? (
-                    <div className="text-center py-8 text-slate-500">
-                      <CheckCircle className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                      <p>Aucune tâche sélectionnée</p>
+                    <div className="text-center py-8">
+                      <CheckCircle className={`w-12 h-12 mx-auto mb-2 ${colors.text.muted}`} />
+                      <p className={colors.text.secondary}>Aucune tâche sélectionnée</p>
                     </div>
                   ) : (
                     addedTasks.map((t, i) => (
@@ -365,14 +328,14 @@ const TaskDetailsModal = ({ isOpen, onClose, task, allTasks, dependencyType, pro
                         exit={{ opacity: 0, y: -10 }}
                         className="flex justify-between items-center bg-white/60 backdrop-blur-sm p-3 rounded-lg shadow-sm border border-white/40"
                       >
-                        <span className="font-medium text-slate-700">
+                        <span className={`font-medium ${colors.text.secondary}`}>
                           {t.name || `Tâche ${i + 1}`}
                         </span>
                         <motion.button
                           whileHover={{ scale: 1.1 }}
                           whileTap={{ scale: 0.9 }}
                           onClick={() => handleRemoveTask(i)}
-                          className="text-red-500 hover:text-red-700 p-1 rounded-full hover:bg-red-50 transition-all duration-200"
+                          className="text-rose-500 hover:text-rose-700 p-1 rounded-full hover:bg-rose-50 transition-all duration-200"
                         >
                           <Trash2 size={16} />
                         </motion.button>
@@ -385,7 +348,7 @@ const TaskDetailsModal = ({ isOpen, onClose, task, allTasks, dependencyType, pro
 
             {/* Actions */}
             <motion.div 
-              className="flex justify-end space-x-4 mt-8 pt-6 border-t border-slate-200"
+              className="flex justify-end space-x-4 mt-8 pt-6 border-t border-stone-200"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
@@ -429,11 +392,11 @@ const TaskDetailsModal = ({ isOpen, onClose, task, allTasks, dependencyType, pro
             border-radius: 3px;
           }
           .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: rgba(99, 102, 241, 0.5);
+            background: rgba(245, 158, 11, 0.5);
             border-radius: 3px;
           }
           .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-            background: rgba(99, 102, 241, 0.7);
+            background: rgba(245, 158, 11, 0.7);
           }
         `}</style>
       </div>

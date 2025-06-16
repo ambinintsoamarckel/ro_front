@@ -12,7 +12,6 @@ const TaskScheduler = ({ currentProject, initialTaskCount , isSecondSidebarOpen,
   const [tasks, setTasks] = useState([{ name: "", duration: "", projectId: currentProject.id }]);
   const [fetchedTasks, setFetchedTasks] = useState([]);
   const [isInitialEntry, setIsInitialEntry] = useState(true);
-  const [isDependencyModalOpen, setIsDependencyModalOpen] = useState(false);
   const [dependencyType, setDependencyType] = useState("");
   const tableRef = useRef(null);
   const [project, setProject] = useState({});
@@ -44,7 +43,6 @@ const TaskScheduler = ({ currentProject, initialTaskCount , isSecondSidebarOpen,
     }
   };
 
-
   const fetchTasksFromBackend = async () => {
     try {
       const response = await fetch(`http://localhost:3001/tasks/project/${currentProject.id}`);
@@ -52,7 +50,7 @@ const TaskScheduler = ({ currentProject, initialTaskCount , isSecondSidebarOpen,
         const data = await response.json();
         setFetchedTasks(data);
         if (cpmGraphRef.current && typeof cpmGraphRef.current.reloadData === 'function') {
-          cpmGraphRef.current.reloadData(); // Correct
+          cpmGraphRef.current.reloadData();
         }
         
       } else {
@@ -250,27 +248,27 @@ const TaskScheduler = ({ currentProject, initialTaskCount , isSecondSidebarOpen,
   };
 
   return (
-<div
-  className={`w-full mx-auto p-8 shadow-md rounded-lg mt-10 transition-all duration-300 ease-in-out ${colors.background.main} ${
-    isSecondSidebarOpen ? 'max-w-[1400px]' : 'max-w-[1600px]'
-  }`}
-> 
+    <div
+      className={`w-full mx-auto p-8 shadow-xl rounded-2xl mt-10 transition-all duration-300 ease-in-out ${colors.background.main} ${
+        isSecondSidebarOpen ? 'max-w-[1400px]' : 'max-w-[1600px]'
+      }`}
+    > 
       {isInitialEntry ? (
         <div className="w-full max-w-[1600px] mx-auto">
-          {/* Header moderne comme TaskListTable */}
+          {/* Header moderne */}
           <motion.div 
             initial={{ y: -20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ duration: 0.6 }}
-            className={`sticky top-0 left-0 w-full z-10 backdrop-blur-xl ${colors.background.header} border-b border-white/20 shadow-lg`}
+            className={`sticky top-0 left-0 w-full z-10 backdrop-blur-xl ${colors.background.header} border-b ${colors.table.border} shadow-2xl rounded-t-2xl`}
           >
-            <div className="max-w-full mx-auto px-4 py-3">
+            <div className="max-w-full mx-auto px-6 py-4">
               <div className="flex items-center justify-center space-x-4">
                 <motion.h1 
                   initial={{ scale: 0.9, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
                   transition={{ duration: 0.5, delay: 0.2 }}
-                  className={`text-center text-2xl font-bold bg-gradient-to-r ${colors.primary.gradient} bg-clip-text text-transparent`}
+                  className={`text-center text-3xl font-bold bg-gradient-to-r ${colors.primary.gradient} bg-clip-text text-transparent`}
                 >
                   {project.name || "Nouveau Projet"}
                 </motion.h1>
@@ -280,10 +278,10 @@ const TaskScheduler = ({ currentProject, initialTaskCount , isSecondSidebarOpen,
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.9 }}
                   onClick={handleToggleFavorite}
-                  className={`p-2 rounded-full transition-all duration-300 ${
+                  className={`p-3 rounded-full transition-all duration-300 shadow-lg ${
                     project.isFavorite 
-                      ? colors.buttons.favorite.active 
-                      : `${colors.buttons.favorite.inactive} ${colors.buttons.favorite.hover}`
+                      ? `${colors.buttons.favorite.active} bg-amber-100/50` 
+                      : `${colors.buttons.favorite.inactive} ${colors.buttons.favorite.hover} bg-stone-100/50`
                   }`}
                 >
                   <Star 
@@ -297,7 +295,7 @@ const TaskScheduler = ({ currentProject, initialTaskCount , isSecondSidebarOpen,
                 initial={{ y: 10, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ duration: 0.5, delay: 0.3 }}
-                className={`text-center ${colors.text.secondary} italic mt-1 text-sm`}
+                className={`text-center ${colors.text.secondary} italic mt-2 text-base`}
               >
                 {project.description || "Configuration initiale des tâches"}
               </motion.p>
@@ -305,31 +303,31 @@ const TaskScheduler = ({ currentProject, initialTaskCount , isSecondSidebarOpen,
           </motion.div>
 
           {/* Container principal */}
-          <div className="max-w-full mx-auto px-2 pb-2">
+          <div className="max-w-full mx-auto px-4 pb-4">
             <motion.div
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ duration: 0.6, delay: 0.4 }}
-              className="relative mt-6"
+              className="relative mt-8"
             >
-              {/* Table avec scrollbars visibles */}
-              <div className="overflow-x-auto" style={{ scrollbarWidth: 'thin', scrollbarColor: '#a5b4fc #f1f5f9' }}>
-                <div className={`backdrop-blur-xl ${colors.background.card} rounded-2xl shadow-2xl border border-white/30 overflow-hidden min-w-max`}>
+              {/* Table avec scrollbars personnalisées */}
+              <div className="overflow-x-auto custom-scrollbar">
+                <div className={`backdrop-blur-xl ${colors.background.card} rounded-2xl shadow-2xl border border-stone-200/50 overflow-hidden min-w-max`}>
                   <table ref={tableRef} className="w-full">
                     <thead>
                       {/* Header des tâches */}
-                      <tr className={`bg-gradient-to-r ${colors.primary.gradientBg} text-white`}>
-                        <th className="p-4 text-left font-semibold tracking-wide min-w-[200px]">
-                          <div className="flex items-center space-x-2">
-                            <div className="w-2 h-2 bg-white rounded-full"></div>
-                            <span>Tâches</span>
+                      <tr className={`${colors.table.header.primary} ${colors.table.header.text}`}>
+                        <th className="p-5 text-left font-semibold tracking-wide min-w-[200px]">
+                          <div className="flex items-center space-x-3">
+                            <div className="w-3 h-3 bg-amber-400 rounded-full shadow-sm"></div>
+                            <span className="text-lg">Tâches</span>
                           </div>
                         </th>
                         {tasks.map((task, index) => (
                           <th 
                             key={index} 
                             className="p-4 relative group"
-                            style={{ width: '250px', minWidth: '250px' }}
+                            style={{ width: '280px', minWidth: '280px' }}
                             onMouseEnter={() => setHoveredColumnIndex(index)}
                             onMouseLeave={() => setHoveredColumnIndex(null)}
                           >
@@ -340,25 +338,25 @@ const TaskScheduler = ({ currentProject, initialTaskCount , isSecondSidebarOpen,
                               value={task.name}
                               onChange={(e) => handleNameChange(index, e.target.value)}
                               placeholder={`Tâche ${index + 1}`}
-                              className={`w-full p-2 text-center ${colors.background.overlay} text-white placeholder-indigo-200 outline-none border border-white/30 rounded-lg focus:border-white focus:bg-white/30 transition-all backdrop-blur-sm text-sm`}
+                              className={`w-full p-3 text-center ${colors.table.input.primary} border border-white/40 rounded-xl ${colors.table.input.focus} transition-all backdrop-blur-sm text-base font-medium placeholder-stone-300`}
                             />
                           </th>
                         ))}
                       </tr>
 
                       {/* Row des durées */}
-                      <tr className="bg-gradient-to-r from-white to-indigo-50/50 border-b border-indigo-100">
-                        <th className={`p-4 text-left font-semibold ${colors.text.primary}`}>
-                          <div className="flex items-center space-x-2">
-                            <div className={`w-2 h-2 ${colors.primary.bg} rounded-full`}></div>
-                            <span>Durée (jours)</span>
+                      <tr className={`${colors.table.header.secondary} border-b ${colors.table.border}`}>
+                        <th className={`p-5 text-left font-semibold ${colors.table.header.textSecondary}`}>
+                          <div className="flex items-center space-x-3">
+                            <div className={`w-3 h-3 bg-gradient-to-r ${colors.duration.bg} rounded-full shadow-sm`}></div>
+                            <span className="text-lg">Durée (jours)</span>
                           </div>
                         </th>
                         {tasks.map((task, index) => (
                           <td 
                             key={index} 
                             className="p-4 group"
-                            style={{ width: '250px', minWidth: '250px' }}
+                            style={{ width: '280px', minWidth: '280px' }}
                             onMouseEnter={() => setHoveredColumnIndex(index)}
                             onMouseLeave={() => setHoveredColumnIndex(null)}
                           >
@@ -369,7 +367,7 @@ const TaskScheduler = ({ currentProject, initialTaskCount , isSecondSidebarOpen,
                                 type="number"
                                 value={task.duration}
                                 onChange={(e) => handleDurationChange(index, e.target.value)}
-                                className={`w-20 p-2 text-center bg-indigo-50 text-slate-800 outline-none border ${colors.primary.border} rounded-lg ${colors.primary.focus} focus:bg-white transition-all text-sm`}
+                                className={`w-24 p-3 text-center ${colors.table.input.secondary} ${colors.duration.text} border ${colors.primary.border} rounded-xl ${colors.table.input.focusSecondary} transition-all text-base font-medium shadow-sm`}
                                 min="1"
                                 placeholder="Durée"
                               />
@@ -382,20 +380,20 @@ const TaskScheduler = ({ currentProject, initialTaskCount , isSecondSidebarOpen,
                 </div>
               </div>
 
-              {/* Boutons d'action repositionnés comme TaskListTable */}
+              {/* Boutons d'action repositionnés */}
               <motion.div
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.6 }}
-                className="absolute top-6 -right-20 flex flex-col items-center space-y-3"
+                className="absolute top-8 -right-24 flex flex-col items-center space-y-4"
               >
                 <motion.button
                   whileHover={{ scale: 1.1, rotate: 90 }}
                   whileTap={{ scale: 0.9 }}
                   onClick={addColumn}
-                  className="w-12 h-12 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 border-2 border-white backdrop-blur-sm"
+                  className={`w-14 h-14 bg-gradient-to-r ${colors.buttons.add.gradient} ${colors.buttons.add.text} rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 border-2 border-white/50 backdrop-blur-sm ${colors.buttons.add.hover}`}
                 >
-                  <Plus size={24} className="mx-auto" />
+                  <Plus size={26} className="mx-auto" />
                 </motion.button>
 
                 <motion.button
@@ -403,13 +401,13 @@ const TaskScheduler = ({ currentProject, initialTaskCount , isSecondSidebarOpen,
                   whileTap={{ scale: 0.9 }}
                   onClick={removeColumn}
                   disabled={tasks.length === 1}
-                  className={`w-12 h-12 rounded-full shadow-xl transition-all duration-300 border-2 border-white backdrop-blur-sm ${
+                  className={`w-14 h-14 rounded-full shadow-xl transition-all duration-300 border-2 border-white/50 backdrop-blur-sm ${
                     tasks.length === 1
-                      ? "bg-gray-400 text-gray-200 cursor-not-allowed"
-                      : "bg-gradient-to-r from-red-500 to-pink-500 text-white hover:shadow-2xl"
+                      ? "bg-stone-300 text-stone-500 cursor-not-allowed"
+                      : `bg-gradient-to-r ${colors.buttons.remove.gradient} ${colors.buttons.remove.text} hover:shadow-2xl ${colors.buttons.remove.hover}`
                   }`}
                 >
-                  <Minus size={24} className="mx-auto" />
+                  <Minus size={26} className="mx-auto" />
                 </motion.button>
               </motion.div>
             </motion.div>
@@ -419,21 +417,21 @@ const TaskScheduler = ({ currentProject, initialTaskCount , isSecondSidebarOpen,
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.8 }}
-              className="flex justify-center mt-8"
+              className="flex justify-center mt-10"
             >
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={handleSaveAndOpenModal}
                 disabled={!allTasksValid}
-                className={`px-8 py-4 rounded-xl font-semibold text-lg shadow-xl transition-all duration-300 ${
+                className={`px-10 py-5 rounded-2xl font-semibold text-lg shadow-2xl transition-all duration-300 ${
                   allTasksValid 
-                    ? `bg-gradient-to-r ${colors.buttons.save.gradient} ${colors.buttons.save.text} ${colors.buttons.save.hover} transform hover:scale-105`
-                    : "bg-gray-400 text-gray-200 cursor-not-allowed"
+                    ? `bg-gradient-to-r ${colors.buttons.save.gradient} ${colors.buttons.save.text} ${colors.buttons.save.hover} transform hover:scale-105 border border-white/30`
+                    : "bg-stone-300 text-stone-500 cursor-not-allowed"
                 }`}
               >
-                <div className="flex items-center space-x-2">
-                  <Save size={20} />
+                <div className="flex items-center space-x-3">
+                  <Save size={22} />
                   <span>Ajouter dépendances</span>
                 </div>
               </motion.button>
@@ -454,20 +452,19 @@ const TaskScheduler = ({ currentProject, initialTaskCount , isSecondSidebarOpen,
         />
       )}
 
-
       {/* Section CPM avec styling moderne */}
       {!isInitialEntry && (
         <motion.div
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 1 }}
-          className={`mt-8 backdrop-blur-xl ${colors.background.card} rounded-2xl shadow-2xl border border-white/30 p-6`}
+          className={`mt-10 backdrop-blur-xl ${colors.background.card} rounded-2xl shadow-2xl border border-stone-200/50 p-8`}
         >
           <motion.h2 
             initial={{ x: -20, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
             transition={{ delay: 1.2 }}
-            className={`text-2xl font-bold bg-gradient-to-r ${colors.primary.gradient} bg-clip-text text-transparent mb-6`}
+            className={`text-3xl font-bold bg-gradient-to-r ${colors.primary.gradient} bg-clip-text text-transparent mb-8`}
           >
             Diagramme du chemin critique
           </motion.h2>
@@ -482,21 +479,28 @@ const TaskScheduler = ({ currentProject, initialTaskCount , isSecondSidebarOpen,
         </motion.div>
       )}
 
-      {/* Styles pour scrollbars webkit */}
+      {/* Styles pour scrollbars personnalisées */}
       <style jsx>{`
-        .overflow-x-auto::-webkit-scrollbar {
-          height: 8px;
+        .custom-scrollbar::-webkit-scrollbar {
+          height: 10px;
         }
-        .overflow-x-auto::-webkit-scrollbar-track {
-          background: #f1f5f9;
-          border-radius: 4px;
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: ${colors.scrollbar.track};
+          border-radius: 6px;
         }
-        .overflow-x-auto::-webkit-scrollbar-thumb {
-          background: #a5b4fc;
-          border-radius: 4px;
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: ${colors.scrollbar.thumb};
+          border-radius: 6px;
+          border: 2px solid ${colors.scrollbar.track};
         }
-        .overflow-x-auto::-webkit-scrollbar-thumb:hover {
-          background: #8b5cf6;
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+          background: ${colors.scrollbar.thumbHover};
+        }
+        
+        /* Firefox */
+        .custom-scrollbar {
+          scrollbar-width: thin;
+          scrollbar-color: ${colors.scrollbar.thumb} ${colors.scrollbar.track};
         }
       `}</style>
     </div>

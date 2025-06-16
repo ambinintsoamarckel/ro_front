@@ -58,29 +58,29 @@ const TaskInitializerModal = ({ isOpen, onClose, onInitialize }) => {
     <AnimatePresence>
       {isOpen && (
         <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
-          {/* Backdrop avec effet de flou */}
+          {/* Backdrop avec effet de flou sophistiqué */}
           <motion.div
-            className="fixed inset-0 bg-gradient-to-br from-indigo-900/30 via-purple-900/30 to-slate-900/40 backdrop-blur-sm"
+            className="fixed inset-0 bg-gradient-to-br from-slate-900/40 via-zinc-900/30 to-stone-900/50 backdrop-blur-sm"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
           />
           
-          {/* Modal principale */}
+          {/* Modal principale avec design élégant */}
           <motion.div
-            className="bg-white/95 backdrop-blur-md border border-white/20 shadow-2xl rounded-2xl w-full max-w-md relative z-50 overflow-hidden"
+            className={`${colors.background.card} backdrop-blur-md border border-stone-200/40 shadow-2xl rounded-2xl w-full max-w-md relative z-50 overflow-hidden`}
             initial={{ opacity: 0, scale: 0.9, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
             transition={{ duration: 0.3, ease: "easeOut" }}
           >
-            {/* Header avec gradient */}
-            <div className="bg-gradient-to-r from-indigo-600 to-purple-600 p-6 text-white relative overflow-hidden">
+            {/* Header avec gradient sophistiqué */}
+            <div className={`bg-gradient-to-r ${colors.primary.gradient} p-6 text-white relative overflow-hidden`}>
               <div className="absolute inset-0 bg-white/10 backdrop-blur-sm"></div>
               <div className="relative z-10 flex justify-between items-center">
                 <div className="flex items-center space-x-3">
-                  <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
+                  <div className={`w-12 h-12 bg-gradient-to-br ${colors.buttons.save.gradient} rounded-full flex items-center justify-center shadow-lg`}>
                     <Sparkles className="w-6 h-6" />
                   </div>
                   <div>
@@ -99,8 +99,8 @@ const TaskInitializerModal = ({ isOpen, onClose, onInitialize }) => {
               </div>
             </div>
 
-            {/* Contenu du formulaire */}
-            <div className="p-6 space-y-6">
+            {/* Contenu du formulaire avec background élégant */}
+            <div className={`p-6 space-y-6 bg-gradient-to-br ${colors.background.main}`}>
               {/* Nom du projet */}
               <motion.div 
                 className="space-y-2"
@@ -108,19 +108,19 @@ const TaskInitializerModal = ({ isOpen, onClose, onInitialize }) => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
               >
-                <label className="block text-sm font-semibold text-slate-700">
+                <label className={`block text-sm font-semibold ${colors.text.primary}`}>
                   Nom du projet
                 </label>
                 <div className="relative group">
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                    <FolderPen className="w-5 h-5 text-slate-400 group-focus-within:text-indigo-500 transition-colors" />
+                    <FolderPen className={`w-5 h-5 ${colors.text.muted} group-focus-within:text-amber-500 transition-colors`} />
                   </div>
                   <input
                     type="text"
                     placeholder="Nom du projet"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    className="block w-full pl-12 pr-4 py-3 border-2 border-slate-200 text-sm rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:outline-none transition-all duration-200 bg-gradient-to-r from-slate-50 to-indigo-50/30 text-slate-700 placeholder:text-slate-400"
+                    className={`block w-full pl-12 pr-4 py-3 border-2 border-stone-200/60 text-sm rounded-xl focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 focus:outline-none transition-all duration-200 bg-white/80 ${colors.text.primary} placeholder:${colors.text.placeholder}`}
                     required
                   />
                 </div>
@@ -133,12 +133,12 @@ const TaskInitializerModal = ({ isOpen, onClose, onInitialize }) => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
               >
-                <label className="block text-sm font-semibold text-slate-700">
+                <label className={`block text-sm font-semibold ${colors.text.primary}`}>
                   Description du projet
                 </label>
                 <div className="relative group">
                   <div className="absolute top-3 left-0 pl-4 flex items-start pointer-events-none">
-                    <AlignCenter className="w-5 h-5 text-slate-400 group-focus-within:text-indigo-500 transition-colors" />
+                    <AlignCenter className={`w-5 h-5 ${colors.text.muted} group-focus-within:text-amber-500 transition-colors`} />
                   </div>
                   <textarea
                     value={description}
@@ -146,7 +146,7 @@ const TaskInitializerModal = ({ isOpen, onClose, onInitialize }) => {
                       setDescription(e.target.value);
                       autoResizeTextarea(e.target);
                     }}
-                    className="block w-full pl-12 pr-4 py-3 border-2 border-slate-200 text-sm rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:outline-none transition-all duration-200 bg-gradient-to-r from-slate-50 to-indigo-50/30 text-slate-700 placeholder:text-slate-400 resize-none overflow-hidden"
+                    className={`block w-full pl-12 pr-4 py-3 border-2 border-stone-200/60 text-sm rounded-xl focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 focus:outline-none transition-all duration-200 bg-white/80 ${colors.text.primary} placeholder:${colors.text.placeholder} resize-none overflow-hidden`}
                     placeholder="Description du projet (facultatif)"
                     rows={1}
                   />
@@ -160,28 +160,28 @@ const TaskInitializerModal = ({ isOpen, onClose, onInitialize }) => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
               >
-                <label className="block text-sm font-semibold text-slate-700">
+                <label className={`block text-sm font-semibold ${colors.text.primary}`}>
                   Nombre initial de tâches
                 </label>
                 <div className="relative group">
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                    <FileDigit className="w-5 h-5 text-slate-400 group-focus-within:text-indigo-500 transition-colors" />
+                    <FileDigit className={`w-5 h-5 ${colors.text.muted} group-focus-within:text-amber-500 transition-colors`} />
                   </div>
                   <input
                     type="number"
                     value={taskCount}
                     onChange={(e) => setTaskCount(Math.max(3, parseInt(e.target.value) || 3))}
-                    className="block w-full pl-12 pr-4 py-3 border-2 border-slate-200 text-sm text-center rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:outline-none transition-all duration-200 bg-gradient-to-r from-slate-50 to-indigo-50/30 text-slate-700 font-semibold"
+                    className={`block w-full pl-12 pr-4 py-3 border-2 border-stone-200/60 text-sm text-center rounded-xl focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 focus:outline-none transition-all duration-200 bg-white/80 ${colors.text.primary} font-semibold`}
                     min="3"
                     required
                   />
-                  <div className="mt-1 text-xs text-slate-500 text-center">
+                  <div className={`mt-1 text-xs ${colors.text.secondary} text-center`}>
                     Minimum 3 tâches
                   </div>
                 </div>
               </motion.div>
 
-              {/* Indicateur de validation */}
+              {/* Indicateur de validation avec couleurs élégantes */}
               <motion.div
                 className="flex items-center justify-center"
                 initial={{ opacity: 0 }}
@@ -190,18 +190,18 @@ const TaskInitializerModal = ({ isOpen, onClose, onInitialize }) => {
               >
                 <div className={`flex items-center space-x-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
                   isValid 
-                    ? 'bg-green-100 text-green-700 border border-green-200' 
-                    : 'bg-amber-100 text-amber-700 border border-amber-200'
+                    ? `${colors.notifications.success.bg} ${colors.notifications.success.text} ${colors.notifications.success.border} border` 
+                    : `${colors.notifications.warning.bg} ${colors.notifications.warning.text} ${colors.notifications.warning.border} border`
                 }`}>
-                  <div className={`w-2 h-2 rounded-full ${isValid ? 'bg-green-500' : 'bg-amber-500'}`}></div>
+                  <div className={`w-2 h-2 rounded-full ${isValid ? 'bg-emerald-500' : 'bg-amber-500'}`}></div>
                   <span>{isValid ? 'Prêt à créer' : 'Remplissez au moins le nom du projet'}</span>
                 </div>
               </motion.div>
             </div>
 
-            {/* Actions */}
+            {/* Actions avec boutons sophistiqués */}
             <motion.div 
-              className="flex justify-end space-x-3 p-6 pt-0"
+              className={`flex justify-end space-x-3 p-6 pt-0 bg-gradient-to-br ${colors.background.main}`}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5 }}
@@ -222,9 +222,9 @@ const TaskInitializerModal = ({ isOpen, onClose, onInitialize }) => {
                 onClick={handleSubmit}
                 disabled={!isValid || loading}
                 className={`px-6 py-3 rounded-xl font-medium transition-all duration-200 flex items-center space-x-2 shadow-lg hover:shadow-xl ${
-                  isValid && !loading
-                    ? 'bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white'
-                    : 'bg-slate-300 text-slate-500 cursor-not-allowed'
+                isValid && !loading
+                  ? `bg-gradient-to-r ${colors.buttons.save.gradient} ${colors.buttons.save.hover} ${colors.buttons.save.text}`
+                  : 'bg-gradient-to-r from-stone-300 to-slate-300 text-stone-500 cursor-not-allowed'
                 }`}
               >
                 {loading ? (

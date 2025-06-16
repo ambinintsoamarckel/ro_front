@@ -5,6 +5,7 @@ import { Menu, X, Power, Search } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
+import { colors } from "../colors"; // Import du système de couleurs
 
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -51,7 +52,7 @@ const Header = () => {
       initial={{ y: -100, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.6, ease: "easeOut" }}
-      className="bg-white/95 backdrop-blur-sm text-[#243063] fixed top-0 left-0 w-full shadow-lg border-b border-gray-100 z-50"
+      className={`${colors.background.header} backdrop-blur-sm ${colors.primary.text} fixed top-0 left-0 w-full shadow-lg ${colors.table.border} border-b z-50`}
     >
       <div className="flex justify-between items-center h-16 sm:h-20 px-2 sm:px-4">
         
@@ -66,7 +67,7 @@ const Header = () => {
             <motion.div
               whileHover={{ rotate: 360 }}
               transition={{ duration: 0.6 }}
-              className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 rounded-full bg-gradient-to-br from-[#243063] to-[#3a4a7a] p-1.5 sm:p-2 shadow-lg"
+              className={`w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 rounded-full bg-gradient-to-br ${colors.primary.gradient} p-1.5 sm:p-2 shadow-lg`}
             >
               <Image 
                 src="/logo.png" 
@@ -76,15 +77,15 @@ const Header = () => {
                 className="w-full h-full object-contain filter brightness-0 invert"
               />
             </motion.div>
-            <div className="absolute -top-0.5 -right-0.5 sm:-top-1 sm:-right-1 w-3 h-3 sm:w-4 sm:h-4 bg-[#EDB640] rounded-full animate-pulse"></div>
+            <div className={`absolute -top-0.5 -right-0.5 sm:-top-1 sm:-right-1 w-3 h-3 sm:w-4 sm:h-4 bg-gradient-to-r ${colors.buttons.add.gradient} rounded-full animate-pulse`}></div>
           </div>
           
           {/* Titre responsive */}
           <div className="min-w-0 hidden lg:block">
-            <h1 className="text-xl lg:text-2xl xl:text-3xl font-bold bg-gradient-to-r from-[#243063] to-[#3a4a7a] bg-clip-text text-transparent whitespace-nowrap">
+            <h1 className={`text-xl lg:text-2xl xl:text-3xl font-bold bg-gradient-to-r ${colors.primary.gradient} bg-clip-text text-transparent whitespace-nowrap`}>
               Ordonnancement des Tâches
             </h1>
-            <p className="text-xs lg:text-sm text-gray-500 font-medium">Gestion intelligente des tâches</p>
+            <p className={`text-xs lg:text-sm ${colors.text.secondary} font-medium`}>Gestion intelligente des tâches</p>
           </div>
         </motion.div>
 
@@ -94,7 +95,6 @@ const Header = () => {
           animate={{ y: 0, opacity: 1, scale: 1 }}
           transition={{ duration: 0.6, delay: 0.4, ease: "easeOut" }}
           className="flex-1 max-w-lg mx-2 sm:mx-3 lg:ml-0 lg:mr-4"
-
         >
           <motion.div 
             className="relative group"
@@ -110,7 +110,7 @@ const Header = () => {
                 whileHover={{ rotate: 15, scale: 1.1 }}
                 transition={{ duration: 0.2 }}
               >
-                <Search className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400 group-focus-within:text-[#243063] group-hover:text-[#3a4a7a] transition-all duration-300" />
+                <Search className={`h-4 w-4 sm:h-5 sm:w-5 ${colors.text.muted} group-focus-within:text-slate-800 group-hover:text-stone-600 transition-all duration-300`} />
               </motion.div>
             </motion.div>
             
@@ -120,12 +120,12 @@ const Header = () => {
               value={searchQuery}
               onChange={handleSearchChange}
               whileFocus={{ scale: 1.01 }}
-              className="w-full pl-0 sm:pl-12 pr-4 py-2.5 sm:py-3 text-sm sm:text-base bg-gradient-to-r from-gray-50/80 to-white/60 backdrop-blur-sm border border-gray-200/60 rounded-full focus:ring-2 focus:ring-[#243063]/30 focus:border-[#243063] focus:bg-white focus:shadow-lg hover:bg-white/90 hover:border-gray-300/80 hover:shadow-md transition-all duration-300 placeholder:text-gray-400 hover:placeholder:text-gray-500"
+              className={`w-full pl-10 sm:pl-12 pr-4 py-2.5 sm:py-3 text-sm sm:text-base ${colors.background.input} backdrop-blur-sm ${colors.primary.border} rounded-full focus:ring-2 focus:ring-rose-400/30 ${colors.primary.focus} focus:bg-white/95 focus:shadow-lg hover:bg-white/90 hover:border-stone-300/80 hover:shadow-md transition-all duration-300 placeholder:${colors.text.placeholder} hover:placeholder:text-stone-500`}
             />
             
             {/* Effet de brillance animé */}
             <motion.div 
-              className="absolute inset-0 rounded-full bg-gradient-to-r from-transparent via-[#243063]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
+              className="absolute inset-0 rounded-full bg-gradient-to-r from-transparent via-rose-400/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
               initial={{ x: "-100%" }}
               whileHover={{ 
                 x: "100%",
@@ -134,10 +134,10 @@ const Header = () => {
             />
             
             {/* Anneau de focus élégant */}
-            <div className="absolute inset-0 rounded-full ring-2 ring-transparent group-focus-within:ring-[#243063]/20 transition-all duration-300 pointer-events-none"></div>
+            <div className="absolute inset-0 rounded-full ring-2 ring-transparent group-focus-within:ring-rose-400/20 transition-all duration-300 pointer-events-none"></div>
             
             {/* Effet de glow subtil */}
-            <div className="absolute inset-0 rounded-full bg-gradient-to-r from-[#243063]/5 via-transparent to-[#EDB640]/5 opacity-0 group-hover:opacity-60 blur-sm transition-all duration-500 pointer-events-none"></div>
+            <div className={`absolute inset-0 rounded-full bg-gradient-to-r ${colors.buttons.add.gradient} opacity-0 group-hover:opacity-[0.03] blur-sm transition-all duration-500 pointer-events-none`}></div>
           </motion.div>
         </motion.div>
 
@@ -147,7 +147,7 @@ const Header = () => {
           whileTap={{ scale: 0.95 }}
           onClick={handleLogout}
           disabled={isLoggingOut}
-          className="group relative p-2 sm:p-3 bg-gradient-to-r from-[#EDB640] to-[#f5c543] text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 flex-shrink-0"
+          className={`group relative p-2 sm:p-3 bg-gradient-to-r ${colors.buttons.add.gradient} ${colors.buttons.add.text} rounded-full shadow-lg hover:shadow-xl ${colors.buttons.add.hover} transition-all duration-300 disabled:opacity-50 flex-shrink-0`}
         >
           <motion.div
             animate={isLoggingOut ? { rotate: 360 } : { rotate: 0 }}
