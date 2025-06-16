@@ -4,6 +4,9 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { User, Lock, Eye, EyeOff, Loader2, Sparkles, Shield, ArrowRight } from "lucide-react";
+import { checkAuthStatus } from "@/utils/auth"; // adapte le chemin
+
+
 
 export default function LoginPage() {
   const router = useRouter();
@@ -16,6 +19,22 @@ export default function LoginPage() {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [isFormValid, setIsFormValid] = useState(false);
   const [hasMounted, setHasMounted] = useState(false);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true); // 👈 nouveau
+
+  useEffect(() => {
+    const verify = async () => {
+      const user = await checkAuthStatus();
+      if (user) {
+        router.replace("/dashboard");
+      } else {
+        setIsCheckingAuth(false);
+      }
+    };
+    verify();
+  }, []);
+
+ // 👈 empêche le flash de la page login
+
 
   useEffect(() => {
     setHasMounted(true);
@@ -59,9 +78,9 @@ export default function LoginPage() {
       setErrorMessage("");
       setIsSuccess(true);
       
-      setTimeout(() => {
+
         router.push("/dashboard");
-      }, 1500);
+
       
     } catch (error) {
       setErrorMessage("Une erreur s'est produite. Veuillez réessayer.");
@@ -69,6 +88,7 @@ export default function LoginPage() {
       setTimeout(() => setIsLoading(false), 800);
     }
   };
+  if (isCheckingAuth) return null;
 
   return (
     <div className="min-h-screen w-full flex items-center justify-center p-4 relative overflow-hidden bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">   

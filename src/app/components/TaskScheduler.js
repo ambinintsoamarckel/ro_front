@@ -315,14 +315,14 @@ const TaskScheduler = ({ currentProject, initialTaskCount , isSecondSidebarOpen,
                 <div className={`backdrop-blur-xl ${colors.background.card} rounded-2xl shadow-2xl border border-stone-200/50 overflow-hidden min-w-max`}>
                   <table ref={tableRef} className="w-full">
                     <thead>
-                      {/* Header des tâches */}
-                      <tr className={`${colors.table.header.primary} ${colors.table.header.text}`}>
-                        <th className="p-5 text-left font-semibold tracking-wide min-w-[200px]">
-                          <div className="flex items-center space-x-3">
-                            <div className="w-3 h-3 bg-amber-400 rounded-full shadow-sm"></div>
-                            <span className="text-lg">Tâches</span>
-                          </div>
-                        </th>
+                  {/* Header des tâches */}
+                  <tr className={`${colors.table.header.primary} ${colors.table.header.text}`}>
+                    <th className="p-4 text-left font-semibold tracking-wide min-w-[200px]">
+                      <div className="flex items-center space-x-2">
+                        <div className={`w-2 h-2 ${colors.primary.bg} rounded-full`}></div>
+                        <span>Tâches</span>
+                      </div>
+                    </th>
                         {tasks.map((task, index) => (
                           <th 
                             key={index} 
@@ -345,12 +345,12 @@ const TaskScheduler = ({ currentProject, initialTaskCount , isSecondSidebarOpen,
                       </tr>
 
                       {/* Row des durées */}
-                      <tr className={`${colors.table.header.secondary} border-b ${colors.table.border}`}>
-                        <th className={`p-5 text-left font-semibold ${colors.table.header.textSecondary}`}>
-                          <div className="flex items-center space-x-3">
-                            <div className={`w-3 h-3 bg-gradient-to-r ${colors.duration.bg} rounded-full shadow-sm`}></div>
-                            <span className="text-lg">Durée (jours)</span>
-                          </div>
+                  <tr className={`${colors.table.header.secondary} border-b ${colors.table.border}`}>
+                    <th className={`p-4 text-left font-semibold ${colors.table.header.textSecondary}`}>
+                      <div className="flex items-center space-x-2">
+                        <div className={`w-2 h-2 ${colors.primary.bg} rounded-full`}></div>
+                        <span>Durée </span>
+                      </div>
                         </th>
                         {tasks.map((task, index) => (
                           <td 

@@ -205,50 +205,50 @@ const TaskListTable = ({
     <div className={`relative ${colors.background.main} `}>
       {/* Header compact */}
       <motion.div 
-        initial={{ y: -20, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.6 }}
-        className={`sticky top-0 left-0 w-full z-10 backdrop-blur-xl ${colors.background.header} border-b border-white/20 shadow-lg`}
-      >
-        <div className="max-w-full mx-auto px-4 py-3">
-          <div className="flex items-center justify-center space-x-4">
-            <motion.h1 
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-              className={`text-center text-2xl font-bold bg-gradient-to-r ${colors.header.title.gradient} bg-clip-text text-transparent`}
-            >
-              {currentProject.name}
-            </motion.h1>
-            
-            {/* Bouton favoris */}
-            <motion.button
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-              onClick={handleToggleFavorite}
-              className={`p-2 rounded-full transition-all duration-300 ${
-                currentProject.isFavorite 
-                  ? colors.buttons.favorite.active 
-                  : `${colors.buttons.favorite.inactive} ${colors.buttons.favorite.hover}`
-              }`}
-            >
-              <Star 
-                size={24} 
-                fill={currentProject.isFavorite ? "currentColor" : "none"}
-              />
-            </motion.button>
-          </div>
-          
-          <motion.p 
-            initial={{ y: 10, opacity: 0 }}
+            initial={{ y: -20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
-            className={`text-center ${colors.header.title.subtitle} italic mt-1 text-sm`}
+            transition={{ duration: 0.6 }}
+            className={`sticky top-0 left-0 w-full z-10 backdrop-blur-xl ${colors.background.header} border-b ${colors.table.border} shadow-2xl rounded-t-2xl`}
           >
-            {currentProject.description}
-          </motion.p>
-        </div>
-      </motion.div>
+            <div className="max-w-full mx-auto px-6 py-4">
+              <div className="flex items-center justify-center space-x-4">
+                <motion.h1 
+                  initial={{ scale: 0.9, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ duration: 0.5, delay: 0.2 }}
+                  className={`text-center text-3xl font-bold bg-gradient-to-r ${colors.primary.gradient} bg-clip-text text-transparent`}
+                >
+                  {currentProject.name}
+                </motion.h1>
+                
+                {/* Bouton favoris */}
+                <motion.button
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                  onClick={handleToggleFavorite}
+                  className={`p-3 rounded-full transition-all duration-300 shadow-lg ${
+                    currentProject.isFavorite 
+                      ? `${colors.buttons.favorite.active} bg-amber-100/50` 
+                      : `${colors.buttons.favorite.inactive} ${colors.buttons.favorite.hover} bg-stone-100/50`
+                  }`}
+                >
+                  <Star 
+                    size={24} 
+                    fill={currentProject.isFavorite ? "currentColor" : "none"}
+                  />
+                </motion.button>
+              </div>
+              
+              <motion.p 
+                initial={{ y: 10, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ duration: 0.5, delay: 0.3 }}
+                className={`text-center ${colors.text.secondary} italic mt-2 text-base`}
+              >
+                {currentProject.description }
+              </motion.p>
+            </div>
+          </motion.div>
 
       {/* Switch Toggle pour le type de dépendance */}
       <motion.div
@@ -321,7 +321,7 @@ const TaskListTable = ({
                   <tr className={`${colors.table.header.primary} ${colors.table.header.text}`}>
                     <th className="p-4 text-left font-semibold tracking-wide min-w-[200px]">
                       <div className="flex items-center space-x-2">
-                        <div className="w-2 h-2 bg-white rounded-full"></div>
+                        <div className={`w-2 h-2 ${colors.primary.bg} rounded-full`}></div>
                         <span>Tâches</span>
                       </div>
                     </th>
@@ -407,7 +407,7 @@ const TaskListTable = ({
                     <th className={`p-4 text-left font-semibold ${colors.table.header.textSecondary}`}>
                       <div className="flex items-center space-x-2">
                         <div className={`w-2 h-2 ${colors.primary.bg} rounded-full`}></div>
-                        <span>Durée (jours)</span>
+                        <span>Durée </span>
                       </div>
                     </th>
                     {tasks.map((task, index) => {
@@ -538,10 +538,10 @@ const TaskListTable = ({
                   </tr>
 
                   {/* Row des dépendances */}
-                  <tr className="bg-gradient-to-r from-slate-50 to-indigo-50/30 border-b border-indigo-100">
-                    <th className={`p-4 text-left font-semibold ${colors.text.primary}`}>
+                  <tr className={`${colors.table.header.secondary} border-b ${colors.table.border}`}>
+                    <th className={`p-4 text-left font-semibold ${colors.table.header.textSecondary}`}>
                       <div className="flex items-center space-x-2">
-                        <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                        <div className={`w-2 h-2 ${colors.primary.bg} rounded-full`}></div>
                         <span>Tâches {dependencyType}</span>
                       </div>
                     </th>
