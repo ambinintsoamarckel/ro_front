@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import TaskInitializerModal from "./TaskInitializerModal";
 import {Menu,X,BadgePlus,User,Settings,Home,FolderOpen,Star,MoreVertical, Edit2, Trash2} from "lucide-react";
+import { colors } from "../colors";
 
 
 const Sidebar = ({ setInitialTaskCount, setCurrentProject, setProjectPage, projects, setProjects, onSecondSidebarToggle }) => {
@@ -104,7 +105,25 @@ const Sidebar = ({ setInitialTaskCount, setCurrentProject, setProjectPage, proje
     { id: 'favoris', icon: Star, label: 'Favoris', action: () => openSecondSidebar('favoris') },
     { id: 'parametres', icon: Settings, label: 'Paramètres', action: () => openSecondSidebar('parametres') },
   ];
-  {projects.map((project, index) => (
+  const ProjectDropdown = ({ onEdit, onDelete }) => (
+    <div className={`absolute right-2 top-10 w-32 ${colors.background.card} ${colors.primary.border} rounded-lg shadow-md z-50`}>
+      <button
+        onClick={onEdit}
+        className={`flex items-center w-full px-3 py-2 text-sm ${colors.buttons.edit.text} ${colors.buttons.edit.base}`}
+      >
+        <Edit2 size={14} className="mr-2" />
+        Modifier
+      </button>
+      <button
+        onClick={onDelete}
+        className={`flex items-center w-full px-3 py-2 text-sm ${colors.buttons.delete.text} ${colors.buttons.delete.base}`}
+      >
+        <Trash2 size={14} className="mr-2" />
+        Supprimer
+      </button>
+    </div>
+  );  
+  const renderProjectCard = (project, index) => (
     <motion.div
       key={project.id}
       initial={{ x: -20, opacity: 0 }}
@@ -118,11 +137,10 @@ const Sidebar = ({ setInitialTaskCount, setCurrentProject, setProjectPage, proje
         onClick={() => {
           setCurrentProject(project);
           setProjectPage(true);
-          closeSecondSidebar();
         }}
       >
         <div className={`w-8 h-8 bg-gradient-to-br ${colors.primary.gradientButton} rounded-lg flex items-center justify-center mr-3`}>
-          <span className={`${colors.text.onPrimary} font-semibold text-xs`}>
+          <span className="text-white font-semibold text-xs">
             {project.name.charAt(0).toUpperCase()}
           </span>
         </div>
@@ -142,39 +160,27 @@ const Sidebar = ({ setInitialTaskCount, setCurrentProject, setProjectPage, proje
             e.stopPropagation();
             setOpenDropdownId(openDropdownId === project.id ? null : project.id);
           }}
-          className={`p-1 rounded-full hover:${colors.background.hover}`}
+          className={`p-1 rounded-full hover:${colors.background.overlay}`}
         >
           <MoreVertical size={18} className={colors.text.muted} />
         </button>
   
         {openDropdownId === project.id && (
-          <div className={`absolute right-2 top-10 w-32 ${colors.background.popup} ${colors.border.default} rounded-lg shadow-md z-50`}>
-            <button
-              onClick={() => {
-                console.log("Modifier", project.id);
-                setOpenDropdownId(null);
-              }}
-              className={`flex items-center w-full px-3 py-2 text-sm ${colors.text.secondary} hover:${colors.background.hover}`}
-            >
-              <Edit2 size={14} className="mr-2" />
-              Modifier
-            </button>
-            <button
-              onClick={() => {
-                console.log("Supprimer", project.id);
-                setOpenDropdownId(null);
-              }}
-              className={`flex items-center w-full px-3 py-2 text-sm ${colors.text.danger} hover:${colors.background.dangerHover}`}
-            >
-              <Trash2 size={14} className="mr-2" />
-              Supprimer
-            </button>
-          </div>
+          <ProjectDropdown
+            onEdit={() => {
+              console.log("Modifier", project.id);
+              setOpenDropdownId(null);
+            }}
+            onDelete={() => {
+              console.log("Supprimer", project.id);
+              setOpenDropdownId(null);
+            }}
+          />
         )}
       </div>
     </motion.div>
-  ))}
-  
+  );
+    
 
   const SidebarIcon = ({ item, isActive }) => (
     <div
