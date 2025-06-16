@@ -3,17 +3,8 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import TaskInitializerModal from "./TaskInitializerModal";
-import { colors } from "../colors.js";
-import { 
-  Menu, 
-  X, 
-  BadgePlus, 
-  User, 
-  Settings, 
-  Home,
-  FolderOpen,
-  Star
-} from "lucide-react";
+import {Menu,X,BadgePlus,User,Settings,Home,FolderOpen,Star,MoreVertical, Edit2, Trash2} from "lucide-react";
+
 
 const Sidebar = ({ setInitialTaskCount, setCurrentProject, setProjectPage, projects, setProjects, onSecondSidebarToggle }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -22,6 +13,8 @@ const Sidebar = ({ setInitialTaskCount, setCurrentProject, setProjectPage, proje
   // Nouvel état pour la deuxième sidebar
   const [secondSidebarOpen, setSecondSidebarOpen] = useState(false);
   const [secondSidebarContent, setSecondSidebarContent] = useState('');
+  const [openDropdownId, setOpenDropdownId] = useState(null);
+
 
   // Informer le parent quand l'état de la deuxième sidebar change
   useEffect(() => {
@@ -111,6 +104,77 @@ const Sidebar = ({ setInitialTaskCount, setCurrentProject, setProjectPage, proje
     { id: 'favoris', icon: Star, label: 'Favoris', action: () => openSecondSidebar('favoris') },
     { id: 'parametres', icon: Settings, label: 'Paramètres', action: () => openSecondSidebar('parametres') },
   ];
+  {projects.map((project, index) => (
+    <motion.div
+      key={project.id}
+      initial={{ x: -20, opacity: 0 }}
+      animate={{ x: 0, opacity: 1 }}
+      transition={{ delay: index * 0.1 }}
+      whileHover={{ x: 4 }}
+      className={`relative flex items-center justify-between p-3 ${colors.background.card} rounded-lg cursor-pointer transition-all duration-200 hover:${colors.background.overlay} hover:shadow-sm ${colors.primary.border}`}
+    >
+      <div
+        className="flex items-center flex-1 min-w-0"
+        onClick={() => {
+          setCurrentProject(project);
+          setProjectPage(true);
+          closeSecondSidebar();
+        }}
+      >
+        <div className={`w-8 h-8 bg-gradient-to-br ${colors.primary.gradientButton} rounded-lg flex items-center justify-center mr-3`}>
+          <span className={`${colors.text.onPrimary} font-semibold text-xs`}>
+            {project.name.charAt(0).toUpperCase()}
+          </span>
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className={`font-medium ${colors.text.primary} text-sm truncate`}>
+            {project.name}
+          </p>
+          <p className={`text-xs ${colors.text.muted}`}>
+            Modifié récemment
+          </p>
+        </div>
+      </div>
+  
+      <div className="relative">
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            setOpenDropdownId(openDropdownId === project.id ? null : project.id);
+          }}
+          className={`p-1 rounded-full hover:${colors.background.hover}`}
+        >
+          <MoreVertical size={18} className={colors.text.muted} />
+        </button>
+  
+        {openDropdownId === project.id && (
+          <div className={`absolute right-2 top-10 w-32 ${colors.background.popup} ${colors.border.default} rounded-lg shadow-md z-50`}>
+            <button
+              onClick={() => {
+                console.log("Modifier", project.id);
+                setOpenDropdownId(null);
+              }}
+              className={`flex items-center w-full px-3 py-2 text-sm ${colors.text.secondary} hover:${colors.background.hover}`}
+            >
+              <Edit2 size={14} className="mr-2" />
+              Modifier
+            </button>
+            <button
+              onClick={() => {
+                console.log("Supprimer", project.id);
+                setOpenDropdownId(null);
+              }}
+              className={`flex items-center w-full px-3 py-2 text-sm ${colors.text.danger} hover:${colors.background.dangerHover}`}
+            >
+              <Trash2 size={14} className="mr-2" />
+              Supprimer
+            </button>
+          </div>
+        )}
+      </div>
+    </motion.div>
+  ))}
+  
 
   const SidebarIcon = ({ item, isActive }) => (
     <div
@@ -156,30 +220,8 @@ const Sidebar = ({ setInitialTaskCount, setCurrentProject, setProjectPage, proje
             <div className="space-y-4">
               {projects.length > 0 ? (
                 <div className="space-y-2">
-                  {projects.map((project, index) => (
-                    <motion.div
-                      key={project.id}
-                      initial={{ x: -20, opacity: 0 }}
-                      animate={{ x: 0, opacity: 1 }}
-                      transition={{ delay: index * 0.1 }}
-                      whileHover={{ x: 4 }}
-                      className={`flex items-center p-3 ${colors.background.card} rounded-lg cursor-pointer transition-all duration-200 hover:${colors.background.overlay} hover:shadow-sm ${colors.primary.border}`}
-                      onClick={() => {
-                        setCurrentProject(project);
-                        setProjectPage(true);
-                      }}
-                    >
-                      <div className={`w-8 h-8 bg-gradient-to-br ${colors.primary.gradientButton} rounded-lg flex items-center justify-center mr-3`}>
-                        <span className="text-white font-semibold text-xs">
-                          {project.name.charAt(0).toUpperCase()}
-                        </span>
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className={`font-medium ${colors.text.primary} text-sm truncate`}>{project.name}</p>
-                        <p className={`text-xs ${colors.text.muted}`}>Modifié récemment</p>
-                      </div>
-                    </motion.div>
-                  ))}
+                  {projects.map((project, index) => renderProjectCard(project, index))}
+
                 </div>
               ) : (
                 <motion.div 
@@ -229,30 +271,7 @@ const Sidebar = ({ setInitialTaskCount, setCurrentProject, setProjectPage, proje
               
               <div className="space-y-2">
                 {projects.length > 0 ? (
-                  projects.map((project, index) => (
-                    <motion.div
-                      key={project.id}
-                      initial={{ x: -20, opacity: 0 }}
-                      animate={{ x: 0, opacity: 1 }}
-                      transition={{ delay: index * 0.05 }}
-                      whileHover={{ x: 4 }}
-                      className={`flex items-center p-3 ${colors.background.card} rounded-lg cursor-pointer transition-all duration-200 hover:${colors.background.overlay} hover:shadow-sm ${colors.primary.border}`}
-                      onClick={() => {
-                        setCurrentProject(project);
-                        setProjectPage(true);
-                      }}
-                    >
-                      <div className={`w-8 h-8 bg-gradient-to-br ${colors.primary.gradientButton} rounded-lg flex items-center justify-center mr-3`}>
-                        <span className="text-white font-semibold text-xs">
-                          {project.name.charAt(0).toUpperCase()}
-                        </span>
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className={`font-medium ${colors.text.primary} text-sm truncate`}>{project.name}</p>
-                        <p className={`text-xs ${colors.text.muted}`}>Modifié récemment</p>
-                      </div>
-                    </motion.div>
-                  ))
+                  projects.map((project, index) => renderProjectCard(project, index))
                 ) : (
                   <motion.div 
                     initial={{ opacity: 0, y: 20 }}
