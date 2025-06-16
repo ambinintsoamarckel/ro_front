@@ -601,23 +601,55 @@ const TaskListTable = ({
             </div>
           </div>
 
-          {/* Bouton d'ajout de colonne - repositionné */}
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.6 }}
-            className="absolute top-6 -right-16 flex items-start"
-          >
-            <motion.button
-              whileHover={{ scale: 1.1, rotate: 90 }}
-              whileTap={{ scale: 0.9 }}
-              onClick={handleAddColumn}
-              disabled={!!tempTask}
-              className={`w-14 h-14 bg-gradient-to-r ${colors.buttons.add.gradient} ${colors.buttons.add.text} rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 border-2 border-white/50 backdrop-blur-sm ${colors.buttons.add.hover}`}
-            >
-              <Plus size={24} className="mx-auto" />
-            </motion.button>
-          </motion.div>
+              {/* Groupe de boutons Ajouter / Supprimer une colonne */}
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.6 }}
+                className="absolute top-6 -right-16 flex flex-col items-center space-y-3"
+              >
+                {/* Bouton Ajouter */}
+                <motion.button
+                  whileHover={{ scale: 1.1, rotate: 90 }}
+                  whileTap={{ scale: 0.9 }}
+                  onClick={handleAddColumn}
+                  disabled={!!tempTask}
+                  className={`
+                    relative group w-12 h-12
+                    bg-gradient-to-br ${colors.buttons.add.gradient}
+                    ${colors.buttons.add.text}
+                    rounded-full shadow-lg hover:shadow-xl
+                    transition-all duration-500 ease-out
+                    border border-white/20 backdrop-blur-sm
+                    ${colors.buttons.add.hover}
+                    before:absolute before:inset-0
+                    before:bg-gradient-to-br before:from-white/20 before:via-transparent before:to-transparent
+                    before:rounded-full before:opacity-0 before:transition-opacity before:duration-300
+                    hover:before:opacity-100
+                  `}
+                >
+                  <div className="relative z-10 flex items-center justify-center h-full">
+                    <Plus 
+                      size={20} 
+                      className="transition-transform duration-300 group-hover:scale-110" 
+                      strokeWidth={2.5}
+                    />
+                  </div>
+                  <div className="absolute inset-0 rounded-full overflow-hidden">
+                    <div className="absolute top-0 left-0 right-0 h-1/2 bg-gradient-to-b from-white/30 via-white/10 to-transparent opacity-60"></div>
+                  </div>
+                </motion.button>
+                {/* Indicateur décoratif */}
+                <motion.div
+                  initial={{ opacity: 0, scale: 0 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.8 }}
+                  className="flex flex-col items-center space-y-2"
+                >
+                  <div className={`w-1 h-8 bg-gradient-to-b from-transparent via-stone-300/50 to-transparent rounded-full`}></div>
+                  <div className={`w-2 h-2 bg-gradient-to-br ${colors.buttons.add.gradient} rounded-full opacity-60 animate-pulse`}></div>
+                </motion.div>
+              </motion.div>
         </motion.div>
       </div>
 

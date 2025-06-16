@@ -3,48 +3,47 @@
 import { useState } from "react";
 import { Menu, X, Power, Search } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import Link from "next/link";
 import Image from "next/image";
-import { colors } from "../colors"; // Import du système de couleurs
+import { colors } from "../colors";
 
-const Header = () => {
-  const [isOpen, setIsOpen] = useState(false);
+const Header = ({ projects = [], setCurrentProject, setProjectPage }) => {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
   const handleLogout = async () => {
     setIsLoggingOut(true);
-    
     try {
       const response = await fetch('http://localhost:3001/logout', {
         method: 'POST',
         credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
       });
-
       if (response.ok) {
-        // Animation de transition avant redirection
         await new Promise(resolve => setTimeout(resolve, 500));
         window.location.href = '/login';
       } else {
         const data = await response.json();
         console.error('Erreur logout:', data.message);
-        // Toast ou notification élégante à la place d'alert
       }
     } catch (error) {
       console.error('Logout failed:', error);
-      // Toast ou notification élégante à la place d'alert
     } finally {
       setIsLoggingOut(false);
     }
   };
 
-  const handleSearchChange = (e) => {
-    setSearchQuery(e.target.value);
-    // Ici vous pouvez ajouter la logique de recherche
-    console.log('Recherche:', e.target.value);
+  const handleSearchChange = (e) => setSearchQuery(e.target.value);
+
+  const filteredProjects = searchQuery
+    ? projects.filter(project =>
+        project.name.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    : [];
+
+  const handleProjectClick = (project) => {
+    setCurrentProject(project);
+    setProjectPage(true);
+    setSearchQuery("");
   };
 
   return (
@@ -79,8 +78,6 @@ const Header = () => {
             </motion.div>
             <div className={`absolute -top-0.5 -right-0.5 sm:-top-1 sm:-right-1 w-3 h-3 sm:w-4 sm:h-4 bg-gradient-to-r ${colors.buttons.add.gradient} rounded-full animate-pulse`}></div>
           </div>
-          
-          {/* Titre responsive */}
           <div className="min-w-0 hidden lg:block">
             <h1 className={`text-xl lg:text-2xl xl:text-3xl font-bold bg-gradient-to-r ${colors.primary.gradient} bg-clip-text text-transparent whitespace-nowrap`}>
               Ordonnancement des Tâches
@@ -89,59 +86,85 @@ const Header = () => {
           </div>
         </motion.div>
 
-        {/* Barre de recherche - Légèrement décalée vers le texte */}
+        {/* Barre de recherche */}
         <motion.div
           initial={{ y: -20, opacity: 0, scale: 0.9 }}
           animate={{ y: 0, opacity: 1, scale: 1 }}
           transition={{ duration: 0.6, delay: 0.4, ease: "easeOut" }}
-          className="flex-1 max-w-lg mx-2 sm:mx-3 lg:ml-0 lg:mr-4"
+          className="flex-1 max-w-lg mx-2 sm:mx-3 lg:ml-0 lg:mr-4 relative"
         >
-          <motion.div 
-            className="relative group"
-            whileHover={{ scale: 1.02 }}
-            transition={{ duration: 0.2, ease: "easeOut" }}
-          >
-            <motion.div 
-              className="absolute inset-y-0 left-0 pl-3 sm:pl-4 flex items-center pointer-events-none"
-              whileHover={{ x: 2 }}
-              transition={{ duration: 0.2 }}
-            >
-              <motion.div
-                whileHover={{ rotate: 15, scale: 1.1 }}
-                transition={{ duration: 0.2 }}
-              >
-                <Search className={`h-4 w-4 sm:h-5 sm:w-5 ${colors.text.muted} group-focus-within:text-slate-800 group-hover:text-stone-600 transition-all duration-300`} />
-              </motion.div>
+          <motion.div className="relative group" whileHover={{ scale: 1.02 }} transition={{ duration: 0.2 }}>
+            <motion.div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+              <Search className={`h-4 w-4 sm:h-5 sm:w-5 ${colors.text.muted}`} />
             </motion.div>
-            
+
             <motion.input
               type="text"
               placeholder="Rechercher vos projets..."
               value={searchQuery}
               onChange={handleSearchChange}
               whileFocus={{ scale: 1.01 }}
-              className={`w-full pl-10 sm:pl-12 pr-4 py-2.5 sm:py-3 text-sm sm:text-base ${colors.background.input} backdrop-blur-sm ${colors.primary.border} rounded-full focus:ring-2 focus:ring-rose-400/30 ${colors.primary.focus} focus:bg-white/95 focus:shadow-lg hover:bg-white/90 hover:border-stone-300/80 hover:shadow-md transition-all duration-300 placeholder:${colors.text.placeholder} hover:placeholder:text-stone-500`}
+              className={`w-full pl-10 sm:pl-12 pr-4 py-2.5 sm:py-3 text-sm sm:text-base ${colors.background.input} backdrop-blur-sm ${colors.primary.border} rounded-full focus:ring-2 focus:ring-rose-400/30 ${colors.primary.focus} focus:bg-white/95 focus:shadow-lg hover:bg-white/90 hover:border-stone-300/80 hover:shadow-md transition-all duration-300 placeholder:${colors.text.placeholder}`}
             />
-            
-            {/* Effet de brillance animé */}
-            <motion.div 
-              className="absolute inset-0 rounded-full bg-gradient-to-r from-transparent via-rose-400/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
-              initial={{ x: "-100%" }}
-              whileHover={{ 
-                x: "100%",
-                transition: { duration: 0.8, ease: "easeInOut" }
-              }}
-            />
-            
-            {/* Anneau de focus élégant */}
-            <div className="absolute inset-0 rounded-full ring-2 ring-transparent group-focus-within:ring-rose-400/20 transition-all duration-300 pointer-events-none"></div>
-            
-            {/* Effet de glow subtil */}
-            <div className={`absolute inset-0 rounded-full bg-gradient-to-r ${colors.buttons.add.gradient} opacity-0 group-hover:opacity-[0.03] blur-sm transition-all duration-500 pointer-events-none`}></div>
+
+            {/* Résultats de recherche */}
+            {filteredProjects.length > 0 && (
+            <div className="absolute top-full left-0 w-full mt-2 z-50 rounded-xl bg-white shadow-xl border max-h-72 overflow-y-auto custom-scrollbar">
+              <div className="p-2 space-y-2">
+                {filteredProjects.map((project, index) => (
+                  <motion.div
+                    key={project.id}
+                    initial={{ x: -20, opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    transition={{ delay: index * 0.05 }}
+                    whileHover={{ x: 4 }}
+                    className={`flex items-center p-3 ${colors.background.card} rounded-lg cursor-pointer transition-all duration-200 hover:${colors.background.overlay} hover:shadow-sm ${colors.primary.border}`}
+                    onClick={() => handleProjectClick(project)}
+                  >
+                    <div className={`w-8 h-8 bg-gradient-to-br ${colors.primary.gradientButton} rounded-lg flex items-center justify-center mr-3`}>
+                      <span className="text-white font-semibold text-xs">
+                        {project.name.charAt(0).toUpperCase()}
+                      </span>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className={`font-medium ${colors.text.primary} text-sm truncate`}>{project.name}</p>
+                      <p className={`text-xs ${colors.text.muted}`}>Modifié récemment</p>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+
+              {/* Custom scrollbar styles */}
+              <style jsx>{`
+                .custom-scrollbar::-webkit-scrollbar {
+                  width: 8px;
+                }
+                .custom-scrollbar::-webkit-scrollbar-track {
+                  background: ${colors.scrollbar.track};
+                  border-radius: 6px;
+                }
+                .custom-scrollbar::-webkit-scrollbar-thumb {
+                  background: ${colors.scrollbar.thumb};
+                  border-radius: 6px;
+                  border: 2px solid ${colors.scrollbar.track};
+                }
+                .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+                  background: ${colors.scrollbar.thumbHover};
+                }
+
+                /* Firefox */
+                .custom-scrollbar {
+                  scrollbar-width: thin;
+                  scrollbar-color: ${colors.scrollbar.thumb} ${colors.scrollbar.track};
+                }
+              `}</style>
+            </div>
+          )}
+
           </motion.div>
         </motion.div>
 
-        {/* Bouton de déconnexion */}
+        {/* Déconnexion */}
         <motion.button
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.95 }}
@@ -155,9 +178,6 @@ const Header = () => {
           >
             <Power size={18} className="sm:w-5 sm:h-5" />
           </motion.div>
-          
-          {/* Effet de survol */}
-          <div className="absolute inset-0 rounded-full bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
         </motion.button>
       </div>
     </motion.header>

@@ -21,7 +21,12 @@ const Layout = ({ children, setInitialTaskCount, setCurrentProject, setProjectPa
     <div className="min-h-screen flex flex-col">
       {/* Header - Prend toute la largeur */}
       <div className="z-40 fixed top-0 left-0 right-0">
-        <Header />
+      <Header 
+        projects={projects}
+        setCurrentProject={setCurrentProject}
+        setProjectPage={setProjectPage}
+      />
+
       </div>
 
       {/* Contenu principal avec sidebar */}

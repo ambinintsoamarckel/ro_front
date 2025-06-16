@@ -381,34 +381,97 @@ const TaskScheduler = ({ currentProject, initialTaskCount , isSecondSidebarOpen,
               </div>
 
               {/* Boutons d'action repositionnés */}
+              {/* Groupe de boutons Ajouter / Supprimer une colonne */}
               <motion.div
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.6 }}
-                className="absolute top-8 -right-24 flex flex-col items-center space-y-4"
+                className="absolute top-6 -right-16 flex flex-col items-center space-y-3"
               >
+                {/* Bouton Ajouter */}
                 <motion.button
                   whileHover={{ scale: 1.1, rotate: 90 }}
                   whileTap={{ scale: 0.9 }}
                   onClick={addColumn}
-                  className={`w-14 h-14 bg-gradient-to-r ${colors.buttons.add.gradient} ${colors.buttons.add.text} rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 border-2 border-white/50 backdrop-blur-sm ${colors.buttons.add.hover}`}
+                  className={`
+                    relative group w-12 h-12
+                    bg-gradient-to-br ${colors.buttons.add.gradient}
+                    ${colors.buttons.add.text}
+                    rounded-full shadow-lg hover:shadow-xl
+                    transition-all duration-500 ease-out
+                    border border-white/20 backdrop-blur-sm
+                    ${colors.buttons.add.hover}
+                    before:absolute before:inset-0
+                    before:bg-gradient-to-br before:from-white/20 before:via-transparent before:to-transparent
+                    before:rounded-full before:opacity-0 before:transition-opacity before:duration-300
+                    hover:before:opacity-100
+                  `}
                 >
-                  <Plus size={26} className="mx-auto" />
+                  <div className="relative z-10 flex items-center justify-center h-full">
+                    <Plus 
+                      size={20} 
+                      className="transition-transform duration-300 group-hover:scale-110" 
+                      strokeWidth={2.5}
+                    />
+                  </div>
+                  <div className="absolute inset-0 rounded-full overflow-hidden">
+                    <div className="absolute top-0 left-0 right-0 h-1/2 bg-gradient-to-b from-white/30 via-white/10 to-transparent opacity-60"></div>
+                  </div>
                 </motion.button>
 
+                {/* Bouton Supprimer */}
                 <motion.button
-                  whileHover={{ scale: 1.1, rotate: -90 }}
-                  whileTap={{ scale: 0.9 }}
+                  whileHover={{ 
+                    scale: tasks.length === 1 ? 1 : 1.1, 
+                    rotate: tasks.length === 1 ? 0 : -90
+                  }}
+                  whileTap={{ scale: tasks.length === 1 ? 1 : 0.95 }}
                   onClick={removeColumn}
                   disabled={tasks.length === 1}
-                  className={`w-14 h-14 rounded-full shadow-xl transition-all duration-300 border-2 border-white/50 backdrop-blur-sm ${
-                    tasks.length === 1
-                      ? "bg-stone-300 text-stone-500 cursor-not-allowed"
-                      : `bg-gradient-to-r ${colors.buttons.remove.gradient} ${colors.buttons.remove.text} hover:shadow-2xl ${colors.buttons.remove.hover}`
-                  }`}
+                  className={`
+                    relative group w-12 h-12 rounded-full shadow-lg
+                    transition-all duration-500 ease-out
+                    border border-white/20 backdrop-blur-sm
+                    ${
+                      tasks.length === 1
+                        ? 'bg-stone-300 text-stone-500 cursor-not-allowed opacity-60 shadow-inner'
+                        : `
+                          bg-gradient-to-br ${colors.buttons.remove.gradient}
+                          ${colors.buttons.remove.text}
+                          hover:shadow-xl ${colors.buttons.remove.hover}
+                          before:absolute before:inset-0
+                          before:bg-gradient-to-br before:from-white/20 before:via-transparent before:to-transparent
+                          before:rounded-full before:opacity-0 before:transition-opacity before:duration-300
+                          hover:before:opacity-100
+                        `
+                    }
+                  `}
                 >
-                  <Minus size={26} className="mx-auto" />
+                  <div className="relative z-10 flex items-center justify-center h-full">
+                    <Minus 
+                      size={20}
+                      className={`transition-transform duration-300 ${
+                        tasks.length === 1 ? '' : 'group-hover:scale-110'
+                      }`}
+                      strokeWidth={2.5}
+                    />
+                  </div>
+                  {tasks.length !== 1 && (
+                    <div className="absolute inset-0 rounded-full overflow-hidden">
+                      <div className="absolute top-0 left-0 right-0 h-1/2 bg-gradient-to-b from-white/30 via-white/10 to-transparent opacity-60"></div>
+                    </div>
+                  )}
                 </motion.button>
+                {/* Indicateur décoratif */}
+                <motion.div
+                  initial={{ opacity: 0, scale: 0 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.8 }}
+                  className="flex flex-col items-center space-y-2"
+                >
+                  <div className={`w-1 h-8 bg-gradient-to-b from-transparent via-stone-300/50 to-transparent rounded-full`}></div>
+                  <div className={`w-2 h-2 bg-gradient-to-br ${colors.buttons.add.gradient} rounded-full opacity-60 animate-pulse`}></div>
+                </motion.div>
               </motion.div>
             </motion.div>
 

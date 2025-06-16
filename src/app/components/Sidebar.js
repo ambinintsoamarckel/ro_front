@@ -143,7 +143,7 @@ const Sidebar = ({ setInitialTaskCount, setCurrentProject, setProjectPage, proje
     switch (secondSidebarContent) {
       case 'recent':
         return (
-          <div className="flex-1 overflow-y-auto p-4">
+          <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
             <div className="flex items-center justify-between mb-4">
               <h3 className={`text-lg font-semibold ${colors.text.primary}`}>Projets récents</h3>
               <button
@@ -167,7 +167,6 @@ const Sidebar = ({ setInitialTaskCount, setCurrentProject, setProjectPage, proje
                       onClick={() => {
                         setCurrentProject(project);
                         setProjectPage(true);
-                        closeSecondSidebar();
                       }}
                     >
                       <div className={`w-8 h-8 bg-gradient-to-br ${colors.primary.gradientButton} rounded-lg flex items-center justify-center mr-3`}>
@@ -206,7 +205,7 @@ const Sidebar = ({ setInitialTaskCount, setCurrentProject, setProjectPage, proje
       
       case 'projects':
         return (
-          <div className="flex-1 overflow-y-auto">
+          <div className="flex-1 overflow-y-auto custom-scrollbar">
             <div className="p-4">
               <div className="flex items-center justify-between mb-4">
                 <h3 className={`text-lg font-semibold ${colors.text.primary}`}>Mes Projets</h3>
@@ -241,7 +240,6 @@ const Sidebar = ({ setInitialTaskCount, setCurrentProject, setProjectPage, proje
                       onClick={() => {
                         setCurrentProject(project);
                         setProjectPage(true);
-                        closeSecondSidebar();
                       }}
                     >
                       <div className={`w-8 h-8 bg-gradient-to-br ${colors.primary.gradientButton} rounded-lg flex items-center justify-center mr-3`}>
@@ -280,7 +278,7 @@ const Sidebar = ({ setInitialTaskCount, setCurrentProject, setProjectPage, proje
       
       case 'favoris':
         return (
-          <div className="flex-1 overflow-y-auto p-4">
+          <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
             <div className="flex items-center justify-between mb-4">
               <h3 className={`text-lg font-semibold ${colors.text.primary}`}>Favoris</h3>
               <button
@@ -305,7 +303,7 @@ const Sidebar = ({ setInitialTaskCount, setCurrentProject, setProjectPage, proje
                       onClick={() => {
                         setCurrentProject(project);
                         setProjectPage(true);
-                        closeSecondSidebar();
+                        
                       }}
                     >
                       <div className={`w-8 h-8 bg-gradient-to-br ${colors.favorites.icon.bg} rounded-lg flex items-center justify-center mr-3`}>
@@ -335,7 +333,7 @@ const Sidebar = ({ setInitialTaskCount, setCurrentProject, setProjectPage, proje
       
       case 'parametres':
         return (
-          <div className="flex-1 overflow-y-auto p-4">
+          <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
             <div className="flex items-center justify-between mb-4">
               <h3 className={`text-lg font-semibold ${colors.text.primary}`}>Paramètres</h3>
               <button
@@ -384,7 +382,7 @@ const Sidebar = ({ setInitialTaskCount, setCurrentProject, setProjectPage, proje
       
       default: // home
         return (
-          <div className="flex-1 overflow-y-auto p-4">
+          <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
             <div className="flex items-center justify-between mb-4">
               <h3 className={`text-lg font-semibold ${colors.text.primary}`}>Accueil</h3>
               <button
@@ -420,7 +418,7 @@ const Sidebar = ({ setInitialTaskCount, setCurrentProject, setProjectPage, proje
                         onClick={() => {
                           setCurrentProject(project);
                           setProjectPage(true);
-                          closeSecondSidebar();
+
                         }}
                       >
                         <div className={`w-6 h-6 bg-gradient-to-br ${colors.primary.gradientButton} rounded-md flex items-center justify-center mr-3`}>
@@ -482,6 +480,28 @@ const Sidebar = ({ setInitialTaskCount, setCurrentProject, setProjectPage, proje
           </div>
         </motion.div>
       </motion.div>
+      <style jsx global>{`
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 8px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: ${colors.scrollbar.track};
+    border-radius: 6px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: ${colors.scrollbar.thumb};
+    border-radius: 6px;
+    border: 2px solid ${colors.scrollbar.track};
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: ${colors.scrollbar.thumbHover};
+  }
+
+  .custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: ${colors.scrollbar.thumb} ${colors.scrollbar.track};
+  }
+`}</style>
 
       {/* Deuxième sidebar */}
       <AnimatePresence>
@@ -509,6 +529,7 @@ const Sidebar = ({ setInitialTaskCount, setCurrentProject, setProjectPage, proje
           setIsModalOpen(false);
         }}
       />
+
     </>
   );
 };

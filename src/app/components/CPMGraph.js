@@ -948,20 +948,21 @@ const THEME = {
   }));
 
   return (
-    <div
-      ref={scrollContainerRef}
-      // Dans le style du scrollContainerRef
-      style={{
-        width: "100%",
-        height: "80vh",
-        overflow: "auto",
-        border: `1px solid ${colors.scrollbar.track}`,
-        borderRadius: "20px",
-        background: "linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(248,250,252,0.95) 100%)",
-        position: "relative",
-        boxShadow: "0 8px 32px rgba(99, 102, 241, 0.08)"
-      }}
-    >
+      <div
+        ref={scrollContainerRef}
+        className="custom-scrollbar"
+        style={{
+          width: "100%",
+          height: "80vh",
+          overflow: "auto",
+          border: `1px solid ${colors.scrollbar.track}`,
+          borderRadius: "20px",
+          background: "linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(248,250,252,0.95) 100%)",
+          position: "relative",
+          boxShadow: "0 8px 32px rgba(99, 102, 241, 0.08)"
+        }}
+      >
+
       {!isGraphReady && (
         <div
           style={{
@@ -1019,41 +1020,29 @@ const THEME = {
         }}
       />
 
-      <style jsx>{`
-        @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
-        }
-        
-        /* Scrollbar personnalisée avec couleurs harmonisées */
-        div[ref="scrollContainerRef"]::-webkit-scrollbar {
-          width: 12px;
-          height: 12px;
-        }
-        
-        div[ref="scrollContainerRef"]::-webkit-scrollbar-track {
-          background: ${colors.scrollbar.track};
-          border-radius: 6px;
-        }
-        
-        div[ref="scrollContainerRef"]::-webkit-scrollbar-thumb {
-          background: ${colors.scrollbar.thumb};
-          border-radius: 6px;
-          border: 2px solid ${colors.scrollbar.track};
-        }
-        
-        div[ref="scrollContainerRef"]::-webkit-scrollbar-thumb:hover {
-          background: ${colors.scrollbar.thumbHover};
-        }
-        
-        div[ref="scrollContainerRef"]::-webkit-scrollbar-thumb:active {
-          background: ${colors.scrollbar.thumbActive};
-        }
-        
-        div[ref="scrollContainerRef"]::-webkit-scrollbar-corner {
-          background: ${colors.scrollbar.track};
-        }
-      `}</style>
+<style jsx global>{`
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 8px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: ${colors.scrollbar.track};
+    border-radius: 6px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: ${colors.scrollbar.thumb};
+    border-radius: 6px;
+    border: 2px solid ${colors.scrollbar.track};
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: ${colors.scrollbar.thumbHover};
+  }
+
+  .custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: ${colors.scrollbar.thumb} ${colors.scrollbar.track};
+  }
+`}</style>
+
     </div>
   );
 });
