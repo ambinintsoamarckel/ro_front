@@ -1,76 +1,76 @@
-// colors.js - Configuration centralisée des couleurs
+// colors.js - Configuration centralisée des couleurs élégantes
 export const colors = {
-    // Couleurs principales
-    primary: {
-      gradient: 'from-indigo-600 via-purple-600 to-indigo-800',
-      gradientBg: 'from-indigo-500 via-purple-500 to-indigo-600',
-      gradientButton: 'from-indigo-500 to-purple-500',
-      text: 'text-indigo-600',
-      bg: 'bg-indigo-500',
-      border: 'border-indigo-200',
-      focus: 'focus:border-indigo-400'
+  // Couleurs principales - Tons sophistiqués charcoal et or rose
+  primary: {
+    gradient: 'from-slate-800 via-slate-700 to-zinc-900',
+    gradientBg: 'from-slate-700 via-zinc-700 to-slate-800',
+    gradientButton: 'from-rose-500 to-amber-500',
+    text: 'text-slate-800',
+    bg: 'bg-slate-700',
+    border: 'border-slate-300',
+    focus: 'focus:border-rose-400'
+  },
+
+  // Couleurs de fond - Base crème luxueuse
+  background: {
+    main: 'from-stone-50 via-amber-50/20 to-rose-50/10',
+    card: 'bg-white/95',
+    header: 'bg-white/90',
+    overlay: 'bg-stone-100/30'
+  },
+
+  // États des boutons - Accents dorés et cuivrés
+  buttons: {
+    edit: {
+      base: 'bg-amber-100/40 hover:bg-amber-200/60',
+      text: 'text-amber-800'
     },
-  
-    // Couleurs de fond
-    background: {
-      main: 'from-slate-50 via-indigo-50/30 to-purple-50/20',
-      card: 'bg-white/90',
-      header: 'bg-white/80',
-      overlay: 'bg-white/20'
+    delete: {
+      base: 'bg-rose-100/40 hover:bg-rose-400/70',
+      text: 'text-rose-800 hover:text-white'
     },
-  
-    // États des boutons
-    buttons: {
-      edit: {
-        base: 'bg-white/20 hover:bg-white/30',
-        text: 'text-white'
-      },
-      delete: {
-        base: 'bg-white/20 hover:bg-red-500/80',
-        text: 'text-white'
-      },
-      cancel: {
-        gradient: "from-slate-400 to-slate-500",
-        hover: "hover:from-slate-500 hover:to-slate-600",
-        text: "text-white"
-      },
-      save: {
-        gradient: "from-indigo-500 to-purple-500",
-        hover: "hover:from-indigo-600 hover:to-purple-600", 
-        text: "text-white"
-      },
-      favorite: {
-        active: 'text-yellow-500',
-        inactive: 'text-gray-400',
-        hover: 'hover:text-yellow-400'
-      }
+    cancel: {
+      gradient: "from-stone-400 to-zinc-500",
+      hover: "hover:from-stone-500 hover:to-zinc-600",
+      text: "text-white"
     },
-  
-    // Dépendances
-    dependencies: {
-      anterior: {
-        bg: 'from-amber-100 to-orange-100',
-        text: 'text-amber-800',
-        border: 'border-amber-200'
-      },
-      successor: {
-        bg: 'from-emerald-100 to-teal-100',
-        text: 'text-emerald-800',
-        border: 'border-emerald-200'
-      }
+    save: {
+      gradient: "from-amber-500 to-rose-500",
+      hover: "hover:from-amber-600 hover:to-rose-600", 
+      text: "text-white"
     },
-  
-    // Textes
-    text: {
-      primary: 'text-slate-700',
-      secondary: 'text-slate-600',
-      muted: 'text-slate-400',
-      placeholder: 'text-indigo-400'
-    },
-  
-    // Durée
-    duration: {
-      bg: 'from-indigo-100 to-purple-100',
-      text: 'text-indigo-800'
+    favorite: {
+      active: 'text-amber-500',
+      inactive: 'text-stone-400',
+      hover: 'hover:text-amber-400'
     }
-  };
+  },
+
+  // Dépendances - Tons terreux raffinés
+  dependencies: {
+    anterior: {
+      bg: 'from-amber-50 to-orange-50',
+      text: 'text-amber-900',
+      border: 'border-amber-200'
+    },
+    successor: {
+      bg: 'from-emerald-50 to-teal-50',
+      text: 'text-emerald-900',
+      border: 'border-emerald-200'
+    }
+  },
+
+  // Textes - Hiérarchie sophistiquée
+  text: {
+    primary: 'text-slate-800',
+    secondary: 'text-stone-600',
+    muted: 'text-stone-400',
+    placeholder: 'text-amber-400'
+  },
+
+  // Durée - Accent doré subtil
+  duration: {
+    bg: 'from-amber-50 to-rose-50',
+    text: 'text-amber-900'
+  }
+};

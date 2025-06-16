@@ -15,15 +15,15 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
   const animationTimeRef = useRef(0);
   const [graphSize, setGraphSize] = React.useState({ width: 1400, height: 1000 });
   const [isGraphReady, setIsGraphReady] = React.useState(false);
-
-  const THEME = {
-    primary: { base: "#6366f1", light: "#a5b4fc", dark: "#4338ca" },
-    secondary: { base: "#8b5cf6", light: "#c4b5fd", dark: "#7c3aed" },
-    accent: { base: "#f59e0b", light: "#fbbf24", dark: "#d97706" }, // Amber au lieu d'orange
-    critical: { base: "#ef4444", light: "#fca5a5", dark: "#dc2626" },
-    success: { base: "#10b981", light: "#6ee7b7", dark: "#059669" },
-    neutral: { base: "#64748b", light: "#cbd5e1", dark: "#475569" }
-  };
+// Thème principal - Palette minimaliste haut de gamme
+const THEME = {
+  primary: { base: "#1e293b", light: "#475569", dark: "#0f172a" }, // Slate sophistiqué
+  secondary: { base: "#f59e0b", light: "#fbbf24", dark: "#d97706" }, // Or élégant
+  accent: { base: "#e11d48", light: "#fb7185", dark: "#be123c" }, // Rose profond
+  critical: { base: "#dc2626", light: "#f87171", dark: "#991b1b" }, // Rouge raffiné
+  success: { base: "#059669", light: "#34d399", dark: "#047857" }, // Émeraude élégant
+  neutral: { base: "#57534e", light: "#a8a29e", dark: "#292524" } // Pierre naturelle
+};
   // Animation du chemin critique
   const animateCriticalPath = useCallback(() => {
     if (!networkRef.current || criticalPathRef.current.length === 0) return;

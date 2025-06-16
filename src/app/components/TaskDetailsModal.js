@@ -1,39 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Trash2, Plus, CheckCircle, Users, AlertCircle, CheckCircle2, Wifi, WifiOff } from 'lucide-react';
-
-// Simulation des couleurs (à remplacer par votre fichier colors.js)
-const colors = {
-  primary: {
-    gradient: "from-indigo-600 to-purple-600",
-    gradientButton: "from-indigo-500 to-purple-500",
-  },
-  dependencies: {
-    successor: {
-      bg: "from-emerald-50 to-green-50",
-      border: "border-emerald-200",
-      text: "text-emerald-700"
-    },
-    anterior: {
-      bg: "from-blue-50 to-indigo-50", 
-      border: "border-blue-200",
-      text: "text-blue-700"
-    }
-  },
-  buttons: {
-    cancel: {
-      gradient: "from-slate-400 to-slate-500",
-      hover: "hover:from-slate-500 hover:to-slate-600",
-      text: "text-white"
-    },
-    save: {
-      gradient: "from-indigo-500 to-purple-500",
-      hover: "hover:from-indigo-600 hover:to-purple-600", 
-      text: "text-white"
-    }
-  }
-};
-
+import { colors } from "../colors";
 // Composant de notification réutilisable
 const NotificationSystem = ({ notification, onClose }) => {
   if (!notification) return null;
