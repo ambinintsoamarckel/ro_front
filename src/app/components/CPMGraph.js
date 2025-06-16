@@ -15,8 +15,15 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
   const animationTimeRef = useRef(0);
   const [graphSize, setGraphSize] = React.useState({ width: 1400, height: 1000 });
   const [isGraphReady, setIsGraphReady] = React.useState(false);
-  const [selectedNodeId, setSelectedNodeId] = React.useState(null);
 
+  const THEME = {
+    primary: { base: "#6366f1", light: "#a5b4fc", dark: "#4338ca" },
+    secondary: { base: "#8b5cf6", light: "#c4b5fd", dark: "#7c3aed" },
+    accent: { base: "#f59e0b", light: "#fbbf24", dark: "#d97706" }, // Amber au lieu d'orange
+    critical: { base: "#ef4444", light: "#fca5a5", dark: "#dc2626" },
+    success: { base: "#10b981", light: "#6ee7b7", dark: "#059669" },
+    neutral: { base: "#64748b", light: "#cbd5e1", dark: "#475569" }
+  };
   // Animation du chemin critique
   const animateCriticalPath = useCallback(() => {
     if (!networkRef.current || criticalPathRef.current.length === 0) return;
@@ -188,36 +195,28 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
             label: "DEBUT",
             shape: "circle",
             size: 50,
+            // Nouveau (gradient indigo-purple)
             color: { 
-              background: "#4f46e5",
-              border: "#3730a3",
-              highlight: {
-                background: "#6366f1",
-                border: "#4f46e5"
-              }
+              background: THEME.primary.base,
+              border: THEME.primary.dark,
+              highlight: { background: THEME.primary.light, border: THEME.primary.base }
             },
-            borderWidth: 3,
+            borderWidth: 2, // Au lieu de 3
             font: { 
               color: "#ffffff", 
-              size: 16, 
-              face: "Inter, -apple-system, BlinkMacSystemFont, sans-serif", 
-              bold: true 
+              size: 16, // Plus petit et élégant
+              face: "Inter, system-ui, sans-serif", 
+              bold: 600 // Au lieu de true/false
             },
             widthConstraint: {
-              minimum: 75,
-              maximum: 75
+              minimum: 65,
+              maximum: 65
             },
             heightConstraint: {
-              minimum: 75,
-              maximum: 75
+              minimum: 65,
+              maximum: 65
             },
-            shadow: {
-              enabled: true,
-              color: "rgba(79, 70, 229, 0.3)",
-              size: 10,
-              x: 0,
-              y: 4
-            },
+            shadow: { enabled: true, color: "rgba(99, 102, 241, 0.15)", size: 6, x: 0, y: 2 }
           },
           ...tasks.map(task => {
             const isCritical = task.slack === 0;
@@ -228,37 +227,37 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
               label: label,
               shape: "circle",
               color: {
-                background: isCritical ? "#fee2e2" : "#e0e7ff",
-                border: isCritical ? "#dc2626" : "#4f46e5",
+                background: isCritical ? THEME.critical.light : THEME.neutral.light,
+                border: isCritical ? THEME.critical.base : THEME.primary.base,
                 highlight: {
-                  background: isCritical ? "#fecaca" : "#c7d2fe",
-                  border: isCritical ? "#ef4444" : "#4338ca"
+                  background: isCritical ? THEME.critical.base : THEME.primary.light,
+                  border: isCritical ? THEME.critical.dark : THEME.primary.base
                 }
               },
               borderWidth: isCritical ? 3 : 2,
               font: {
-                color: isCritical ? "#b91c1c" : "#312e81",
-                size: 16,
-                face: "Inter, -apple-system, BlinkMacSystemFont, sans-serif",
-                bold: true,
+                color: isCritical ? THEME.critical.dark : THEME.neutral.dark,
+                size: 16, // Plus compact
+                face: "Inter, system-ui, sans-serif",
+                weight: 500,
                 multi: true,
-                align: "center",
-                vadjust: -4
+                align: "center"
               },
               widthConstraint: {
-                minimum: 75,
-                maximum: 75
+                minimum: 65,
+                maximum: 65
               },
               heightConstraint: {
-                minimum: 75,
-                maximum: 75
+                minimum: 65,
+                maximum: 65
               },
+              // Remplacer les shadow avec des valeurs plus douces
               shadow: {
                 enabled: true,
-                color: isCritical ? "rgba(220, 38, 38, 0.15)" : "rgba(79, 70, 229, 0.15)",
-                size: 8,
+                color: "rgba(79, 70, 229, 0.12)", // Au lieu de 0.3
+                size: 8, // Au lieu de 10-12
                 x: 0,
-                y: 3
+                y: 2 // Au lieu de 4
               },
               fixed: { x: false, y: false }
             };
@@ -268,38 +267,28 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
             label: `FIN\n${maxEarlyFinish}`,
             shape: "circle",
             size: 70,
-            color: { 
-              background: "#7c3aed",
-              border: "#5b21b6",
-              highlight: {
-                background: "#8b5cf6",
-                border: "#7c3aed"
-              }
-            },
-            borderWidth: 3,
-            font: {
-              color: "#ffffff",
-              size: 16,
-              face: "Inter, -apple-system, BlinkMacSystemFont, sans-serif",
-              bold: true,
-              multi: true,
-              align: "center"
-            },
-            widthConstraint: {
-              minimum: 75,
-              maximum: 75
-            },
-            heightConstraint: {
-              minimum: 75,
-              maximum: 75
-            },            
-            shadow: {
-              enabled: true,
-              color: "rgba(124, 58, 237, 0.3)",
-              size: 12,
-              x: 0,
-              y: 4
-            },
+            // Garder purple mais harmonisé
+          color: { 
+            background: THEME.primary.base,
+            border: THEME.primary.dark,
+            highlight: { background: THEME.primary.light, border: THEME.primary.base }
+          },
+          borderWidth: 2, // Au lieu de 3
+          font: { 
+            color: "#ffffff", 
+            size: 16, // Plus petit et élégant
+            face: "Inter, system-ui, sans-serif", 
+            bold: 600 // Au lieu de true/false
+          },
+          widthConstraint: {
+            minimum: 65,
+            maximum: 65
+          },
+          heightConstraint: {
+            minimum: 65,
+            maximum: 65
+          },
+          shadow: { enabled: true, color: "rgba(99, 102, 241, 0.15)", size: 6, x: 0, y: 2 },
           }
         ]);
 
@@ -308,9 +297,9 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
             from: "start",
             to: taskId,
             color: { 
-              color: "#7c3aed",
-              highlight: "#8b5cf6",
-              hover: "#8b5cf6"
+              color: "#8b5cf6", // purple-500 au lieu de #7c3aed
+              highlight: "#a855f7",
+              hover: "#a855f7"
             },
             width: 2.5,
             smooth: { type: "continuous", roundness: 0.3 },
@@ -321,12 +310,13 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
                 type: "arrow" 
               } 
             },
+            // Remplacer les shadow avec des valeurs plus douces
             shadow: {
               enabled: true,
-              color: "rgba(124, 58, 237, 0.15)",
-              size: 5,
+              color: "rgba(79, 70, 229, 0.12)", // Au lieu de 0.3
+              size: 8, // Au lieu de 10-12
               x: 0,
-              y: 2
+              y: 2 // Au lieu de 4
             }
           })),
           ...tasks.flatMap(task =>
@@ -334,18 +324,24 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
               const target = tasks.find(t => t.id === succ);
               const isCritical = task.slack === 0 && target && target.slack === 0 &&
                                  task.earlyFinish === target.earlyStart;
+              const getEdgeWidth = (isCritical, isStartEnd = false) => {
+              if (isStartEnd) return 2.5;
+              return isCritical ? 3.5 : 2;
+            };
 
               return {
                 from: task.id,
                 to: succ,
                 label: task.duration.toString(),
+                // Couleurs harmonisées :
                 color: { 
-                  color: isCritical ? "#dc2626" : "#4f46e5",
-                  highlight: isCritical ? "#ef4444" : "#6366f1",
-                  hover: isCritical ? "#ef4444" : "#6366f1"
+                  color: isCritical ? THEME.accent.base : THEME.primary.base,
+                  highlight: isCritical ? THEME.accent.light : THEME.primary.light,
+                  hover: isCritical ? THEME.accent.light : THEME.primary.light
                 },
-                width: isCritical ? 3 : 2,
-                font: {
+                width: getEdgeWidth(isCritical),
+                // Partout où il y a font, utiliser :
+                font: { 
                   color: "#1e293b",
                   size: 16,
                   face: "Inter, -apple-system, BlinkMacSystemFont, sans-serif",
@@ -362,12 +358,13 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
                     type: "arrow" 
                   } 
                 },
+                // Remplacer les shadow avec des valeurs plus douces
                 shadow: {
                   enabled: true,
-                  color: isCritical ? "rgba(220, 38, 38, 0.15)" : "rgba(79, 70, 229, 0.15)",
-                  size: 5,
+                  color: "rgba(79, 70, 229, 0.12)", // Au lieu de 0.3
+                  size: 8, // Au lieu de 10-12
                   x: 0,
-                  y: 2
+                  y: 2 // Au lieu de 4
                 },
                 isCritical: isCritical
               };
@@ -387,14 +384,12 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
                 hover: isCritical ? "#ef4444" : "#8b5cf6"
               },
               width: isCritical ? 3 : 2,
-              font: {
-                color: "#1e293b",
-                size: 16,
-                face: "Inter, -apple-system, BlinkMacSystemFont, sans-serif",
-                bold: true,
-                background: "rgba(255, 255, 255, 0.95)",
-                strokeWidth: 0,
-                strokeColor: "transparent"
+              // Partout où il y a font, utiliser :
+              font: { 
+                color: "#334155", // slate-700 au lieu de couleurs variables
+                size: 16, // Taille plus cohérente
+                face: "Inter, system-ui, -apple-system, sans-serif", // Modernisé
+                bold: true 
               },
               smooth: { type: "continuous", roundness: 0.3 },
               arrows: { 
@@ -404,12 +399,13 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
                   type: "arrow" 
                 } 
               },
+              // Remplacer les shadow avec des valeurs plus douces
               shadow: {
                 enabled: true,
-                color: isCritical ? "rgba(220, 38, 38, 0.15)" : "rgba(124, 58, 237, 0.15)",
-                size: 5,
+                color: "rgba(79, 70, 229, 0.12)", // Au lieu de 0.3
+                size: 8, // Au lieu de 10-12
                 x: 0,
-                y: 2
+                y: 2 // Au lieu de 4
               },
               isCritical: isCritical
             };
@@ -424,8 +420,8 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
           layout: {
             hierarchical: {
               direction: "LR",
-              nodeSpacing: 180,
-              levelSeparation: 220,
+              nodeSpacing: 120, // Au lieu de 180
+              levelSeparation: 160, // Au lieu de 220
               sortMethod: "directed"
             }
           },
@@ -470,13 +466,13 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
           // Calcul du nouveau width/height du canvas
           const xs = Object.values(positions).map(p => p.x);
           const ys = Object.values(positions).map(p => p.y);
-          const padding = 200;
-          
+          const padding = 120; // Au lieu de 200
           const contentWidth = Math.abs(Math.max(...xs) - Math.min(...xs)) + padding * 2;
           const contentHeight = Math.abs(Math.max(...ys) - Math.min(...ys)) + padding * 2;
           
-          const minWidth = 1400;
-          const minHeight = 1000;
+          // Tailles minimales réduites :
+          const minWidth = 1200; // Au lieu de 1400
+          const minHeight = 800;  // Au lieu de 1000
           
           const width = Math.max(minWidth, contentWidth);
           const height = Math.max(minHeight, contentHeight);
@@ -499,7 +495,7 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
           setTimeout(applyFixedZoom, 200);
 
           // Limites pour le clamping
-          const clampPadding = 40;
+          const clampPadding = 30;
           const minX = -width / 2 + clampPadding;
           const maxX = width / 2 - clampPadding;
           const minY = -height / 2 + clampPadding;
@@ -596,9 +592,9 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
               // Dessiner l'effet glow en 3 couches
               for (let i = 0; i < 3; i++) {
                 ctx.globalAlpha = glowIntensity * (0.3 - i * 0.1);
-                ctx.strokeStyle = "#ff6b6b";
+                ctx.strokeStyle = "#f97316";
                 ctx.lineWidth = (6 - i * 2);
-                ctx.shadowColor = "#ff6b6b";
+                ctx.shadowColor = "#f97316";
                 ctx.shadowBlur = 15 + i * 5;
                 
                 ctx.beginPath();
@@ -618,15 +614,15 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
               // Particule principale
               ctx.globalAlpha = 0.8 + 0.2 * Math.sin(currentTime * 6);
               ctx.fillStyle = "#fff";
-              ctx.shadowColor = "#ff6b6b";
+              ctx.shadowColor = "#f97316";
               ctx.shadowBlur = 20;
               ctx.beginPath();
               ctx.arc(particleX, particleY, 5, 0, 2 * Math.PI);
               ctx.fill();
               
               // Traînée de particules
-              for (let j = 1; j <= 4; j++) {
-                const trailDelay = j * 0.08;
+              for (let j = 1; j <= 2; j++) {
+                const trailDelay = j * 0.12;
                 const trailProgress = ((currentTime * particleSpeed - trailDelay) % cycleDuration) / cycleDuration;
                 
                 if (trailProgress > 0) {
@@ -635,7 +631,7 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
                   
                   ctx.globalAlpha = (0.6 - j * 0.12);
                   ctx.beginPath();
-                  ctx.arc(trailX, trailY, 3 - j * 0.5, 0, 2 * Math.PI);
+                  ctx.arc(trailX, trailY, 2.5 - j * 0.8, 0, 2 * Math.PI); 
                   ctx.fill();
                 }
               }
@@ -658,8 +654,8 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
               const haloAlpha = 0.2 + 0.15 * Math.sin(currentTime * 1.5);
               
               ctx.globalAlpha = haloAlpha;
-              ctx.fillStyle = "#ff6b6b";
-              ctx.shadowColor = "#ff6b6b";
+              ctx.fillStyle = "#f97316";
+              ctx.shadowColor = "#f97316";
               ctx.shadowBlur = 30;
               ctx.beginPath();
               ctx.arc(pos.x, pos.y, haloSize, 0, 2 * Math.PI);
@@ -736,11 +732,11 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
               ctx.stroke();
 
               // Configuration du badge
-              const badgeWidth = 36;
-              const badgeHeight = 24;
-              const cornerRadius = 12;
+              const badgeWidth = 28; // Au lieu de 36
+              const badgeHeight = 18; // Au lieu de 24
+              const cornerRadius = 9; // Au lieu de 12
+              const badgeY = pos.y - 45; // Plus proche du nœud
               const badgeX = pos.x - badgeWidth / 2;
-              const badgeY = pos.y - 55;
 
               const isCritical = task.slack === 0;
               
@@ -759,11 +755,8 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
                   ? 4 * normalizedSin * normalizedSin * normalizedSin
                   : 1 - Math.pow(-2 * normalizedSin + 2, 3) / 2;
                 
-                // Bondissement vertical élégant
-                badgeYOffset = -8 * easedValue; // Vers le haut (négatif)
-                
-                // Scaling subtil qui suit le bondissement
-                badgeScale = 1 + 0.15 * easedValue;
+                  badgeYOffset = -6 * easedValue; // Au lieu de -8
+                  badgeScale = 1 + 0.08 * easedValue; // Au lieu de 0.15
                 
                 // Effet de glow pulsant synchronisé
                 badgeAlpha = 0.9 + 0.1 * Math.sin(currentTime * 8);
@@ -783,7 +776,7 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
               
               // Effet de glow pour les badges critiques
               if (isCritical) {
-                ctx.shadowColor = "#ff6b6b";
+                ctx.shadowColor = "#f97316";
                 ctx.shadowBlur = 12 * badgeScale;
                 ctx.shadowOffsetX = 0;
                 ctx.shadowOffsetY = 2;
@@ -800,9 +793,10 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
               if (isCritical) {
                 // Dégradé dynamique pour les badges critiques
                 const glowIntensity = 0.1 + 0.05 * Math.sin(currentTime * 6);
-                gradient.addColorStop(0, `rgba(239, 68, 68, ${badgeAlpha - glowIntensity})`);
-                gradient.addColorStop(0.5, `rgba(239, 68, 68, ${badgeAlpha})`);
-                gradient.addColorStop(1, `rgba(220, 38, 38, ${badgeAlpha})`);
+                // Dégradé plus sophistiqué
+                gradient.addColorStop(0, `rgba(251, 146, 60, ${badgeAlpha - glowIntensity})`); // orange-400
+                gradient.addColorStop(0.5, `rgba(249, 115, 22, ${badgeAlpha})`); // orange-500
+                gradient.addColorStop(1, `rgba(234, 88, 12, ${badgeAlpha})`); // orange-600
               } else {
                 gradient.addColorStop(0, "#10b981");
                 gradient.addColorStop(1, "#059669");
@@ -948,15 +942,16 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
   return (
     <div
       ref={scrollContainerRef}
+      // Dans le style du scrollContainerRef
       style={{
         width: "100%",
         height: "80vh",
         overflow: "auto",
-        border: "1px solid #e2e8f0",
-        borderRadius: "16px",
-        boxShadow: "0 10px 30px rgba(0, 0, 0, 0.04), 0 4px 12px rgba(0, 0, 0, 0.06)",
-        background: "#ffffff",
-        position: "relative"
+        border: "1px solid rgba(99, 102, 241, 0.1)", // Plus subtil
+        borderRadius: "20px", // Au lieu de 16px
+        background: "linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(248,250,252,0.95) 100%)",
+        position: "relative",
+        boxShadow: "0 8px 32px rgba(99, 102, 241, 0.08)" // Une seule ombre propre
       }}
     >
       {!isGraphReady && (
@@ -982,16 +977,13 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
               gap: "16px"
             }}
           >
-            <div
-              style={{
-                width: "40px",
-                height: "40px",
-                border: "4px solid #f1f5f9",
-                borderTop: "4px solid #4f46e5",
-                borderRadius: "50%",
-                animation: "spin 1s linear infinite"
-              }}
-            />
+        <div style={{
+          width: "32px", height: "32px", // Plus petit
+          border: "3px solid #f1f5f9", // Plus fin
+          borderTop: "3px solid #6366f1",
+          borderRadius: "50%",
+          animation: "spin 0.8s linear infinite" // Plus rapide
+        }} />
             <div
               style={{
                 color: "#64748b",
