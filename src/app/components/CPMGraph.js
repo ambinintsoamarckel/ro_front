@@ -3,6 +3,7 @@ import React, { useEffect, useRef, forwardRef, useImperativeHandle, useCallback 
 import { Network } from "vis-network";
 import { DataSet } from "vis-data";
 import "vis-network/styles/vis-network.css";
+import { colors } from "../colors";
 
 const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
   const containerRef = useRef(null);
@@ -17,12 +18,19 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
   const [isGraphReady, setIsGraphReady] = React.useState(false);
 // Thème principal - Palette minimaliste haut de gamme
 const THEME = {
-  primary: { base: "#1e293b", light: "#475569", dark: "#0f172a" }, // Slate sophistiqué
-  secondary: { base: "#f59e0b", light: "#fbbf24", dark: "#d97706" }, // Or élégant
-  accent: { base: "#e11d48", light: "#fb7185", dark: "#be123c" }, // Rose profond
-  critical: { base: "#dc2626", light: "#f87171", dark: "#991b1b" }, // Rouge raffiné
-  success: { base: "#059669", light: "#34d399", dark: "#047857" }, // Émeraude élégant
-  neutral: { base: "#57534e", light: "#a8a29e", dark: "#292524" } // Pierre naturelle
+  primary: { base: "#1e293b", light: "#475569", dark: "#0f172a" }, // Conservé pour vis-network
+  secondary: { base: "#f59e0b", light: "#fbbf24", dark: "#d97706" },
+  accent: { base: "#e11d48", light: "#fb7185", dark: "#be123c" },
+  critical: { base: "#dc2626", light: "#f87171", dark: "#991b1b" },
+  success: { base: "#059669", light: "#34d399", dark: "#047857" },
+  neutral: { base: "#57534e", light: "#a8a29e", dark: "#292524" },
+  // Ajouter les couleurs de scrollbar depuis colors.js
+  scrollbar: {
+    track: colors.scrollbar.track,
+    thumb: colors.scrollbar.thumb,
+    thumbHover: colors.scrollbar.thumbHover,
+    thumbActive: colors.scrollbar.thumbActive
+  }
 };
   // Animation du chemin critique
   const animateCriticalPath = useCallback(() => {
@@ -947,11 +955,11 @@ const THEME = {
         width: "100%",
         height: "80vh",
         overflow: "auto",
-        border: "1px solid rgba(99, 102, 241, 0.1)", // Plus subtil
-        borderRadius: "20px", // Au lieu de 16px
+        border: `1px solid ${colors.scrollbar.track}`,
+        borderRadius: "20px",
         background: "linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(248,250,252,0.95) 100%)",
         position: "relative",
-        boxShadow: "0 8px 32px rgba(99, 102, 241, 0.08)" // Une seule ombre propre
+        boxShadow: "0 8px 32px rgba(99, 102, 241, 0.08)"
       }}
     >
       {!isGraphReady && (
@@ -977,23 +985,23 @@ const THEME = {
               gap: "16px"
             }}
           >
-        <div style={{
-          width: "32px", height: "32px", // Plus petit
-          border: "3px solid #f1f5f9", // Plus fin
-          borderTop: "3px solid #6366f1",
-          borderRadius: "50%",
-          animation: "spin 0.8s linear infinite" // Plus rapide
-        }} />
-            <div
-              style={{
-                color: "#64748b",
-                fontSize: "14px",
-                fontFamily: "Inter, -apple-system, BlinkMacSystemFont, sans-serif",
-                fontWeight: "500"
-              }}
-            >
-              Chargement du graphique...
-            </div>
+          <div style={{
+            width: "32px", 
+            height: "32px",
+            border: `3px solid ${colors.scrollbar.track}`,
+            borderTop: "3px solid #6366f1",
+            borderRadius: "50%",
+            animation: "spin 0.8s linear infinite"
+          }} />
+
+          <div style={{
+            color: colors.text.secondary.replace('text-', '#64748b'), // Convertir en hex
+            fontSize: "14px",
+            fontFamily: "Inter, -apple-system, BlinkMacSystemFont, sans-serif",
+            fontWeight: "500"
+          }}>
+            Chargement du graphique...
+          </div>
           </div>
         </div>
       )}
@@ -1015,6 +1023,35 @@ const THEME = {
         @keyframes spin {
           0% { transform: rotate(0deg); }
           100% { transform: rotate(360deg); }
+        }
+        
+        /* Scrollbar personnalisée avec couleurs harmonisées */
+        div[ref="scrollContainerRef"]::-webkit-scrollbar {
+          width: 12px;
+          height: 12px;
+        }
+        
+        div[ref="scrollContainerRef"]::-webkit-scrollbar-track {
+          background: ${colors.scrollbar.track};
+          border-radius: 6px;
+        }
+        
+        div[ref="scrollContainerRef"]::-webkit-scrollbar-thumb {
+          background: ${colors.scrollbar.thumb};
+          border-radius: 6px;
+          border: 2px solid ${colors.scrollbar.track};
+        }
+        
+        div[ref="scrollContainerRef"]::-webkit-scrollbar-thumb:hover {
+          background: ${colors.scrollbar.thumbHover};
+        }
+        
+        div[ref="scrollContainerRef"]::-webkit-scrollbar-thumb:active {
+          background: ${colors.scrollbar.thumbActive};
+        }
+        
+        div[ref="scrollContainerRef"]::-webkit-scrollbar-corner {
+          background: ${colors.scrollbar.track};
         }
       `}</style>
     </div>
