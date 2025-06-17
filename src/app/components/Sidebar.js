@@ -241,7 +241,7 @@ const Sidebar = ({ setInitialTaskCount, setCurrentProject, setProjectPage, proje
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => setIsModalOpen(true)}
-                    className={`px-4 py-2 bg-gradient-to-r ${colors.primary.gradientButton} text-white rounded-lg ${colors.buttons.save.hover} transition-colors text-sm`}
+                    className={`px-4 py-2 ${colors.primary.gradientButton} text-white rounded-lg ${colors.buttons.save.hover} transition-colors text-sm`}
                   >
                     Créer un projet
                   </motion.button>
@@ -262,7 +262,7 @@ const Sidebar = ({ setInitialTaskCount, setCurrentProject, setProjectPage, proje
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => setIsModalOpen(true)}
-                    className={`p-2 bg-gradient-to-r ${colors.primary.gradientButton} text-white rounded-lg ${colors.buttons.save.hover} transition-colors`}
+                    className={`p-2 ${colors.primary.gradientButton} text-white rounded-lg ${colors.buttons.save.hover} transition-colors`}
                   >
                     <BadgePlus size={16} />
                   </motion.button>
@@ -290,7 +290,7 @@ const Sidebar = ({ setInitialTaskCount, setCurrentProject, setProjectPage, proje
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                       onClick={() => setIsModalOpen(true)}
-                      className={`px-4 py-2 bg-gradient-to-r ${colors.primary.gradientButton} text-white rounded-lg ${colors.buttons.save.hover} transition-colors text-sm`}
+                      className={`px-4 py-2 ${colors.primary.gradientButton} text-white rounded-lg ${colors.buttons.save.hover} transition-colors text-sm`}
                     >
                       Créer un projet
                     </motion.button>
@@ -380,7 +380,7 @@ const Sidebar = ({ setInitialTaskCount, setCurrentProject, setProjectPage, proje
                   </div>
                   <div className="flex items-center justify-between">
                     <span className={`text-sm ${colors.text.secondary}`}>Notifications</span>
-                    <button className={`w-10 h-5 bg-gradient-to-r ${colors.primary.gradientButton} rounded-full relative`}>
+                    <button className={`w-10 h-5 ${colors.primary.gradientButton} rounded-full relative`}>
                       <div className="w-4 h-4 bg-white rounded-full absolute top-0.5 right-0.5 transition-transform shadow-sm"></div>
                     </button>
                   </div>
@@ -422,7 +422,7 @@ const Sidebar = ({ setInitialTaskCount, setCurrentProject, setProjectPage, proje
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => setIsModalOpen(true)}
-                className={`w-full flex items-center justify-center px-4 py-3 bg-gradient-to-r ${colors.primary.gradientButton} text-white rounded-lg ${colors.buttons.save.hover} transition-all duration-300 shadow-sm`}
+                className={`w-full flex items-center justify-center px-4 py-3 ${colors.primary.gradientButton} text-white rounded-lg ${colors.buttons.save.hover} transition-all duration-300 shadow-sm`}
               >
                 <BadgePlus size={18} className="mr-2" />
                 <span className="font-medium text-sm">Nouveau projet</span>

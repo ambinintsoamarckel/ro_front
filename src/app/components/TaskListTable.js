@@ -216,7 +216,7 @@ const TaskListTable = ({
                   initial={{ scale: 0.9, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
                   transition={{ duration: 0.5, delay: 0.2 }}
-                  className={`text-center text-3xl font-bold bg-gradient-to-r ${colors.primary.gradient} bg-clip-text text-transparent`}
+                  className={`text-center text-3xl font-bold ${colors.primary.gradient} bg-clip-text text-transparent`}
                 >
                   {currentProject.name}
                 </motion.h1>
@@ -313,7 +313,7 @@ const TaskListTable = ({
           className="relative"
         >
           {/* Table avec scrollbars visibles */}
-          <div className="overflow-x-auto" style={{ scrollbarWidth: 'thin', scrollbarColor: '#d4a574 #f1f5f9' }}>
+          <div className="overflow-x-auto custom-scrollbar" >
             <div className={`backdrop-blur-xl ${colors.background.card} rounded-2xl shadow-2xl border border-white/30 overflow-hidden min-w-max`}>
               <table ref={tableRef} className="w-full">
                 <thead>
@@ -435,7 +435,7 @@ const TaskListTable = ({
                                 min="1"
                               />
                             ) : (
-                              <div className={`px-3 py-1.5 bg-gradient-to-r ${colors.duration.bg} ${colors.duration.text} font-semibold rounded-lg text-sm shadow-sm`}>
+                              <div className={`px-3 py-1.5 ${colors.duration.bg} ${colors.duration.text} font-semibold rounded-lg text-sm shadow-sm`}>
                                 {task.duration}
                               </div>
                             )}
@@ -451,7 +451,7 @@ const TaskListTable = ({
                                   whileHover={{ scale: 1.05 }}
                                   whileTap={{ scale: 0.95 }}
                                   onClick={handleEditSave}
-                                  className={`p-1.5 bg-gradient-to-r ${colors.buttons.save.gradient} ${colors.buttons.save.text} rounded-lg ${colors.buttons.save.hover} transition-all shadow-lg`}
+                                  className={`p-1.5 ${colors.buttons.save.gradient} ${colors.buttons.save.text} rounded-lg ${colors.buttons.save.hover} transition-all shadow-lg`}
                                 >
                                   <CheckSquare2 size={18} />
                                 </motion.button>
@@ -459,7 +459,7 @@ const TaskListTable = ({
                                   whileHover={{ scale: 1.05 }}
                                   whileTap={{ scale: 0.95 }}
                                   onClick={handleEditCancel}
-                                  className={`p-1.5 bg-gradient-to-r ${colors.buttons.cancel.gradient} ${colors.buttons.cancel.text} rounded-lg ${colors.buttons.cancel.hover} transition-all shadow-lg`}
+                                  className={`p-1.5 ${colors.buttons.cancel.gradient} ${colors.buttons.cancel.text} rounded-lg ${colors.buttons.cancel.hover} transition-all shadow-lg`}
                                 >
                                   <SquareX size={18} />
                                 </motion.button>
@@ -479,7 +479,7 @@ const TaskListTable = ({
                                     whileHover={{ scale: 1.05 }}
                                     whileTap={{ scale: 0.95 }}
                                     onClick={() => handleDeleteConfirm(task.id)}
-                                    className={`p-1.5 bg-gradient-to-r ${colors.buttons.delete.base.replace('bg-rose-100/40 hover:bg-rose-400/70', colors.buttons.cancel.gradient)} ${colors.buttons.cancel.text} rounded-lg ${colors.buttons.cancel.hover} transition-all shadow-lg`}
+                                    className={`p-1.5 ${colors.buttons.delete.base.replace('bg-rose-100/40 hover:bg-rose-400/70', colors.buttons.cancel.gradient)} ${colors.buttons.cancel.text} rounded-lg ${colors.buttons.cancel.hover} transition-all shadow-lg`}
                                   >
                                     <CheckSquare2 size={18} />
                                   </motion.button>
@@ -487,7 +487,7 @@ const TaskListTable = ({
                                     whileHover={{ scale: 1.05 }}
                                     whileTap={{ scale: 0.95 }}
                                     onClick={handleDeleteCancel}
-                                    className={`p-1.5 bg-gradient-to-r ${colors.buttons.remove.gradient} ${colors.buttons.remove.text} rounded-lg ${colors.buttons.remove.hover} transition-all shadow-lg`}
+                                    className={`p-1.5 ${colors.buttons.remove.gradient} ${colors.buttons.remove.text} rounded-lg ${colors.buttons.remove.hover} transition-all shadow-lg`}
                                   >
                                     <SquareX size={18} />
                                   </motion.button>
@@ -519,7 +519,7 @@ const TaskListTable = ({
                               whileTap={{ scale: 0.95 }}
                               onClick={handleSaveTempColumn}
                               disabled={!tempTask.name.trim() || tempTask.duration <= 0}
-                              className={`p-1.5 bg-gradient-to-r ${colors.buttons.save.gradient} ${colors.buttons.save.text} rounded-lg ${colors.buttons.save.hover} transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed`}
+                              className={`p-1.5 ${colors.buttons.save.gradient} ${colors.buttons.save.text} rounded-lg ${colors.buttons.save.hover} transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed`}
                             >
                               <Save size={18} />
                             </motion.button>
@@ -527,7 +527,7 @@ const TaskListTable = ({
                               whileHover={{ scale: 1.05 }}
                               whileTap={{ scale: 0.95 }}
                               onClick={handleCancelTempColumn}
-                              className={`p-1.5 bg-gradient-to-r ${colors.buttons.cancel.gradient} ${colors.buttons.cancel.text} rounded-lg ${colors.buttons.cancel.hover} transition-all shadow-lg`}
+                              className={`p-1.5 ${colors.buttons.cancel.gradient} ${colors.buttons.cancel.text} rounded-lg ${colors.buttons.cancel.hover} transition-all shadow-lg`}
                             >
                               <SquareX size={18} />
                             </motion.button>
@@ -568,7 +568,7 @@ const TaskListTable = ({
                                     return dependentTask ? dependentTask.name : "Tâche inconnue";
                                   })
                                   .map((name, idx) => (
-                                    <span key={idx} className={`px-2 py-1 bg-gradient-to-r ${colors.dependencies.anterior.bg} ${colors.dependencies.anterior.text} text-xs font-medium rounded-full border ${colors.dependencies.anterior.border}`}>
+                                    <span key={idx} className={`px-2 py-1 ${colors.dependencies.anterior.bg} ${colors.dependencies.anterior.text} text-xs font-medium rounded-full border ${colors.dependencies.anterior.border}`}>
                                       {name}
                                     </span>
                                   ))}
@@ -581,7 +581,7 @@ const TaskListTable = ({
                                     return successorTask ? successorTask.name : "Tâche inconnue";
                                   })
                                   .map((name, idx) => (
-                                    <span key={idx} className={`px-2 py-1 bg-gradient-to-r ${colors.dependencies.successor.bg} ${colors.dependencies.successor.text} text-xs font-medium rounded-full border ${colors.dependencies.successor.border}`}>
+                                    <span key={idx} className={`px-2 py-1 ${colors.dependencies.successor.bg} ${colors.dependencies.successor.text} text-xs font-medium rounded-full border ${colors.dependencies.successor.border}`}>
                                       {name}
                                     </span>
                                   ))}

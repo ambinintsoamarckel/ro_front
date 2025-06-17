@@ -268,7 +268,7 @@ const TaskScheduler = ({ currentProject, initialTaskCount , isSecondSidebarOpen,
                   initial={{ scale: 0.9, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
                   transition={{ duration: 0.5, delay: 0.2 }}
-                  className={`text-center text-3xl font-bold bg-gradient-to-r ${colors.primary.gradient} bg-clip-text text-transparent`}
+                  className={`text-center text-3xl font-bold ${colors.primary.gradient} bg-clip-text text-transparent`}
                 >
                   {project.name || "Nouveau Projet"}
                 </motion.h1>
@@ -489,7 +489,7 @@ const TaskScheduler = ({ currentProject, initialTaskCount , isSecondSidebarOpen,
                 disabled={!allTasksValid}
                 className={`px-10 py-5 rounded-2xl font-semibold text-lg shadow-2xl transition-all duration-300 ${
                   allTasksValid 
-                    ? `bg-gradient-to-r ${colors.buttons.save.gradient} ${colors.buttons.save.text} ${colors.buttons.save.hover} transform hover:scale-105 border border-white/30`
+                    ? `${colors.buttons.save.gradient} ${colors.buttons.save.text} ${colors.buttons.save.hover} transform hover:scale-105 border border-white/30`
                     : "bg-stone-300 text-stone-500 cursor-not-allowed"
                 }`}
               >
@@ -527,7 +527,7 @@ const TaskScheduler = ({ currentProject, initialTaskCount , isSecondSidebarOpen,
             initial={{ x: -20, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
             transition={{ delay: 1.2 }}
-            className={`text-3xl font-bold bg-gradient-to-r ${colors.primary.gradient} bg-clip-text text-transparent mb-8`}
+            className={`text-3xl font-bold ${colors.primary.gradient} bg-clip-text text-transparent mb-8`}
           >
             Diagramme du chemin critique
           </motion.h2>

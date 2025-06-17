@@ -76,10 +76,10 @@ const Header = ({ projects = [], setCurrentProject, setProjectPage }) => {
                 className="w-full h-full object-contain filter brightness-0 invert"
               />
             </motion.div>
-            <div className={`absolute -top-0.5 -right-0.5 sm:-top-1 sm:-right-1 w-3 h-3 sm:w-4 sm:h-4 bg-gradient-to-r ${colors.buttons.add.gradient} rounded-full animate-pulse`}></div>
+            <div className={`absolute -top-0.5 -right-0.5 sm:-top-1 sm:-right-1 w-3 h-3 sm:w-4 sm:h-4 ${colors.buttons.add.gradient} rounded-full animate-pulse`}></div>
           </div>
           <div className="min-w-0 hidden lg:block">
-            <h1 className={`text-xl lg:text-2xl xl:text-3xl font-bold bg-gradient-to-r ${colors.primary.gradient} bg-clip-text text-transparent whitespace-nowrap`}>
+            <h1 className={`text-xl lg:text-2xl xl:text-3xl font-bold ${colors.primary.gradient} bg-clip-text text-transparent whitespace-nowrap`}>
               Ordonnancement des Tâches
             </h1>
             <p className={`text-xs lg:text-sm ${colors.text.secondary} font-medium`}>Gestion intelligente des tâches</p>
@@ -170,7 +170,7 @@ const Header = ({ projects = [], setCurrentProject, setProjectPage }) => {
           whileTap={{ scale: 0.95 }}
           onClick={handleLogout}
           disabled={isLoggingOut}
-          className={`group relative p-2 sm:p-3 bg-gradient-to-r ${colors.buttons.add.gradient} ${colors.buttons.add.text} rounded-full shadow-lg hover:shadow-xl ${colors.buttons.add.hover} transition-all duration-300 disabled:opacity-50 flex-shrink-0`}
+          className={`group relative p-2 sm:p-3 ${colors.buttons.add.gradient} ${colors.buttons.add.text} rounded-full shadow-lg hover:shadow-xl ${colors.buttons.add.hover} transition-all duration-300 disabled:opacity-50 flex-shrink-0`}
         >
           <motion.div
             animate={isLoggingOut ? { rotate: 360 } : { rotate: 0 }}

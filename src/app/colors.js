@@ -1,208 +1,211 @@
-// colors.js - Configuration centralisée des couleurs élégantes
+// colors.js - Thème "Pure Elegance" - Minimaliste & Sophistiqué - Version Violet/Indigo
 export const colors = {
-  // Couleurs principales - Tons sophistiqués charcoal et or rose
+  // Couleurs principales - Dégradés colorés avec accent violet/indigo
   primary: {
-    gradient: 'from-slate-800 via-slate-700 to-zinc-900',
-    gradientBg: 'from-slate-700 via-zinc-700 to-slate-800',
-    gradientButton: 'from-rose-500 to-amber-500',
-    text: 'text-slate-800',
-    bg: 'bg-slate-700',
-    border: 'border-slate-300',
-    focus: 'focus:border-rose-400'
+    gradient: 'bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-800',
+    gradientBg: 'bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-600',
+    gradientButton: 'bg-gradient-to-r from-indigo-500 to-purple-500',
+    text: 'text-indigo-600',
+    bg: 'bg-indigo-500',
+    border: 'border-indigo-200',
+    focus: 'focus:border-indigo-400'
   },
 
-  // Couleurs de fond - Base crème luxueuse
+  // Couleurs de fond - Dégradés colorés subtils
   background: {
-    main: 'bg-gradient-to-br from-stone-50 via-amber-50/20 to-rose-50/10',
-    card: 'bg-white/95',
-    header: 'bg-white/90',
-    overlay: 'bg-stone-100/30',
-    input: 'bg-white/80',
-    inputFocus: 'bg-white/95'
+    main: 'bg-gradient-to-r from-slate-50 via-indigo-50/30 to-purple-50/20',
+    card: 'bg-white/90',
+    header: 'bg-white/80',
+    overlay: 'bg-white/20',
+    input: 'bg-white/90',
+    inputFocus: 'bg-white'
   },
 
-  // États des boutons - Accents dorés et cuivrés
+  // États des boutons - Accent violet/indigo + neutrals
   buttons: {
     add: {
-      gradient: 'from-amber-500 to-rose-500',
-      hover: 'hover:from-amber-600 hover:to-rose-600',
+      gradient: 'bg-gradient-to-r from-indigo-500 to-purple-500',
+      hover: 'hover:from-indigo-600 hover:to-purple-600',
       text: 'text-white'
     },
     remove: {
-      gradient: 'from-stone-400 to-zinc-500',
-      hover: 'hover:from-stone-500 hover:to-zinc-600',
+      gradient: 'bg-gradient-to-r from-slate-400 to-slate-500',
+      hover: 'hover:from-slate-500 hover:to-slate-600',
       text: 'text-white'
     },
     edit: {
-      base: 'bg-amber-100/40 hover:bg-amber-200/60',
-      text: 'text-amber-800'
+      base: 'bg-white/20 hover:bg-white/30',
+      text: 'text-white'
     },
     delete: {
-      base: 'bg-rose-100/40 hover:bg-rose-400/70',
-      text: 'text-rose-800 hover:text-white'
+      base: 'bg-white/20 hover:bg-red-500/80',
+      text: 'text-white'
     },
     cancel: {
-      gradient: "from-stone-400 to-zinc-500",
-      hover: "hover:from-stone-500 hover:to-zinc-600",
+      gradient: "bg-gradient-to-r from-slate-400 to-slate-500",
+      hover: "hover:from-slate-500 hover:to-slate-600",
       text: "text-white"
     },
     save: {
-      gradient: "from-amber-500 to-rose-500",
-      hover: "hover:from-amber-600 hover:to-rose-600",
+      gradient: "bg-gradient-to-r from-indigo-500 to-purple-500",
+      hover: "hover:from-indigo-600 hover:to-purple-600",
       text: "text-white"
     },
     favorite: {
-      active: 'text-amber-500',
-      inactive: 'text-stone-400',
-      hover: 'hover:text-amber-400'
+      active: 'text-yellow-500',
+      inactive: 'text-gray-400',
+      hover: 'hover:text-yellow-400'
     }
   },
 
-  // Header - Couleurs spécifiques pour le header
+  // Header - Design avec dégradés colorés
   header: {
     logo: {
-      bg: 'from-slate-800 via-slate-700 to-zinc-900',
-      accent: 'from-amber-500 to-rose-500'
+      bg: 'bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-800',
+      accent: 'bg-gradient-to-r from-indigo-500 to-purple-500'
     },
     title: {
-      gradient: 'from-slate-800 via-slate-700 to-zinc-900',
-      subtitle: 'text-stone-600'
+      gradient: 'bg-gradient-to-r from-slate-700 to-slate-600',
+      subtitle: 'text-slate-600'
     },
     search: {
       icon: {
-        default: 'text-stone-400',
-        focus: 'text-slate-800',
-        hover: 'text-stone-600'
+        default: 'text-slate-500',
+        focus: 'text-indigo-600',
+        hover: 'text-slate-700'
       },
       input: {
-        bg: 'bg-white/80',
-        bgHover: 'hover:bg-white/90',
-        bgFocus: 'focus:bg-white/95',
-        border: 'border-slate-300',
-        borderHover: 'hover:border-stone-300/80',
-        borderFocus: 'focus:border-rose-400',
-        placeholder: 'placeholder:text-stone-400',
-        placeholderHover: 'hover:placeholder:text-stone-500',
-        ring: 'focus:ring-rose-400/30'
+        bg: 'bg-white/90',
+        bgHover: 'hover:bg-white/95',
+        bgFocus: 'focus:bg-white',
+        border: 'border-indigo-200',
+        borderHover: 'hover:border-indigo-300',
+        borderFocus: 'focus:border-indigo-400',
+        placeholder: 'placeholder:text-indigo-400',
+        placeholderHover: 'hover:placeholder:text-indigo-500',
+        ring: 'focus:ring-indigo-500/20'
       },
       effects: {
-        shine: 'from-transparent via-rose-400/5 to-transparent',
-        glow: 'from-amber-500/5 via-transparent to-rose-500/5',
-        ring: 'ring-rose-400/20'
+        shine: 'bg-gradient-to-r from-transparent via-indigo-500/5 to-transparent',
+        glow: 'bg-gradient-to-r from-indigo-600/5 via-transparent to-indigo-500/5',
+        ring: 'ring-indigo-500/15'
       }
     }
   },
 
-  // Table - Styling spécifique pour les tableaux
+  // Table - Design avec dégradés colorés
   table: {
     header: {
-      primary: 'bg-gradient-to-r from-slate-700 via-zinc-700 to-slate-800',
-      secondary: 'bg-gradient-to-r from-white to-stone-50/50',
+      primary: 'bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-800',
+      secondary: 'bg-gradient-to-r from-slate-100 to-indigo-50',
       text: 'text-white',
-      textSecondary: 'text-slate-800'
+      textSecondary: 'text-slate-700'
     },
     input: {
-      primary: 'bg-white/20 text-white placeholder-stone-200',
-      secondary: 'bg-stone-50 text-slate-800',
-      focus: 'focus:bg-white/30 focus:border-white',
-      focusSecondary: 'focus:bg-white focus:border-rose-400'
+      primary: 'bg-white/10 text-white placeholder-indigo-300',
+      secondary: 'bg-white/90 text-slate-700',
+      focus: 'focus:bg-white/20 focus:border-white',
+      focusSecondary: 'focus:bg-white focus:border-indigo-400'
     },
-    border: 'border-stone-200'
+    border: 'border-indigo-200'
   },
 
-  // Favoris - Couleurs spécifiques pour l'onglet favoris
+  // Favoris - Section des favoris (couleurs neutres)
   favorites: {
     icon: {
-      bg: 'from-amber-400 via-yellow-500 to-amber-600',
+      bg: 'bg-gradient-to-r from-gray-500 to-gray-600',
       text: 'text-white'
     },
     card: {
-      bg: 'bg-gradient-to-br from-amber-50/60 to-yellow-50/40',
-      border: 'border-amber-200/50',
-      hover: 'hover:from-amber-100/70 hover:to-yellow-100/50'
+      bg: 'bg-gradient-to-r from-gray-50 to-slate-50',
+      border: 'border-gray-200',
+      hover: 'hover:from-gray-50 hover:to-slate-100'
     },
     empty: {
-      icon: 'text-amber-300',
-      text: 'text-amber-600'
+      icon: 'text-gray-300',
+      text: 'text-gray-600'
     }
   },
 
-  // Dépendances - Tons terreux raffinés
+  // Dépendances - Dégradés colorés différenciés
   dependencies: {
     anterior: {
-      bg: 'from-amber-50 to-orange-50',
-      text: 'text-amber-900',
+      bg: 'bg-gradient-to-r from-amber-100 to-orange-100',
+      text: 'text-amber-800',
       border: 'border-amber-200'
     },
     successor: {
-      bg: 'from-emerald-50 to-teal-50',
-      text: 'text-emerald-900',
+      bg: 'bg-gradient-to-r from-emerald-100 to-teal-100',
+      text: 'text-emerald-800',
       border: 'border-emerald-200'
     }
   },
 
-  // Notifications - Système cohérent avec le thème principal
+  // Notifications - Système cohérent et minimal
   notifications: {
     success: {
-      bg: 'bg-gradient-to-r from-emerald-50/95 to-teal-50/95',
-      border: 'border-emerald-200/80',
-      text: 'text-emerald-800',
-      iconBg: 'bg-emerald-100/80',
-      iconColor: 'text-emerald-600'
+      bg: 'bg-green-50',
+      border: 'border-green-200',
+      text: 'text-green-800',
+      iconBg: 'bg-green-100',
+      iconColor: 'text-green-600'
     },
     error: {
-      bg: 'bg-gradient-to-r from-rose-50/95 to-red-50/95',
-      border: 'border-rose-200/80',
-      text: 'text-rose-800',
-      iconBg: 'bg-rose-100/80',
-      iconColor: 'text-rose-600'
+      bg: 'bg-red-50',
+      border: 'border-red-200',
+      text: 'text-red-800',
+      iconBg: 'bg-red-100',
+      iconColor: 'text-red-600'
     },
     warning: {
-      bg: 'bg-gradient-to-r from-amber-50/95 to-orange-50/95',
-      border: 'border-amber-200/80',
-      text: 'text-amber-800',
-      iconBg: 'bg-amber-100/80',
-      iconColor: 'text-amber-600'
+      bg: 'bg-orange-50',
+      border: 'border-orange-200',
+      text: 'text-orange-800',
+      iconBg: 'bg-orange-100',
+      iconColor: 'text-orange-600'
     },
     info: {
-      bg: 'bg-gradient-to-r from-amber-50/95 to-rose-50/95',
-      border: 'border-amber-200/80',
-      text: 'text-amber-800',
-      iconBg: 'bg-amber-100/80',
-      iconColor: 'text-amber-600'
+      bg: 'bg-indigo-50',
+      border: 'border-indigo-200',
+      text: 'text-indigo-800',
+      iconBg: 'bg-indigo-100',
+      iconColor: 'text-indigo-600'
     },
     network: {
-      bg: 'bg-gradient-to-r from-slate-50/95 to-stone-50/95',
-      border: 'border-slate-200/80',
+      bg: 'bg-slate-50',
+      border: 'border-slate-200',
       text: 'text-slate-800',
-      iconBg: 'bg-slate-100/80',
+      iconBg: 'bg-slate-100',
       iconColor: 'text-slate-600'
     }
   },
 
-  // Textes - Hiérarchie sophistiquée
+  // Textes - Hiérarchie claire avec couleurs douces
   text: {
-    primary: 'text-slate-800',
-    secondary: 'text-stone-600',
-    muted: 'text-stone-400',
-    placeholder: 'text-stone-400'
+    primary: 'text-slate-700',
+    secondary: 'text-slate-600',
+    muted: 'text-slate-400',
+    placeholder: 'text-indigo-400'
   },
 
-  // Durée - Accent doré subtil
+  // Durée - Dégradé violet/indigo subtil
   duration: {
-    bg: 'from-amber-50 to-rose-50',
-    text: 'text-amber-900'
+    bg: 'bg-gradient-to-r from-indigo-100 to-purple-100',
+    text: 'text-indigo-800'
   },
+
+  // Toggle - Design avec dégradés colorés
   toggle: {
-  container: 'bg-white/95 backdrop-blur-sm border-white/30',
-  active: 'bg-gradient-to-r from-rose-500 to-amber-500 text-white shadow-lg transform scale-105',
-  inactive: 'text-stone-600 hover:text-slate-800'
-},
-  // Scrollbar - Styling cohérent avec le thème principal
+    container: 'bg-white/90 border-indigo-200 shadow-sm',
+    active: 'bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow-md transform scale-105',
+    inactive: 'text-slate-600 hover:text-slate-700'
+  },
+
+  // Scrollbar - Design avec couleurs violet/indigo
   scrollbar: {
-    track: '#f1f5f9',           // stone-100 - Piste claire et discrète
-    thumb: '#d4a574',           // Couleur dorée harmonieuse avec le thème amber/rose
-    thumbHover: '#c2956b',      // Version plus foncée au survol
-    thumbActive: '#b8855f'      // Version encore plus foncée lors du clic
+    track: '#f1f5f9',           // slate-100 - Piste douce
+    thumb: '#6366f1',           // indigo-500 - Accent violet/indigo
+    thumbHover: '#4f46e5',      // indigo-600 - Plus intense au survol
+    thumbActive: '#4338ca'      // indigo-700 - Actif
   }
 };
