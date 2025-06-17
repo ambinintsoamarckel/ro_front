@@ -121,7 +121,7 @@ const Header = ({ projects = [], setCurrentProject, setProjectPage }) => {
                     className={`flex items-center p-3 ${colors.background.card} rounded-lg cursor-pointer transition-all duration-200 hover:${colors.background.overlay} hover:shadow-sm ${colors.primary.border}`}
                     onClick={() => handleProjectClick(project)}
                   >
-                    <div className={`w-8 h-8 bg-gradient-to-br ${colors.primary.gradientButton} rounded-lg flex items-center justify-center mr-3`}>
+                    <div className={`w-8 h-8 ${colors.projects.colors[index % colors.projects.colors.length]} rounded-lg flex items-center justify-center mr-3 ${colors.projects.shadows[index % colors.projects.shadows.length]} group-hover:scale-110 transition-transform duration-300`}>
                       <span className="text-white font-semibold text-xs">
                         {project.name.charAt(0).toUpperCase()}
                       </span>
