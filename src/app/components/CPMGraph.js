@@ -4,6 +4,7 @@ import { Network } from "vis-network";
 import { DataSet } from "vis-data";
 import "vis-network/styles/vis-network.css";
 import { colors } from "../colors";
+import { THEME} from "../theme";
 
 const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
   const containerRef = useRef(null);
@@ -16,22 +17,7 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
   const animationTimeRef = useRef(0);
   const [graphSize, setGraphSize] = React.useState({ width: 1400, height: 1000 });
   const [isGraphReady, setIsGraphReady] = React.useState(false);
-// Thème principal - Palette minimaliste haut de gamme
-const THEME = {
-  primary: { base: "#1e293b", light: "#475569", dark: "#0f172a" }, // Conservé pour vis-network
-  secondary: { base: "#f59e0b", light: "#fbbf24", dark: "#d97706" },
-  accent: { base: "#e11d48", light: "#fb7185", dark: "#be123c" },
-  critical: { base: "#dc2626", light: "#f87171", dark: "#991b1b" },
-  success: { base: "#059669", light: "#34d399", dark: "#047857" },
-  neutral: { base: "#57534e", light: "#a8a29e", dark: "#292524" },
-  // Ajouter les couleurs de scrollbar depuis colors.js
-  scrollbar: {
-    track: colors.scrollbar.track,
-    thumb: colors.scrollbar.thumb,
-    thumbHover: colors.scrollbar.thumbHover,
-    thumbActive: colors.scrollbar.thumbActive
-  }
-};
+
   // Animation du chemin critique
   const animateCriticalPath = useCallback(() => {
     if (!networkRef.current || criticalPathRef.current.length === 0) return;
