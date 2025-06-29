@@ -21,6 +21,20 @@ const Sidebar = ({ setInitialTaskCount, setCurrentProject, setProjectPage, proje
     }
   }, [secondSidebarOpen, onSecondSidebarToggle]);
 
+  // Fermer le dropdown quand on clique ailleurs
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (openDropdownId && !event.target.closest('.dropdown-container')) {
+        setOpenDropdownId(null);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [openDropdownId]);
+
   // Charger les projets au montage
   useEffect(() => {
     const fetchProjects = async () => {
@@ -97,29 +111,47 @@ const Sidebar = ({ setInitialTaskCount, setCurrentProject, setProjectPage, proje
   const sidebarItems = [
     { id: 'menu', icon:Menu, label: 'Menu', action: () => handleMenuClick() },
     { id: 'nouveau', icon: BadgePlus, label: 'Nouveau', action: () => setIsModalOpen(true) },
-    { id: 'home', icon: Home, label: 'Accueil', action: () => openSecondSidebar('home') },
+    { id: 'home', icon: Home, label: 'Accueil', action: () => {setProjectPage(false); setSecondSidebarOpen(false)} },
     { id: 'projects', icon: FolderOpen, label: 'Projets', action: () => openSecondSidebar('projects') },
     { id: 'favoris', icon: Star, label: 'Favoris', action: () => openSecondSidebar('favoris') },
     { id: 'parametres', icon: Settings, label: 'Paramètres', action: () => openSecondSidebar('parametres') },
   ];
-  const ProjectDropdown = ({ onEdit, onDelete }) => (
-    <div className={`absolute right-2 top-10 w-32 ${colors.background.card} ${colors.primary.border} rounded-lg ${colors.effects.glow} z-50`}>
+
+  const ProjectDropdown = ({ onEdit, onDelete, projectId }) => (
+    <motion.div 
+      initial={{ opacity: 0, scale: 0.95, y: -10 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      exit={{ opacity: 0, scale: 0.95, y: -10 }}
+      transition={{ duration: 0.15 }}
+      className={`dropdown-container absolute right-0 top-full mt-1 w-36 ${colors.background.card} ${colors.primary.border} rounded-lg shadow-xl z-[9999] overflow-hidden`}
+      style={{ 
+        boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+        backdropFilter: 'blur(8px)'
+      }}
+    >
       <button
-        onClick={onEdit}
-        className={`flex items-center w-full px-3 py-2 text-sm ${colors.buttons.edit.text} ${colors.buttons.edit.base} ${colors.buttons.edit.hover} rounded-t-lg transition-all duration-200`}
+        onClick={(e) => {
+          e.stopPropagation();
+          onEdit();
+        }}
+        className={`flex items-center w-full px-4 py-3 text-sm ${colors.buttons.edit.text} ${colors.buttons.edit.base} ${colors.buttons.edit.hover} transition-all duration-200 border-b border-opacity-10 border-gray-200`}
       >
-        <Edit2 size={14} className="mr-2" />
+        <Edit2 size={14} className="mr-3" />
         Modifier
       </button>
       <button
-        onClick={onDelete}
-        className={`flex items-center w-full px-3 py-2 text-sm ${colors.buttons.delete.text} ${colors.buttons.delete.base} ${colors.buttons.delete.hover} rounded-b-lg transition-all duration-200`}
+        onClick={(e) => {
+          e.stopPropagation();
+          onDelete();
+        }}
+        className={`flex items-center w-full px-4 py-3 text-sm ${colors.buttons.delete.text} ${colors.buttons.delete.base} ${colors.buttons.delete.hover} transition-all duration-200`}
       >
-        <Trash2 size={14} className="mr-2" />
+        <Trash2 size={14} className="mr-3" />
         Supprimer
       </button>
-    </div>
+    </motion.div>
   ); 
+
   const renderProjectCard = (project, index) => (
     <motion.div
       key={project.id}
@@ -128,6 +160,7 @@ const Sidebar = ({ setInitialTaskCount, setCurrentProject, setProjectPage, proje
       transition={{ delay: index * 0.1 }}
       whileHover={{ x: 4, scale: 1.02 }}
       className={`relative flex items-center justify-between p-3 ${colors.background.card} rounded-lg cursor-pointer transition-all duration-300 ${colors.effects.glowHover} ${colors.primary.border} group`}
+      style={{ zIndex: openDropdownId === project.id ? 1000 : 'auto' }}
     >
       <div
         className="flex items-center flex-1 min-w-0"
@@ -151,29 +184,34 @@ const Sidebar = ({ setInitialTaskCount, setCurrentProject, setProjectPage, proje
         </div>
       </div>
   
-      <div className="relative">
+      <div className="relative dropdown-container">
         <button
           onClick={(e) => {
             e.stopPropagation();
             setOpenDropdownId(openDropdownId === project.id ? null : project.id);
           }}
-          className={`p-1 rounded-full hover:${colors.background.overlay} transition-all duration-200 ${colors.effects.glowHover}`}
+          className={`p-2 rounded-full hover:${colors.background.overlay} transition-all duration-200 ${colors.effects.glowHover} ${
+            openDropdownId === project.id ? `${colors.background.overlay} scale-110` : ''
+          }`}
         >
           <MoreVertical size={18} className={colors.text.muted} />
         </button>
   
-        {openDropdownId === project.id && (
-          <ProjectDropdown
-            onEdit={() => {
-              console.log("Modifier", project.id);
-              setOpenDropdownId(null);
-            }}
-            onDelete={() => {
-              console.log("Supprimer", project.id);
-              setOpenDropdownId(null);
-            }}
-          />
-        )}
+        <AnimatePresence>
+          {openDropdownId === project.id && (
+            <ProjectDropdown
+              projectId={project.id}
+              onEdit={() => {
+                console.log("Modifier", project.id);
+                setOpenDropdownId(null);
+              }}
+              onDelete={() => {
+                console.log("Supprimer", project.id);
+                setOpenDropdownId(null);
+              }}
+            />
+          )}
+        </AnimatePresence>
       </div>
     </motion.div>
   );
