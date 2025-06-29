@@ -85,7 +85,7 @@ export default function LoginPage() {
     } catch (error) {
       setErrorMessage("Une erreur s'est produite. Veuillez réessayer.");
     } finally {
-      setTimeout(() => setIsLoading(false), 800);
+      setIsLoading(false);
     }
   };
   if (isCheckingAuth) return null;

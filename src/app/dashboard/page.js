@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Layout from "../components/Layout";
+import DashboardHome from "../components/DashboardHome";
 import TaskScheduler from "../components/TaskScheduler";
 import { checkAuthStatus } from "@/utils/auth"; // adapte le chemin
 
@@ -36,15 +37,18 @@ const Dashboard = () => {
       projects={projects}
       setProjects={setProjects}
     >
-      {(projectPage || initialTaskCount) && (
+      {projectPage || initialTaskCount ? (
         <TaskScheduler
           initialTaskCount={initialTaskCount}
           currentProject={currentProject}
           setProjects={setProjects}
         />
+      ) : (
+        <DashboardHome />
       )}
     </Layout>
   );
+  
 };
 
 export default Dashboard;
