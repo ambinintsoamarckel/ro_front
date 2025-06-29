@@ -81,7 +81,7 @@ export const colors = {
     }
   },
 
-  // Sidebar - Design minimaliste et élégant
+  // Sidebar - Design minimaliste et élégant avec contraste amélioré
   sidebar: {
     main: {
       bg: 'bg-white/98 backdrop-blur-sm',
@@ -90,58 +90,58 @@ export const colors = {
     },
     icons: {
       default: 'text-slate-600',
-      hover: 'text-slate-700',
-      active: 'text-white',
-      bg: 'bg-slate-100',
-      bgHover: 'hover:bg-slate-100',
-      bgActive: 'bg-gradient-to-r from-slate-700 via-slate-600 to-slate-800'
+      hover: 'text-slate-800 hover:scale-105',
+      active: 'text-slate-800',
+      bg: 'bg-transparent',        // Fond transparent par défaut
+      bgHover: 'hover:bg-slate-100/70 hover:shadow-sm hover:shadow-slate-500/10',
+      bgActive: 'bg-slate-200/80'  // Fond actif plus visible mais doux
     },
     items: {
       menu: {
-        icon: 'text-slate-700',
-        bg: 'bg-gradient-to-r from-slate-100 to-gray-100',
-        hover: 'hover:from-slate-150 hover:to-gray-150',
-        shadow: 'hover:shadow-sm hover:shadow-slate-500/10'
+        icon: 'text-slate-700 hover:text-slate-900',
+        bg: 'bg-transparent',
+        hover: 'hover:bg-slate-100/80 hover:scale-102 hover:shadow-sm',
+        shadow: 'hover:shadow-slate-500/10 transition-all duration-200'
       },
       nouveau: {
-        icon: 'text-white',
-        bg: 'bg-gradient-to-r from-slate-700 via-slate-600 to-slate-800',
-        hover: 'hover:from-slate-800 hover:via-slate-700 hover:to-slate-900',
-        shadow: 'shadow-md shadow-slate-500/20'
+        icon: 'text-slate-700 hover:text-slate-900',           // Texte sombre au lieu de blanc
+        bg: 'bg-gradient-to-r from-slate-200/60 to-slate-300/60', // Fond plus clair
+        hover: 'hover:bg-gradient-to-r hover:from-slate-300/80 hover:to-slate-400/80 hover:scale-102', // Hover plus sombre mais lisible
+        shadow: 'shadow-sm shadow-slate-500/15 hover:shadow-md hover:shadow-slate-500/25 transition-all duration-200'
       },
       home: {
-        icon: 'text-orange-700',
-        bg: 'bg-gradient-to-r from-orange-50 to-amber-50',
-        hover: 'hover:from-orange-100 hover:to-amber-100',
-        shadow: 'hover:shadow-sm hover:shadow-orange-500/10'
+        icon: 'text-orange-700 hover:text-orange-800',        // Plus foncé pour le contraste
+        bg: 'bg-gradient-to-r from-orange-100/70 to-amber-100/70', // Fond plus opaque
+        hover: 'hover:bg-gradient-to-r hover:from-orange-200/90 hover:to-amber-200/90 hover:scale-102',
+        shadow: 'hover:shadow-sm hover:shadow-orange-500/15 transition-all duration-200'
       },
       projects: {
-        icon: 'text-emerald-700',
-        bg: 'bg-gradient-to-r from-emerald-50 to-teal-50',
-        hover: 'hover:from-emerald-100 hover:to-teal-100',
-        shadow: 'hover:shadow-sm hover:shadow-emerald-500/10'
+        icon: 'text-emerald-700 hover:text-emerald-800',
+        bg: 'bg-gradient-to-r from-emerald-100/70 to-teal-100/70',
+        hover: 'hover:bg-gradient-to-r hover:from-emerald-200/90 hover:to-teal-200/90 hover:scale-102',
+        shadow: 'hover:shadow-sm hover:shadow-emerald-500/15 transition-all duration-200'
       },
       favoris: {
-        icon: 'text-amber-700',
-        bg: 'bg-gradient-to-r from-amber-50 to-yellow-50',
-        hover: 'hover:from-amber-100 hover:to-yellow-100',
-        shadow: 'hover:shadow-sm hover:shadow-amber-500/10'
+        icon: 'text-amber-700 hover:text-amber-800',
+        bg: 'bg-gradient-to-r from-amber-100/70 to-yellow-100/70',
+        hover: 'hover:bg-gradient-to-r hover:from-amber-200/90 hover:to-yellow-200/90 hover:scale-102',
+        shadow: 'hover:shadow-sm hover:shadow-amber-500/15 transition-all duration-200'
       },
       parametres: {
-        icon: 'text-violet-700',
-        bg: 'bg-gradient-to-r from-violet-50 to-purple-50',
-        hover: 'hover:from-violet-100 hover:to-purple-100',
-        shadow: 'hover:shadow-sm hover:shadow-violet-500/10'
+        icon: 'text-violet-700 hover:text-violet-800',
+        bg: 'bg-gradient-to-r from-violet-100/70 to-purple-100/70',
+        hover: 'hover:bg-gradient-to-r hover:from-violet-200/90 hover:to-purple-200/90 hover:scale-102',
+        shadow: 'hover:shadow-sm hover:shadow-violet-500/15 transition-all duration-200'
       }
     },
-    // Section pour les contenus de la deuxième sidebar - Minimalisme premium
+    // Section pour les contenus de la deuxième sidebar - Amélioration de la lisibilité
     secondSidebar: {
       bg: 'bg-white/98 backdrop-blur-sm',
       border: 'border-r border-slate-200/40',
       shadow: 'shadow-lg shadow-slate-500/8',
       header: {
-        bg: 'bg-gradient-to-r from-slate-50 to-gray-50',
-        border: 'border-b border-slate-200/40'
+        bg: 'bg-gradient-to-r from-slate-50/80 to-gray-50/80',
+        border: 'border-b border-slate-200/30'
       }
     }
   },
