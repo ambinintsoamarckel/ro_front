@@ -460,13 +460,13 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
           // Calcul du nouveau width/height du canvas
           const xs = Object.values(positions).map(p => p.x);
           const ys = Object.values(positions).map(p => p.y);
-          const padding = 120; // Au lieu de 200
+          const padding = 200; // Au lieu de 200
           const contentWidth = Math.abs(Math.max(...xs) - Math.min(...xs)) + padding * 2;
           const contentHeight = Math.abs(Math.max(...ys) - Math.min(...ys)) + padding * 2;
           
           // Tailles minimales réduites :
-          const minWidth = 1200; // Au lieu de 1400
-          const minHeight = 800;  // Au lieu de 1000
+          const minWidth = 1400; // Au lieu de 1400
+          const minHeight = 1000;  // Au lieu de 1000
           
           const width = Math.max(minWidth, contentWidth);
           const height = Math.max(minHeight, contentHeight);
