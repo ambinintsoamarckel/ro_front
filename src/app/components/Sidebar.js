@@ -512,245 +512,245 @@ const Sidebar = ({ setInitialTaskCount, setCurrentProject, setProjectPage, proje
       </motion.div>
 
       <style jsx global>{`
-  .custom-scrollbar::-webkit-scrollbar {
-    width: 8px;
-  }
-  .custom-scrollbar::-webkit-scrollbar-track {
-    background: ${colors.scrollbar.track};
-    border-radius: 6px;
-  }
-  .custom-scrollbar::-webkit-scrollbar-thumb {
-    background: linear-gradient(45deg, ${colors.scrollbar.thumb}, ${colors.scrollbar.thumbHover});
-    border-radius: 6px;
-    border: 2px solid ${colors.scrollbar.track};
-  }
-  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(45deg, ${colors.scrollbar.thumbHover}, ${colors.scrollbar.thumbActive});
-  }
-
-  .custom-scrollbar {
-    scrollbar-width: thin;
-    scrollbar-color: ${colors.scrollbar.thumb} ${colors.scrollbar.track};
-  }
-  
-  /* Effet de brillance sur hover */
-  .group:hover .shine-effect {
-    animation: shine 2s infinite;
-  }
-  
-  @keyframes shine {
-    0% {
-      transform: translateX(-100%) skewX(-15deg);
-      opacity: 0;
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 8px;
     }
-    50% {
-      opacity: 1;
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: ${colors.scrollbar.track};
+      border-radius: 6px;
     }
-    100% {
-      transform: translateX(200%) skewX(-15deg);
-      opacity: 0;
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: linear-gradient(45deg, ${colors.scrollbar.thumb}, ${colors.scrollbar.thumbHover});
+      border-radius: 6px;
+      border: 2px solid ${colors.scrollbar.track};
     }
-  }
-
-  /* Effet de pulse pour les éléments actifs */
-  .pulse-glow {
-    animation: pulse-glow 2s ease-in-out infinite alternate;
-  }
-
-  @keyframes pulse-glow {
-    from {
-      box-shadow: 0 0 20px rgba(168, 85, 247, 0.4);
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: linear-gradient(45deg, ${colors.scrollbar.thumbHover}, ${colors.scrollbar.thumbActive});
     }
-    to {
-      box-shadow: 0 0 30px rgba(168, 85, 247, 0.8), 0 0 40px rgba(168, 85, 247, 0.3);
+
+    .custom-scrollbar {
+      scrollbar-width: thin;
+      scrollbar-color: ${colors.scrollbar.thumb} ${colors.scrollbar.track};
     }
-  }
-
-  /* Effet de flottement pour les cartes */
-  .float-animation {
-    animation: float 3s ease-in-out infinite;
-  }
-
-  @keyframes float {
-    0%, 100% {
-      transform: translateY(0px);
+    
+    /* Effet de brillance sur hover */
+    .group:hover .shine-effect {
+      animation: shine 2s infinite;
     }
-    50% {
-      transform: translateY(-3px);
+    
+    @keyframes shine {
+      0% {
+        transform: translateX(-100%) skewX(-15deg);
+        opacity: 0;
+      }
+      50% {
+        opacity: 1;
+      }
+      100% {
+        transform: translateX(200%) skewX(-15deg);
+        opacity: 0;
+      }
     }
-  }
 
-  /* Effet de gradient animé pour les boutons */
-  .gradient-shift {
-    background-size: 200% 200%;
-    animation: gradient-shift 3s ease infinite;
-  }
-
-  @keyframes gradient-shift {
-    0% {
-      background-position: 0% 50%;
+    /* Effet de pulse pour les éléments actifs */
+    .pulse-glow {
+      animation: pulse-glow 2s ease-in-out infinite alternate;
     }
-    50% {
-      background-position: 100% 50%;
+
+    @keyframes pulse-glow {
+      from {
+        box-shadow: 0 0 20px rgba(168, 85, 247, 0.4);
+      }
+      to {
+        box-shadow: 0 0 30px rgba(168, 85, 247, 0.8), 0 0 40px rgba(168, 85, 247, 0.3);
+      }
     }
-    100% {
-      background-position: 0% 50%;
+
+    /* Effet de flottement pour les cartes */
+    .float-animation {
+      animation: float 3s ease-in-out infinite;
     }
-  }
 
-  /* Effet de rotation subtile pour les icônes */
-  .icon-hover-rotate:hover {
-    animation: subtle-rotate 0.3s ease-in-out;
-  }
-
-  @keyframes subtle-rotate {
-    0% {
-      transform: rotate(0deg);
+    @keyframes float {
+      0%, 100% {
+        transform: translateY(0px);
+      }
+      50% {
+        transform: translateY(-3px);
+      }
     }
-    50% {
-      transform: rotate(5deg);
+
+    /* Effet de gradient animé pour les boutons */
+    .gradient-shift {
+      background-size: 200% 200%;
+      animation: gradient-shift 3s ease infinite;
     }
-    100% {
-      transform: rotate(0deg);
+
+    @keyframes gradient-shift {
+      0% {
+        background-position: 0% 50%;
+      }
+      50% {
+        background-position: 100% 50%;
+      }
+      100% {
+        background-position: 0% 50%;
+      }
     }
-  }
 
-  /* Effet de bordure animée */
-  .border-glow {
-    position: relative;
-    overflow: hidden;
-  }
-
-  .border-glow::before {
-    content: '';
-    position: absolute;
-    top: -2px;
-    left: -2px;
-    right: -2px;
-    bottom: -2px;
-    background: linear-gradient(45deg, transparent, rgba(168, 85, 247, 0.5), transparent);
-    border-radius: inherit;
-    z-index: -1;
-    animation: border-rotate 3s linear infinite;
-  }
-
-  @keyframes border-rotate {
-    0% {
-      transform: rotate(0deg);
+    /* Effet de rotation subtile pour les icônes */
+    .icon-hover-rotate:hover {
+      animation: subtle-rotate 0.3s ease-in-out;
     }
-    100% {
-      transform: rotate(360deg);
+
+    @keyframes subtle-rotate {
+      0% {
+        transform: rotate(0deg);
+      }
+      50% {
+        transform: rotate(5deg);
+      }
+      100% {
+        transform: rotate(0deg);
+      }
     }
-  }
 
-  /* Effet de slide-in pour les dropdowns */
-  .slide-in {
-    animation: slide-in 0.2s ease-out;
-  }
-
-  @keyframes slide-in {
-    from {
-      opacity: 0;
-      transform: translateY(-10px) scale(0.95);
+    /* Effet de bordure animée */
+    .border-glow {
+      position: relative;
+      overflow: hidden;
     }
-    to {
-      opacity: 1;
-      transform: translateY(0) scale(1);
+
+    .border-glow::before {
+      content: '';
+      position: absolute;
+      top: -2px;
+      left: -2px;
+      right: -2px;
+      bottom: -2px;
+      background: linear-gradient(45deg, transparent, rgba(168, 85, 247, 0.5), transparent);
+      border-radius: inherit;
+      z-index: -1;
+      animation: border-rotate 3s linear infinite;
     }
-  }
 
-  /* Effet de text-glow pour les textes importants */
-  .text-glow {
-    text-shadow: 0 0 10px rgba(168, 85, 247, 0.5);
-  }
-
-  /* Effet de ripple sur clic */
-  .ripple-effect {
-    position: relative;
-    overflow: hidden;
-  }
-
-  .ripple-effect::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 0;
-    height: 0;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.3);
-    transform: translate(-50%, -50%);
-    transition: width 0.6s, height 0.6s;
-  }
-
-  .ripple-effect:active::after {
-    width: 300px;
-    height: 300px;
-  }
-
-  /* Animation de chargement */
-  .loading-dots {
-    animation: loading-dots 1.4s ease-in-out infinite;
-  }
-
-  .loading-dots:nth-child(1) {
-    animation-delay: -0.32s;
-  }
-
-  .loading-dots:nth-child(2) {
-    animation-delay: -0.16s;
-  }
-
-  @keyframes loading-dots {
-    0%, 80%, 100% {
-      transform: scale(0);
-      opacity: 0.5;
+    @keyframes border-rotate {
+      0% {
+        transform: rotate(0deg);
+      }
+      100% {
+        transform: rotate(360deg);
+      }
     }
-    40% {
-      transform: scale(1);
-      opacity: 1;
+
+    /* Effet de slide-in pour les dropdowns */
+    .slide-in {
+      animation: slide-in 0.2s ease-out;
     }
-  }
 
-  /* Effet de morphing pour les transitions */
-  .morph-transition {
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-
-  /* Effet de néon pour les éléments actifs */
-  .neon-glow {
-    box-shadow: 
-      0 0 5px rgba(168, 85, 247, 0.5),
-      0 0 10px rgba(168, 85, 247, 0.3),
-      0 0 15px rgba(168, 85, 247, 0.2),
-      inset 0 0 5px rgba(168, 85, 247, 0.1);
-  }
-
-  /* Amélioration des performances pour les animations */
-  .gpu-accelerated {
-    transform: translateZ(0);
-    backface-visibility: hidden;
-    perspective: 1000px;
-  }
-
-  /* Media queries pour les animations responsives */
-  @media (prefers-reduced-motion: reduce) {
-    *,
-    *::before,
-    *::after {
-      animation-duration: 0.01ms !important;
-      animation-iteration-count: 1 !important;
-      transition-duration: 0.01ms !important;
+    @keyframes slide-in {
+      from {
+        opacity: 0;
+        transform: translateY(-10px) scale(0.95);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
     }
-  }
 
-  /* Mode sombre amélioré */
-  @media (prefers-color-scheme: dark) {
-    .auto-dark {
-      filter: brightness(0.9) contrast(1.1);
+    /* Effet de text-glow pour les textes importants */
+    .text-glow {
+      text-shadow: 0 0 10px rgba(168, 85, 247, 0.5);
     }
-  }
-`}</style>
+
+    /* Effet de ripple sur clic */
+    .ripple-effect {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .ripple-effect::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.3);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s, height 0.6s;
+    }
+
+    .ripple-effect:active::after {
+      width: 300px;
+      height: 300px;
+    }
+
+    /* Animation de chargement */
+    .loading-dots {
+      animation: loading-dots 1.4s ease-in-out infinite;
+    }
+
+    .loading-dots:nth-child(1) {
+      animation-delay: -0.32s;
+    }
+
+    .loading-dots:nth-child(2) {
+      animation-delay: -0.16s;
+    }
+
+    @keyframes loading-dots {
+      0%, 80%, 100% {
+        transform: scale(0);
+        opacity: 0.5;
+      }
+      40% {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    /* Effet de morphing pour les transitions */
+    .morph-transition {
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Effet de néon pour les éléments actifs */
+    .neon-glow {
+      box-shadow: 
+        0 0 5px rgba(168, 85, 247, 0.5),
+        0 0 10px rgba(168, 85, 247, 0.3),
+        0 0 15px rgba(168, 85, 247, 0.2),
+        inset 0 0 5px rgba(168, 85, 247, 0.1);
+    }
+
+    /* Amélioration des performances pour les animations */
+    .gpu-accelerated {
+      transform: translateZ(0);
+      backface-visibility: hidden;
+      perspective: 1000px;
+    }
+
+    /* Media queries pour les animations responsives */
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+
+    /* Mode sombre amélioré */
+    @media (prefers-color-scheme: dark) {
+      .auto-dark {
+        filter: brightness(0.9) contrast(1.1);
+      }
+    }
+  `}</style>
 
       {/* Deuxième sidebar */}
       <AnimatePresence>

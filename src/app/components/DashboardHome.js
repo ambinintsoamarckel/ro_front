@@ -1,356 +1,287 @@
 "use client";
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 
-const Dashboard = () => {
+const Dashboard = ({ 
+  onOpenSecondSidebar, 
+  onOpenModal, 
+  onNavigateToProjects, 
+  onNavigateToFavorites, 
+  onNavigateToSettings 
+}) => {
+  const [animatedStats, setAnimatedStats] = useState({
+    tasks: 0,
+    projects: 0,
+    productivity: 0,
+    streak: 0
+  });
+
   const navigateTo = (section) => {
     console.log('Navigation vers:', section);
-    // Ici vous pouvez ajouter la logique de navigation
-    // Par exemple: router.push(`/${section}`);
+    
+    switch(section) {
+      case 'nouveau':
+        if (onOpenModal) {
+          onOpenModal();
+        }
+        break;
+      case 'projets':
+        if (onOpenSecondSidebar) {
+          onOpenSecondSidebar('projects');
+        }
+        break;
+      case 'favoris':
+        if (onOpenSecondSidebar) {
+          onOpenSecondSidebar('favoris');
+        }
+        break;
+      case 'parametres':
+        if (onOpenSecondSidebar) {
+          onOpenSecondSidebar('parametres');
+        }
+        break;
+      default:
+        console.log('Action non définie pour:', section);
+    }
   };
 
   useEffect(() => {
-    // Animation des statistiques au chargement
-    const progressBars = document.querySelectorAll('.progress-fill');
-    progressBars.forEach(bar => {
-      const width = bar.style.width;
-      bar.style.width = '0%';
-      setTimeout(() => {
-        bar.style.width = width;
-      }, 500);
-    });
+    // Animation des statistiques
+    const targetStats = { tasks: 8, projects: 3, productivity: 92, streak: 12 };
+    const duration = 2000;
+    const steps = 60;
+    const stepTime = duration / steps;
 
-    // Animation des nombres
-    const numbers = document.querySelectorAll('.stats-number');
-    numbers.forEach(num => {
-      const finalValue = parseInt(num.textContent);
-      if (!isNaN(finalValue)) {
-        let currentValue = 0;
-        const increment = finalValue / 20;
-        
-        const timer = setInterval(() => {
-          currentValue += increment;
-          if (currentValue >= finalValue) {
-            currentValue = finalValue;
-            clearInterval(timer);
-          }
-          num.textContent = Math.floor(currentValue) + (num.textContent.includes('%') ? '%' : '');
-        }, 50);
+    let currentStep = 0;
+    const timer = setInterval(() => {
+      currentStep++;
+      const progress = currentStep / steps;
+      
+      setAnimatedStats({
+        tasks: Math.floor(targetStats.tasks * progress),
+        projects: Math.floor(targetStats.projects * progress),
+        productivity: Math.floor(targetStats.productivity * progress),
+        streak: Math.floor(targetStats.streak * progress)
+      });
+
+      if (currentStep >= steps) {
+        setAnimatedStats(targetStats);
+        clearInterval(timer);
       }
-    });
+    }, stepTime);
+
+    return () => clearInterval(timer);
   }, []);
 
-  return (
-    <>
-      <style jsx>{`
-        * {
-          margin: 0;
-          padding: 0;
-          box-sizing: border-box;
-        }
-
-        .dashboard-body {
-          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-          min-height: 100vh;
-          color: #333;
-        }
-
-        .container {
-          max-width: 1200px;
-          margin: 0 auto;
-          padding: 2rem;
-        }
-
-        .header {
-          text-align: center;
-          margin-bottom: 3rem;
-          color: white;
-        }
-
-        .header h1 {
-          font-size: 2.5rem;
-          margin-bottom: 0.5rem;
-          font-weight: 300;
-          text-shadow: 0 2px 4px rgba(0,0,0,0.3);
-        }
-
-        .header p {
-          font-size: 1.1rem;
-          opacity: 0.9;
-        }
-
-        .dashboard-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-          gap: 2rem;
-          margin-bottom: 3rem;
-        }
-
-        .card {
-          background: rgba(255, 255, 255, 0.95);
-          border-radius: 15px;
-          padding: 2rem;
-          box-shadow: 0 8px 32px rgba(0,0,0,0.1);
-          backdrop-filter: blur(10px);
-          border: 1px solid rgba(255, 255, 255, 0.2);
-          transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .card:hover {
-          transform: translateY(-5px);
-          box-shadow: 0 12px 48px rgba(0,0,0,0.15);
-        }
-
-        .card-icon {
-          width: 60px;
-          height: 60px;
-          background: linear-gradient(45deg, #667eea, #764ba2);
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          margin-bottom: 1rem;
-          font-size: 1.5rem;
-          color: white;
-        }
-
-        .card h3 {
-          font-size: 1.3rem;
-          margin-bottom: 0.5rem;
-          color: #333;
-        }
-
-        .card p {
-          color: #666;
-          line-height: 1.6;
-          margin-bottom: 1rem;
-        }
-
-        .stats-number {
-          font-size: 2rem;
-          font-weight: bold;
-          color: #667eea;
-          margin-bottom: 0.5rem;
-        }
-
-        .welcome-section {
-          background: rgba(255, 255, 255, 0.95);
-          border-radius: 15px;
-          padding: 2.5rem;
-          margin-bottom: 2rem;
-          box-shadow: 0 8px 32px rgba(0,0,0,0.1);
-          backdrop-filter: blur(10px);
-          border: 1px solid rgba(255, 255, 255, 0.2);
-          text-align: center;
-        }
-
-        .welcome-section h2 {
-          color: #333;
-          margin-bottom: 1rem;
-          font-size: 1.8rem;
-          font-weight: 300;
-        }
-
-        .welcome-section p {
-          color: #666;
-          font-size: 1.1rem;
-          line-height: 1.6;
-          max-width: 600px;
-          margin: 0 auto;
-        }
-
-        .quick-actions {
-          display: flex;
-          justify-content: center;
-          gap: 1rem;
-          margin-top: 2rem;
-          flex-wrap: wrap;
-        }
-
-        .btn {
-          background: linear-gradient(45deg, #667eea, #764ba2);
-          color: white;
-          border: none;
-          padding: 0.8rem 1.5rem;
-          border-radius: 25px;
-          cursor: pointer;
-          font-size: 1rem;
-          transition: all 0.3s ease;
-          text-decoration: none;
-          display: inline-block;
-        }
-
-        .btn:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-        }
-
-        .progress-bar {
-          width: 100%;
-          height: 8px;
-          background: #e0e0e0;
-          border-radius: 4px;
-          overflow: hidden;
-          margin-top: 1rem;
-        }
-
-        .progress-fill {
-          height: 100%;
-          background: linear-gradient(45deg, #667eea, #764ba2);
-          border-radius: 4px;
-          transition: width 0.3s ease;
-        }
-
-        .floating-elements {
-          position: fixed;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          pointer-events: none;
-          z-index: -1;
-        }
-
-        .floating-circle {
-          position: absolute;
-          border-radius: 50%;
-          background: rgba(255, 255, 255, 0.1);
-          animation: float 6s ease-in-out infinite;
-        }
-
-        .floating-circle:nth-child(1) {
-          width: 80px;
-          height: 80px;
-          top: 20%;
-          left: 10%;
-          animation-delay: 0s;
-        }
-
-        .floating-circle:nth-child(2) {
-          width: 120px;
-          height: 120px;
-          top: 60%;
-          right: 10%;
-          animation-delay: 2s;
-        }
-
-        .floating-circle:nth-child(3) {
-          width: 60px;
-          height: 60px;
-          top: 80%;
-          left: 20%;
-          animation-delay: 4s;
-        }
-
-        @keyframes float {
-          0%, 100% {
-            transform: translateY(0px);
-          }
-          50% {
-            transform: translateY(-20px);
-          }
-        }
-
-        @media (max-width: 768px) {
-          .container {
-            padding: 1rem;
-          }
-          
-          .header h1 {
-            font-size: 2rem;
-          }
-          
-          .dashboard-grid {
-            grid-template-columns: 1fr;
-            gap: 1rem;
-          }
-          
-          .card {
-            padding: 1.5rem;
-          }
-        }
-      `}</style>
-
-      <div className="dashboard-body">
-        <div className="floating-elements">
-          <div className="floating-circle"></div>
-          <div className="floating-circle"></div>
-          <div className="floating-circle"></div>
+  const StatCard = ({ icon, title, value, subtitle, progress }) => (
+    <div className="bg-white/98 backdrop-blur-sm border border-slate-200/50 shadow-sm shadow-slate-500/5 rounded-xl p-6 hover:shadow-md hover:shadow-slate-500/15 transition-all duration-300 group">
+      <div className="flex items-center justify-between mb-4">
+        <div className="w-12 h-12 bg-gradient-to-r from-slate-700 via-slate-600 to-slate-800 rounded-lg flex items-center justify-center text-white text-xl shadow-md shadow-slate-500/20">
+          {icon}
         </div>
+        <div className="text-right">
+          <div className="text-2xl font-bold text-slate-800">{value}</div>
+          <div className="text-sm text-slate-600">{subtitle}</div>
+        </div>
+      </div>
+      <h3 className="text-slate-700 font-medium mb-3">{title}</h3>
+      {progress && (
+        <div className="w-full bg-slate-100 rounded-full h-2">
+          <div 
+            className="bg-gradient-to-r from-slate-700 via-slate-600 to-slate-800 h-2 rounded-full transition-all duration-1000 ease-out"
+            style={{ width: `${progress}%` }}
+          ></div>
+        </div>
+      )}
+    </div>
+  );
 
-        <div className="container">
-          <div className="header">
-            <h1>Bienvenue dans votre espace de travail</h1>
-            <p>Organisez, planifiez et accomplissez vos objectifs avec élégance</p>
-          </div>
+  const QuickActionCard = ({ icon, title, description, color, onClick }) => (
+    <div 
+      onClick={onClick}
+      className={`${color.bg} ${color.hover} border ${color.border} rounded-xl p-6 cursor-pointer transition-all duration-300 ${color.shadow} hover:shadow-md ${color.hover.includes('shadow') ? color.hover : 'hover:shadow-slate-500/15'} group transform hover:scale-105 hover:-translate-y-1`}
+    >
+      <div className={`w-12 h-12 ${color.iconBg} rounded-lg flex items-center justify-center ${color.iconColor} text-xl mb-4 group-hover:scale-105 transition-transform duration-300`}>
+        {icon}
+      </div>
+      <h3 className={`${color.text} font-semibold mb-2`}>{title}</h3>
+      <p className={`${color.text} opacity-80 text-sm`}>{description}</p>
+    </div>
+  );
 
-          <div className="welcome-section">
-            <h2>🎯 Tableau de bord personnel</h2>
-            <p>Votre centre de contrôle pour une gestion intelligente des tâches. Suivez vos progrès, planifiez vos projets et restez productif avec notre interface intuitive.</p>
-            
-            <div className="quick-actions">
-              <button className="btn" onClick={() => navigateTo('nouveau')}>➕ Nouvelle projet</button>
-              <button className="btn" onClick={() => navigateTo('projets')}>📁 Mes projets</button>
-              <button className="btn" onClick={() => navigateTo('favoris')}>⭐ Favoris</button>
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-slate-50 to-zinc-50">
+      {/* Header */}
+      <div className="bg-white/95 backdrop-blur-md border-b border-slate-200/40 px-6 py-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-light bg-gradient-to-r from-slate-800 via-slate-700 to-slate-800 bg-clip-text text-transparent mb-2">
+              Bienvenue dans votre espace de travail
+              </h1>
+              <p className="text-slate-600">Organisez, planifiez et accomplissez vos projets en ordre ...</p>
             </div>
-          </div>
-
-          <div className="dashboard-grid">
-            <div className="card">
-              <div className="card-icon">📋</div>
-              <h3>Tâches du jour</h3>
-              <div className="stats-number">8</div>
-              <p>Tâches planifiées pour aujourd'hui</p>
-              <div className="progress-bar">
-                <div className="progress-fill" style={{width: '65%'}}></div>
+            <div className="flex items-center space-x-4">
+              <div className="bg-white/90 backdrop-blur-sm border border-slate-200 rounded-lg px-4 py-2 flex items-center space-x-2">
+                <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
+                <span className="text-sm text-slate-600">En ligne</span>
               </div>
-            </div>
-
-            <div className="card">
-              <div className="card-icon">🎯</div>
-              <h3>Projets actifs</h3>
-              <div className="stats-number">3</div>
-              <p>Projets en cours de réalisation</p>
-              <div className="progress-bar">
-                <div className="progress-fill" style={{width: '80%'}}></div>
-              </div>
-            </div>
-
-            <div className="card">
-              <div className="card-icon">⏰</div>
-              <h3>Productivité</h3>
-              <div className="stats-number">92%</div>
-              <p>Taux de completion cette semaine</p>
-              <div className="progress-bar">
-                <div className="progress-fill" style={{width: '92%'}}></div>
-              </div>
-            </div>
-
-            <div className="card">
-              <div className="card-icon">🔥</div>
-              <h3>Série active</h3>
-              <div className="stats-number">12</div>
-              <p>Jours consécutifs d'accomplissement</p>
-              <div className="progress-bar">
-                <div className="progress-fill" style={{width: '75%'}}></div>
-              </div>
-            </div>
-
-            <div className="card">
-              <div className="card-icon">📈</div>
-              <h3>Tendance mensuelle</h3>
-              <p>Vos performances s'améliorent constamment. Continuez sur cette lancée pour atteindre vos objectifs !</p>
-            </div>
-
-            <div className="card">
-              <div className="card-icon">💡</div>
-              <h3>Astuce du jour</h3>
-              <p>Organisez vos tâches par priorité pour maximiser votre efficacité. Commencez par le plus important !</p>
             </div>
           </div>
         </div>
       </div>
-    </>
+
+      <div className="max-w-7xl mx-auto px-6 py-8">
+        {/* Statistiques principales */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <StatCard
+            icon="📋"
+            title="Tâches du jour"
+            value={animatedStats.tasks}
+            subtitle="en cours"
+            progress={65}
+          />
+          <StatCard
+            icon="🎯"
+            title="Projets actifs"
+            value={animatedStats.projects}
+            subtitle="projets"
+            progress={80}
+          />
+          <StatCard
+            icon="📈"
+            title="Productivité"
+            value={`${animatedStats.productivity}%`}
+            subtitle="cette semaine"
+            progress={animatedStats.productivity}
+          />
+          <StatCard
+            icon="🔥"
+            title="Série active"
+            value={animatedStats.streak}
+            subtitle="jours"
+            progress={75}
+          />
+        </div>
+
+        {/* Actions rapides */}
+        <div className="mb-8">
+          <h2 className="text-xl font-medium text-slate-700 mb-6">Actions rapides</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <QuickActionCard
+              icon="➕"
+              title="Nouveau projet"
+              description="Créer un nouveau projet"
+              color={{
+                bg: 'bg-gradient-to-r from-slate-50 to-gray-50',
+                hover: 'hover:from-slate-100 hover:to-gray-100',
+                border: 'border-slate-200/50',
+                shadow: 'shadow-sm shadow-slate-500/10',
+                iconBg: 'bg-gradient-to-r from-slate-700 via-slate-600 to-slate-800',
+                iconColor: 'text-white',
+                text: 'text-slate-700'
+              }}
+              onClick={() => navigateTo('nouveau')}
+            />
+            <QuickActionCard
+              icon="📁"
+              title="Mes projets"
+              description="Voir tous les projets"
+              color={{
+                bg: 'bg-gradient-to-r from-emerald-50 to-teal-50',
+                hover: 'hover:from-emerald-100 hover:to-teal-100',
+                border: 'border-emerald-300/50',
+                shadow: 'shadow-sm shadow-emerald-500/10',
+                iconBg: 'bg-gradient-to-r from-emerald-100 to-teal-100',
+                iconColor: 'text-emerald-700',
+                text: 'text-emerald-800'
+              }}
+              onClick={() => navigateTo('projets')}
+            />
+            <QuickActionCard
+              icon="⭐"
+              title="Favoris"
+              description="Éléments favoris"
+              color={{
+                bg: 'bg-gradient-to-r from-amber-50 to-yellow-50',
+                hover: 'hover:from-amber-100 hover:to-yellow-100',
+                border: 'border-amber-300/50',
+                shadow: 'shadow-sm shadow-amber-500/10',
+                iconBg: 'bg-gradient-to-r from-amber-100 to-yellow-100',
+                iconColor: 'text-amber-700',
+                text: 'text-amber-800'
+              }}
+              onClick={() => navigateTo('favoris')}
+            />
+            <QuickActionCard
+              icon="⚙️"
+              title="Paramètres"
+              description="Configuration"
+              color={{
+                bg: 'bg-gradient-to-r from-violet-50 to-purple-50',
+                hover: 'hover:from-violet-100 hover:to-purple-100',
+                border: 'border-violet-300/50',
+                shadow: 'shadow-sm shadow-violet-500/10',
+                iconBg: 'bg-gradient-to-r from-violet-100 to-purple-100',
+                iconColor: 'text-violet-700',
+                text: 'text-violet-800'
+              }}
+              onClick={() => navigateTo('parametres')}
+            />
+          </div>
+        </div>
+
+        {/* Section activité récente */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Activité récente */}
+          <div className="bg-white/98 backdrop-blur-sm border border-slate-200/50 shadow-sm shadow-slate-500/5 rounded-xl p-6">
+            <h3 className="text-lg font-medium text-slate-700 mb-4">Activité récente</h3>
+            <div className="space-y-4">
+              {[
+                { action: "Projet terminé", name: "Site web personnel", time: "Il y a 2h", icon: "✅" },
+                { action: "Nouvelle tâche", name: "Révision du code", time: "Il y a 4h", icon: "📝" },
+                { action: "Mise à jour", name: "Dashboard design", time: "Hier", icon: "🔄" }
+              ].map((item, index) => (
+                <div key={index} className="flex items-center space-x-4 p-3 rounded-lg hover:bg-slate-50/50 transition-colors duration-200">
+                  <div className="w-8 h-8 bg-gradient-to-r from-slate-100 to-gray-100 rounded-full flex items-center justify-center text-sm">
+                    {item.icon}
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-slate-700 font-medium text-sm">{item.action}</p>
+                    <p className="text-slate-500 text-sm">{item.name}</p>
+                  </div>
+                  <span className="text-xs text-slate-400">{item.time}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Aperçu des objectifs */}
+          <div className="bg-white/98 backdrop-blur-sm border border-slate-200/50 shadow-sm shadow-slate-500/5 rounded-xl p-6">
+            <h3 className="text-lg font-medium text-slate-700 mb-4">Objectifs de la semaine</h3>
+            <div className="space-y-4">
+              {[
+                { goal: "Finaliser 3 projets", progress: 66, color: "from-emerald-600 to-emerald-700" },
+                { goal: "Code review quotidien", progress: 85, color: "from-blue-600 to-blue-700" },
+                { goal: "Documentation", progress: 45, color: "from-amber-600 to-amber-700" }
+              ].map((item, index) => (
+                <div key={index} className="space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-slate-700">{item.goal}</span>
+                    <span className="text-slate-500">{item.progress}%</span>
+                  </div>
+                  <div className="w-full bg-slate-100 rounded-full h-2">
+                    <div 
+                      className={`bg-gradient-to-r ${item.color} h-2 rounded-full transition-all duration-1000 ease-out`}
+                      style={{ width: `${item.progress}%` }}
+                    ></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
 
