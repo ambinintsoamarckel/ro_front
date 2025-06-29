@@ -5,7 +5,7 @@ import Header from "./Header";
 import Sidebar from "./Sidebar";
 //import Dashboard from "./Dashboard";
 
-const Layout = ({ children, setInitialTaskCount, setCurrentProject, setProjectPage, projects, setProjects }) => {
+const Layout = ({ children, setInitialTaskCount, setCurrentProject, setProjectPage, projects, setProjects, secondSidebarOpen,setSecondSidebarOpen,secondSidebarContent,setSecondSidebarContent,isModalOpen,setIsModalOpen }) => {
   // État pour savoir si la deuxième sidebar est ouverte
   const [isSecondSidebarOpen, setIsSecondSidebarOpen] = useState(false);
   
@@ -40,6 +40,12 @@ const Layout = ({ children, setInitialTaskCount, setCurrentProject, setProjectPa
             projects={projects}
             setProjects={setProjects}
             onSecondSidebarToggle={setIsSecondSidebarOpen}
+            secondSidebarOpen={secondSidebarOpen}
+            setSecondSidebarOpen={setSecondSidebarOpen}
+            secondSidebarContent={secondSidebarContent}
+            setSecondSidebarContent={setSecondSidebarContent}
+            isModalOpen={isModalOpen}
+            setIsModalOpen={setIsModalOpen}
           />
         </div>
 

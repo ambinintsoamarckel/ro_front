@@ -7,13 +7,10 @@ import {Menu,X,BadgePlus,User,Settings,Home,FolderOpen,Star,MoreVertical, Edit2,
 import { colors } from "../colors";
 
 
-const Sidebar = ({ setInitialTaskCount, setCurrentProject, setProjectPage, projects, setProjects, onSecondSidebarToggle }) => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
+const Sidebar = ({ setInitialTaskCount, setCurrentProject, setProjectPage, projects, setProjects, onSecondSidebarToggle, secondSidebarOpen,setSecondSidebarOpen,secondSidebarContent,setSecondSidebarContent,isModalOpen,setIsModalOpen }) => {
+
   const [showProjects, setShowProjects] = useState(false);
   const [activeTab, setActiveTab] = useState('home');
-  // Nouvel état pour la deuxième sidebar
-  const [secondSidebarOpen, setSecondSidebarOpen] = useState(false);
-  const [secondSidebarContent, setSecondSidebarContent] = useState('');
   const [openDropdownId, setOpenDropdownId] = useState(null);
 
 

@@ -14,7 +14,9 @@ const Dashboard = () => {
   const [currentProject, setCurrentProject] = useState({});
   const [projectPage, setProjectPage] = useState(false);
   const [projects, setProjects] = useState([]);
-
+  const [secondSidebarOpen, setSecondSidebarOpen] = useState(false);
+  const [secondSidebarContent, setSecondSidebarContent] = useState('');
+  const [isModalOpen, setIsModalOpen] = useState(false);
   useEffect(() => {
     const verify = async () => {
       const user = await checkAuthStatus();
@@ -36,6 +38,12 @@ const Dashboard = () => {
       setProjectPage={setProjectPage}
       projects={projects}
       setProjects={setProjects}
+      secondSidebarOpen={secondSidebarOpen}
+      setSecondSidebarOpen={setSecondSidebarOpen}
+      secondSidebarContent={secondSidebarContent}
+      setSecondSidebarContent={setSecondSidebarContent}
+      isModalOpen={isModalOpen}
+      setIsModalOpen={setIsModalOpen}
     >
       {projectPage || initialTaskCount ? (
         <TaskScheduler
@@ -44,7 +52,13 @@ const Dashboard = () => {
           setProjects={setProjects}
         />
       ) : (
-        <DashboardHome />
+        <DashboardHome
+      secondSidebarOpen={secondSidebarOpen}
+      setSecondSidebarOpen={setSecondSidebarOpen}
+      secondSidebarContent={secondSidebarContent}
+      setSecondSidebarContent={setSecondSidebarContent}
+      isModalOpen={isModalOpen}
+      setIsModalOpen={setIsModalOpen} />
       )}
     </Layout>
   );

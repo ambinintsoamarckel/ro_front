@@ -1,12 +1,7 @@
 "use client";
 import React, { useEffect, useState } from 'react';
 
-const Dashboard = ({ 
-  onOpenSecondSidebar, 
-  onOpenModal, 
-  onNavigateToProjects, 
-  onNavigateToFavorites, 
-  onNavigateToSettings 
+const Dashboard = ({ secondSidebarOpen,setSecondSidebarOpen,secondSidebarContent,setSecondSidebarContent,isModalOpen,setIsModalOpen
 }) => {
   const [animatedStats, setAnimatedStats] = useState({
     tasks: 0,
@@ -20,24 +15,25 @@ const Dashboard = ({
     
     switch(section) {
       case 'nouveau':
-        if (onOpenModal) {
-          onOpenModal();
-        }
+          setIsModalOpen(true);       
         break;
       case 'projets':
-        if (onOpenSecondSidebar) {
-          onOpenSecondSidebar('projects');
-        }
+
+          setSecondSidebarContent('projects');
+          setSecondSidebarOpen(true);
+        
         break;
       case 'favoris':
-        if (onOpenSecondSidebar) {
-          onOpenSecondSidebar('favoris');
-        }
+    
+          setSecondSidebarContent('favoris');
+          setSecondSidebarOpen(true);
+        
         break;
       case 'parametres':
-        if (onOpenSecondSidebar) {
-          onOpenSecondSidebar('parametres');
-        }
+
+          setSecondSidebarContent('parametres');
+          setSecondSidebarOpen(true);
+        
         break;
       default:
         console.log('Action non définie pour:', section);
