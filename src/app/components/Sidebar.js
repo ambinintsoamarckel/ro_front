@@ -121,7 +121,12 @@ const toggleDropdown = (id) => {
   };
 
   const sidebarItems = [
-    { id: 'menu', icon:Menu, label: 'Menu', action: () => handleMenuClick() },
+    { 
+      id: 'menu', 
+      icon: secondSidebarOpen ? X : Menu,
+      label: secondSidebarOpen ? '' : 'Menu', 
+      action: () => handleMenuClick() 
+    },
     { id: 'nouveau', icon: BadgePlus, label: 'Nouveau', action: () => setIsModalOpen(true) },
     { id: 'home', icon: Home, label: 'Accueil', action: () => {setProjectPage(false); setSecondSidebarOpen(false)} },
     { id: 'projects', icon: FolderOpen, label: 'Projets', action: () => openSecondSidebar('projects') },
@@ -267,14 +272,8 @@ const toggleDropdown = (id) => {
       case 'recent':
         return (
           <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
-          <div className={`flex items-center justify-between mb-4 p-4 -m-4 ${colors.sidebar.secondSidebar.header.bg} ${colors.sidebar.secondSidebar.header.border} rounded-t-2xl`}>
+          <div className={`flex items-center justify-between mb-4 p-4 -m-4  rounded-t-2xl`}>
             <h3 className={`text-lg font-semibold ${colors.text.gradient}`}>Projets récents</h3>
-            <button
-              onClick={closeSecondSidebar}
-              className={`p-2 hover:${colors.background.overlay} rounded-lg transition-colors ${colors.effects.glowHover}`}
-            >
-              <X size={18} className={colors.text.muted} />
-            </button>
           </div>
             <div className="space-y-4">
               {projects.length > 0 ? (
@@ -308,7 +307,7 @@ const toggleDropdown = (id) => {
         return (
           <div className="flex-1 overflow-y-auto custom-scrollbar">
             <div className="p-4">
-              <div className={`flex items-center justify-between mb-4 p-4 -m-4 ${colors.sidebar.secondSidebar.header.bg} ${colors.sidebar.secondSidebar.header.border} rounded-t-2xl`}>
+              <div className={`flex items-center justify-between mb-4 p-4 -m-4 rounded-t-2xl`}>
                 <h3 className={`text-lg font-semibold ${colors.text.gradient}`}>Mes Projets</h3>
                 <div className="flex items-center space-x-2">
                   <motion.button
@@ -319,12 +318,6 @@ const toggleDropdown = (id) => {
                   >
                     <BadgePlus size={16} />
                   </motion.button>
-                  <button
-                    onClick={closeSecondSidebar}
-                    className={`p-2 hover:${colors.background.overlay} rounded-lg transition-colors ${colors.effects.glowHover}`}
-                  >
-                    <X size={18} className={colors.text.muted} />
-                  </button>
                 </div>
               </div>
               
@@ -357,14 +350,8 @@ const toggleDropdown = (id) => {
       case 'favoris':
         return (
           <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
-            <div className={`flex items-center justify-between mb-4 p-4 -m-4 ${colors.sidebar.secondSidebar.header.bg} ${colors.sidebar.secondSidebar.header.border} rounded-t-2xl`}>
+            <div className={`flex items-center justify-between mb-4 p-4 -m-4 rounded-t-2xl`}>
               <h3 className={`text-lg font-semibold ${colors.text.gradient}`}>Favoris</h3>
-              <button
-                onClick={closeSecondSidebar}
-                className={`p-2 hover:${colors.background.overlay} rounded-lg transition-colors ${colors.effects.glowHover}`}
-              >
-                <X size={18} className={colors.text.muted} />
-              </button>
             </div>
             <div className="space-y-2">
               {projects.filter(p => p.isFavorite).length > 0 ? (
@@ -412,14 +399,8 @@ const toggleDropdown = (id) => {
       case 'parametres':
         return (
           <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
-            <div className={`flex items-center justify-between mb-4 p-4 -m-4 ${colors.sidebar.secondSidebar.header.bg} ${colors.sidebar.secondSidebar.header.border} rounded-t-2xl`}>
+            <div className={`flex items-center justify-between mb-4 p-4 -m-4  rounded-t-2xl`}>
               <h3 className={`text-lg font-semibold ${colors.text.gradient}`}>Paramètres</h3>
-              <button
-                onClick={closeSecondSidebar}
-                className={`p-2 hover:${colors.background.overlay} rounded-lg transition-colors ${colors.effects.glowHover}`}
-              >
-                <X size={18} className={colors.text.muted} />
-              </button>
             </div>
             <SettingsSection />
           </div>
@@ -428,14 +409,8 @@ const toggleDropdown = (id) => {
       default: // home
         return (
           <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
-            <div className={`flex items-center justify-between mb-4 p-4 -m-4 ${colors.sidebar.secondSidebar.header.bg} ${colors.sidebar.secondSidebar.header.border} rounded-t-2xl`}>
+            <div className={`flex items-center justify-between mb-4 p-4 -m-4  rounded-t-2xl`}>
               <h3 className={`text-lg font-semibold ${colors.text.gradient}`}>Accueil</h3>
-              <button
-                onClick={closeSecondSidebar}
-                className={`p-2 hover:${colors.background.overlay} rounded-lg transition-colors ${colors.effects.glowHover}`}
-              >
-                <X size={18} className={colors.text.muted} />
-              </button>
             </div>
             <div className="space-y-4">
             <motion.button
@@ -491,8 +466,7 @@ const toggleDropdown = (id) => {
         initial={{ x: -80, opacity: 0 }}
         animate={{ x: 0, opacity: 1 }}
         transition={{ duration: 0.4, ease: "easeInOut" }}
-        className={`fixed left-2 top-20 h-[calc(100vh-6rem)] w-20 z-40 flex flex-col ${colors.sidebar.main.bg} ${colors.sidebar.main.border} ${colors.sidebar.main.shadow} rounded-2xl`}
-      >
+        className={`fixed left-2 top-20 h-[calc(100vh-6rem)] w-20 z-40 flex flex-col`}      >
         {/* Icônes de navigation */}
         <div className="flex-1 py-4 space-y-1">
           {sidebarItems.map((item, index) => (
@@ -776,7 +750,7 @@ const toggleDropdown = (id) => {
             animate={{ x: 0, opacity: 1 }}
             exit={{ x: -320, opacity: 0 }}
             transition={{ duration: 0.3, ease: "easeInOut" }}
-            className={`fixed left-20 top-20 h-[calc(100vh-6rem)] w-80 z-30 overflow-hidden flex flex-col ${colors.sidebar.secondSidebar.bg} ${colors.sidebar.secondSidebar.border} ${colors.sidebar.secondSidebar.shadow} rounded-r-2xl`}
+            className={`fixed left-20 top-20 h-[calc(100vh-6rem)] w-80 z-30 overflow-hidden flex flex-col`}
           >
             {renderSecondSidebarContent()}
           </motion.div>
