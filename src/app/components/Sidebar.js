@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import TaskInitializerModal from "./TaskInitializerModal";
 import {Menu,X,BadgePlus,User,Settings,Home,FolderOpen,Star,MoreVertical, Edit2, Trash2} from "lucide-react";
 import { colors } from "../colors";
+import SettingsSection from './SettingsSection';
 
 
 const Sidebar = ({ setInitialTaskCount, setCurrentProject, setProjectPage, projects, setProjects, onSecondSidebarToggle, secondSidebarOpen,setSecondSidebarOpen,secondSidebarContent,setSecondSidebarContent,isModalOpen,setIsModalOpen }) => {
@@ -369,40 +370,7 @@ const Sidebar = ({ setInitialTaskCount, setCurrentProject, setProjectPage, proje
                 <X size={18} className={colors.text.muted} />
               </button>
             </div>
-            <div className="space-y-4">
-              <div className={`${colors.background.card} rounded-lg p-4 ${colors.primary.border}`}>
-                <h4 className={`font-semibold ${colors.text.secondary} mb-3 text-sm`}>Général</h4>
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className={`text-sm ${colors.text.secondary}`}>Thème sombre</span>
-                    <button className={`w-10 h-5 ${colors.background.overlay} rounded-full relative`}>
-                      <div className="w-4 h-4 bg-white rounded-full absolute top-0.5 left-0.5 transition-transform shadow-sm"></div>
-                    </button>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className={`text-sm ${colors.text.secondary}`}>Notifications</span>
-                    <button className={`w-10 h-5 ${colors.primary.gradientButton} rounded-full relative`}>
-                      <div className="w-4 h-4 bg-white rounded-full absolute top-0.5 right-0.5 transition-transform shadow-sm"></div>
-                    </button>
-                  </div>
-                </div>
-              </div>
-              
-              <div className={`${colors.background.card} rounded-lg p-4 ${colors.primary.border}`}>
-                <h4 className={`font-semibold ${colors.text.secondary} mb-3 text-sm`}>Compte</h4>
-                <div className="space-y-2">
-                  <button className={`w-full text-left text-sm ${colors.text.secondary} ${colors.buttons.favorite.hover} transition-colors py-1`}>
-                    Modifier le profil
-                  </button>
-                  <button className={`w-full text-left text-sm ${colors.text.secondary} ${colors.buttons.favorite.hover} transition-colors py-1`}>
-                    Changer le mot de passe
-                  </button>
-                  <button className={`w-full text-left text-sm ${colors.buttons.delete.text} transition-colors py-1`}>
-                    Déconnexion
-                  </button>
-                </div>
-              </div>
-            </div>
+            <SettingsSection />
           </div>
         );
       
