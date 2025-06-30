@@ -196,7 +196,13 @@ const toggleDropdown = (id) => {
             {project.name}
           </p>
           <p className={`text-xs ${colors.text.muted}`}>
-            Modifié récemment
+            {project.description ? 
+              (project.description.length > 30 ? 
+                project.description.substring(0, 20) + '...' : 
+                project.description
+              ) : 
+              'Aucune description'
+            }
           </p>
         </div>
       </div>
@@ -376,7 +382,15 @@ const toggleDropdown = (id) => {
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className={`font-medium ${colors.text.primary} text-sm truncate`}>{project.name}</p>
-                        <p className={`text-xs ${colors.favorites.empty.text}`}>Favori</p>
+                        <p className={`text-xs ${colors.favorites.empty.text}`}>
+                          {project.description ? 
+                            (project.description.length > 25 ? 
+                              project.description.substring(0, 20) + '...' : 
+                              project.description
+                            ) : 
+                            'Aucune description'
+                          }
+                        </p>                      
                       </div>
                     </motion.div>
                   ))
