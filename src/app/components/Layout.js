@@ -5,7 +5,7 @@ import Header from "./Header";
 import Sidebar from "./Sidebar";
 //import Dashboard from "./Dashboard";
 
-const Layout = ({ children, setInitialTaskCount, setCurrentProject, setProjectPage, projects, setProjects, secondSidebarOpen,setSecondSidebarOpen,secondSidebarContent,setSecondSidebarContent,isModalOpen,setIsModalOpen }) => {
+const Layout = ({ children, setInitialTaskCount, currentProject,setCurrentProject, setProjectPage, projects, setProjects, secondSidebarOpen,setSecondSidebarOpen,secondSidebarContent,setSecondSidebarContent,isModalOpen,setIsModalOpen,editModalOpen,setEditModalOpen,deleteModalOpen,setDeleteModalOpen,selectedProject,setSelectedProject }) => {
   // État pour savoir si la deuxième sidebar est ouverte
   const [isSecondSidebarOpen, setIsSecondSidebarOpen] = useState(false);
   
@@ -35,6 +35,7 @@ const Layout = ({ children, setInitialTaskCount, setCurrentProject, setProjectPa
         <div className="z-50 fixed left-0 top-[60px] sm:top-[80px] bottom-0">
           <Sidebar
             setInitialTaskCount={setInitialTaskCount}
+            currentProject={currentProject}
             setCurrentProject={setCurrentProject}
             setProjectPage={setProjectPage}
             projects={projects}
@@ -46,6 +47,12 @@ const Layout = ({ children, setInitialTaskCount, setCurrentProject, setProjectPa
             setSecondSidebarContent={setSecondSidebarContent}
             isModalOpen={isModalOpen}
             setIsModalOpen={setIsModalOpen}
+            editModalOpen={editModalOpen}
+            setEditModalOpen={setEditModalOpen}
+            deleteModalOpen={deleteModalOpen}
+          setDeleteModalOpen={setDeleteModalOpen}
+          selectedProject={selectedProject}
+          setSelectedProject={setSelectedProject} 
           />
         </div>
 

@@ -10,15 +10,13 @@ import { colors } from "../colors";
 import SettingsSection from './SettingsSection';
 
 
-const Sidebar = ({ setInitialTaskCount, setCurrentProject, setProjectPage, projects, setProjects, onSecondSidebarToggle, secondSidebarOpen,setSecondSidebarOpen,secondSidebarContent,setSecondSidebarContent,isModalOpen,setIsModalOpen }) => {
+const Sidebar = ({ setInitialTaskCount, setCurrentProject, setProjectPage, projects, setProjects, onSecondSidebarToggle, secondSidebarOpen,setSecondSidebarOpen,secondSidebarContent,setSecondSidebarContent,isModalOpen,setIsModalOpen,editModalOpen,setEditModalOpen,deleteModalOpen,setDeleteModalOpen,selectedProject,setSelectedProject,currentProject }) => {
 
   const [showProjects, setShowProjects] = useState(false);
   const [activeTab, setActiveTab] = useState('home');
   const [openDropdownId, setOpenDropdownId] = useState(null);
   const [dropdownOpenId, setDropdownOpenId] = useState(null);
-  const [editModalOpen, setEditModalOpen] = useState(false);
-  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-  const [selectedProject, setSelectedProject] = useState(null);
+
 
 const toggleDropdown = (id) => {
   setDropdownOpenId(prev => (prev === id ? null : id));
@@ -781,16 +779,34 @@ const toggleDropdown = (id) => {
           await reload();
           setIsModalOpen(false);
         }}
-      />
+        />
       <EditProjectModal
         isOpen={editModalOpen}
         onClose={() => setEditModalOpen(false)}
         project={selectedProject}
-        onUpdated={(updatedProject) => {
-          // remplace le projet modifié dans la liste
-          setProjects((prev) => prev.map(p => p.id === updatedProject.id ? updatedProject : p));
+        onUpdated={async (updatedProject) => {
+          try {
+            await fetch(`http://localhost:3001/projects/${updatedProject.id}`, {
+              method: "PUT",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              credentials: "include",
+              body: JSON.stringify(updatedProject), // Envoyer le projet modifié
+            });
+            
+            setProjects((prev) => prev.map(p => p.id === updatedProject.id ? updatedProject : p));
+            
+            if (currentProject?.id === updatedProject.id) {
+              setCurrentProject(updatedProject);
+            }
+            
+            setEditModalOpen(false); // Fermer le modal d'édition, pas de suppression
+          } catch (err) {
+            alert("Erreur lors de la modification");
+          }
         }}
-      />
+  />
 
       <ConfirmDeleteModal
         isOpen={deleteModalOpen}
@@ -803,6 +819,14 @@ const toggleDropdown = (id) => {
               credentials: "include",
             });
             setProjects(prev => prev.filter(p => p.id !== selectedProject.id));
+            console.log(selectedProject.id === currentProject?.id)
+            console.log(currentProject.id)
+            console.log(selectedProject.id)
+            
+                // Vérifier si le projet supprimé est le projet actuel
+            if (selectedProject.id === currentProject?.id) {
+              setProjectPage(false);
+            }
             setDeleteModalOpen(false);
           } catch (err) {
             alert("Erreur lors de la suppression");

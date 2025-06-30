@@ -1,14 +1,14 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Plus, Minus, Star, Save } from "lucide-react";
+import { Plus, Minus, Star, Save, Trash2, Edit2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import TaskListTable from "./TaskListTable";
 import CPMGraph from "./CPMGraph";
 import { ReactFlowProvider } from "reactflow";
 import { colors } from "../colors";
 
-const TaskScheduler = ({ currentProject, initialTaskCount , isSecondSidebarOpen, setProjects }) => {
+const TaskScheduler = ({ currentProject, initialTaskCount , isSecondSidebarOpen, setProjects, editModalOpen,setEditModalOpen,setProjectPage,deleteModalOpen,setDeleteModalOpen,selectedProject,setSelectedProject}) => {
   const [tasks, setTasks] = useState([{ name: "", duration: "", projectId: currentProject.id }]);
   const [fetchedTasks, setFetchedTasks] = useState([]);
   const [isInitialEntry, setIsInitialEntry] = useState(true);
@@ -255,51 +255,80 @@ const TaskScheduler = ({ currentProject, initialTaskCount , isSecondSidebarOpen,
       {isInitialEntry ? (
         <div className="w-full max-w-[1600px] mx-auto">
           {/* Header moderne */}
-          <motion.div 
-            initial={{ y: -20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ duration: 0.6 }}
-            className={`sticky top-0 left-0 w-full z-10 backdrop-blur-xl ${colors.background.header} border-b ${colors.table.border} shadow-2xl rounded-t-2xl`}
-          >
-            <div className="max-w-full mx-auto px-6 py-4">
-              <div className="flex items-center justify-center space-x-4">
-                <motion.h1 
-                  initial={{ scale: 0.9, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  transition={{ duration: 0.5, delay: 0.2 }}
-                  className={`text-center text-3xl font-bold ${colors.primary.gradient} bg-clip-text text-transparent`}
-                >
-                  {project.name || "Nouveau Projet"}
-                </motion.h1>
-                
-                {/* Bouton favoris */}
-                <motion.button
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.9 }}
-                  onClick={handleToggleFavorite}
-                  className={`p-3 rounded-full transition-all duration-300 shadow-lg ${
-                    project.isFavorite 
-                      ? `${colors.buttons.favorite.active} bg-amber-100/50` 
-                      : `${colors.buttons.favorite.inactive} ${colors.buttons.favorite.hover} bg-stone-100/50`
-                  }`}
-                >
-                  <Star 
-                    size={24} 
-                    fill={project.isFavorite ? "currentColor" : "none"}
-                  />
-                </motion.button>
-              </div>
-              
-              <motion.p 
-                initial={{ y: 10, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ duration: 0.5, delay: 0.3 }}
-                className={`text-center ${colors.text.secondary} italic mt-2 text-base`}
+      <motion.div 
+        initial={{ y: -20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.6 }}
+        className={`sticky top-0 left-0 w-full z-10 backdrop-blur-xl ${colors.background.header} border-b ${colors.table.border} shadow-2xl rounded-t-2xl`}
+      >
+        <div className="max-w-full mx-auto px-6 py-4">
+          <div className="flex items-center justify-center space-x-4">
+            <motion.h1 
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className={`text-center text-3xl font-bold ${colors.primary.gradient} bg-clip-text text-transparent`}
+            >
+              {project.name || "Nouveau Projet"}
+            </motion.h1>
+            
+            {/* Groupe de boutons d'actions */}
+            <div className="flex items-center space-x-3">
+              {/* Bouton favoris */}
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                onClick={handleToggleFavorite}
+                className={`p-3 rounded-full transition-all duration-300 shadow-lg ${
+                  project.isFavorite 
+                    ? `${colors.buttons.favorite.active} bg-amber-100/50` 
+                    : `${colors.buttons.favorite.inactive} ${colors.buttons.favorite.hover} bg-stone-100/50`
+                }`}
               >
-                {project.description || "Configuration initiale des tâches"}
-              </motion.p>
+                <Star 
+                  size={24} 
+                  fill={project.isFavorite ? "currentColor" : "none"}
+                />
+              </motion.button>
+
+              {/* Bouton modifier */}
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                onClick={() => {
+                  setSelectedProject(project);
+                  setEditModalOpen(true);
+                }}
+                className={`p-3 rounded-full transition-all duration-300 shadow-lg ${colors.buttons.edit.base} ${colors.buttons.edit.hover} bg-blue-100/50`}
+              >
+                <Edit2 size={20} className={colors.buttons.edit.text} />
+              </motion.button>
+
+              {/* Bouton supprimer */}
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                onClick={() => {
+                  setSelectedProject(project);
+                  setDeleteModalOpen(true);
+                }}
+                className={`p-3 rounded-full transition-all duration-300 shadow-lg ${colors.buttons.delete.base} ${colors.buttons.delete.hover} bg-red-100/50`}
+              >
+                <Trash2 size={20} className={colors.buttons.delete.text} />
+              </motion.button>
             </div>
-          </motion.div>
+          </div>
+          
+    <motion.p 
+      initial={{ y: 10, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      transition={{ duration: 0.5, delay: 0.3 }}
+      className={`text-center ${colors.text.secondary} italic mt-2 text-base`}
+    >
+      {project.description || "Configuration initiale des tâches"}
+    </motion.p>
+  </div>
+</motion.div>
 
           {/* Container principal */}
           <div className="max-w-full mx-auto px-4 pb-4">
