@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import TaskInitializerModal from "./TaskInitializerModal";
+import EditProjectModal from "./EditProjectModal";
+import ConfirmDeleteModal from "./ConfirmDeleteModal";
 import {Menu,X,BadgePlus,User,Settings,Home,FolderOpen,Star,MoreVertical, Edit2, Trash2} from "lucide-react";
 import { colors } from "../colors";
 
@@ -12,6 +14,15 @@ const Sidebar = ({ setInitialTaskCount, setCurrentProject, setProjectPage, proje
   const [showProjects, setShowProjects] = useState(false);
   const [activeTab, setActiveTab] = useState('home');
   const [openDropdownId, setOpenDropdownId] = useState(null);
+  const [dropdownOpenId, setDropdownOpenId] = useState(null);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [selectedProject, setSelectedProject] = useState(null);
+
+const toggleDropdown = (id) => {
+  setDropdownOpenId(prev => (prev === id ? null : id));
+};
+
 
 
   // Informer le parent quand l'état de la deuxième sidebar change
@@ -200,16 +211,18 @@ const Sidebar = ({ setInitialTaskCount, setCurrentProject, setProjectPage, proje
         <AnimatePresence>
           {openDropdownId === project.id && (
             <ProjectDropdown
-              projectId={project.id}
-              onEdit={() => {
-                console.log("Modifier", project.id);
-                setOpenDropdownId(null);
-              }}
-              onDelete={() => {
-                console.log("Supprimer", project.id);
-                setOpenDropdownId(null);
-              }}
-            />
+            onEdit={() => {
+              setSelectedProject(project);
+              setEditModalOpen(true);
+              setDropdownOpenId(null); // Ferme le dropdown après clic
+            }}
+            onDelete={() => {
+              setSelectedProject(project);
+              setDeleteModalOpen(true);
+              setDropdownOpenId(null);
+            }}
+            projectId={project.id}
+          />
           )}
         </AnimatePresence>
       </div>
@@ -813,9 +826,39 @@ const Sidebar = ({ setInitialTaskCount, setCurrentProject, setProjectPage, proje
           setIsModalOpen(false);
         }}
       />
+      <EditProjectModal
+        isOpen={editModalOpen}
+        onClose={() => setEditModalOpen(false)}
+        project={selectedProject}
+        onUpdated={(updatedProject) => {
+          // remplace le projet modifié dans la liste
+          setProjects((prev) => prev.map(p => p.id === updatedProject.id ? updatedProject : p));
+        }}
+      />
+
+      <ConfirmDeleteModal
+        isOpen={deleteModalOpen}
+        onClose={() => setDeleteModalOpen(false)}
+        projectName={selectedProject?.name}
+        onConfirm={async () => {
+          try {
+            await fetch(`http://localhost:3001/projects/${selectedProject.id}`, {
+              method: "DELETE",
+              credentials: "include",
+            });
+            setProjects(prev => prev.filter(p => p.id !== selectedProject.id));
+            setDeleteModalOpen(false);
+          } catch (err) {
+            alert("Erreur lors de la suppression");
+          }
+        }}
+      />
+
+      
 
     </>
   );
+
 };
 
 export default Sidebar;
