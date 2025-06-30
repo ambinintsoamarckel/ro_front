@@ -249,8 +249,7 @@ const TaskScheduler = ({ currentProject, initialTaskCount , isSecondSidebarOpen,
 
   return (
     <div
-      className={`w-full mx-auto p-8 shadow-xl rounded-2xl mt-10 transition-all duration-300 ease-in-out ${colors.background.main} ${
-        isSecondSidebarOpen ? 'max-w-[1400px]' : 'max-w-[1600px]'
+      className={`w-full mx-auto p-8 shadow-xl rounded-2xl mt-10 transition-all duration-300 ease-in-out ${colors.background.main} ${isSecondSidebarOpen ? 'max-w-[1400px]' : 'max-w-[1600px]'
       }`}
     > 
       {isInitialEntry ? (

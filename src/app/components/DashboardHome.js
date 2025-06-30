@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState } from 'react';
 
-const Dashboard = ({ secondSidebarOpen,setSecondSidebarOpen,secondSidebarContent,setSecondSidebarContent,isModalOpen,setIsModalOpen
+const Dashboard = ({ secondSidebarOpen,setSecondSidebarOpen,secondSidebarContent,isSecondSidebarOpen,setSecondSidebarContent,isModalOpen,setIsModalOpen
 }) => {
   const [animatedStats, setAnimatedStats] = useState({
     tasks: 0,
@@ -105,7 +105,7 @@ const Dashboard = ({ secondSidebarOpen,setSecondSidebarOpen,secondSidebarContent
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-slate-50 to-zinc-50">
+    <div className={`w-full mx-auto p-8 shadow-xl rounded-2xl mt-10 transition-all duration-300 ease-in-out min-h-screen  bg-gradient-to-br from-gray-50 via-slate-50 to-zinc-50 ${isSecondSidebarOpen ? 'max-w-[1400px]' : 'max-w-[1600px]'} `}>
       {/* Header */}
       <div className="bg-white/95 backdrop-blur-md border-b border-slate-200/40 px-6 py-8">
         <div className="max-w-7xl mx-auto">
