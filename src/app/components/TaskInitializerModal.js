@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, FolderPen, AlignCenter, FileDigit, Sparkles, Folder, Play } from 'lucide-react';
+import { X, FolderPen, AlignCenter, FileDigit, Sparkles, Folder, Play ,Undo2} from 'lucide-react';
 import Image from "next/image";
 import { colors } from '../colors.js';
 
@@ -97,11 +97,11 @@ const TaskInitializerModal = ({ isOpen, onClose, onInitialize }) => {
                               </motion.div>
                               <div className={`absolute -top-0.5 -right-0.5 sm:-top-1 sm:-right-1 w-3 h-3 sm:w-4 sm:h-4 bg-gradient-to-r ${colors.buttons.add.gradient} rounded-full animate-pulse`}></div>
                             </div>
-                  <div>
-                    <h1 className="text-xl font-bold">Nouveau Projet</h1>
-                    <p className="text-white/80 text-sm">Initialisation des tâches</p>
+                        <div>
+                          <h1 className="text-xl font-bold">Nouveau Projet</h1>
+                          <p className="text-white/80 text-sm">Initialisation des tâches</p>
+                        </div>
                   </div>
-                </div>
                 <motion.button
                   whileHover={{ scale: 1.1, rotate: 90 }}
                   whileTap={{ scale: 0.9 }}
@@ -221,14 +221,15 @@ const TaskInitializerModal = ({ isOpen, onClose, onInitialize }) => {
               transition={{ delay: 0.5 }}
             >
               <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={onClose}
-                disabled={loading}
-                className={`px-6 py-3 rounded-lg font-medium transition-all duration-200 bg-gradient-to-r ${colors.buttons.cancel.gradient} ${colors.buttons.cancel.hover} ${colors.buttons.cancel.text} shadow-lg hover:shadow-xl`}
-              >
-                Annuler
-              </motion.button>
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={onClose}
+              disabled={loading}
+              className={`px-6 py-3 rounded-lg font-medium transition-all duration-200 bg-gradient-to-r ${colors.buttons.cancel.gradient} ${colors.buttons.cancel.hover} ${colors.buttons.cancel.text} shadow-lg hover:shadow-xl flex items-center space-x-2`}
+            >
+              <Undo2 className="w-4 h-4" />
+              <span>Annuler</span>
+            </motion.button>
               
               <motion.button
                 whileHover={{ scale: isValid && !loading ? 1.05 : 1 }}
