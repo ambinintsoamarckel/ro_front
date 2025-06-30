@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import TaskInitializerModal from "./TaskInitializerModal";
 import EditProjectModal from "./EditProjectModal";
 import ConfirmDeleteModal from "./ConfirmDeleteModal";
-import {Menu,X,BadgePlus,User,Settings,Home,FolderOpen,Star,MoreVertical, Edit2, Trash2} from "lucide-react";
+import {Menu,X,BadgePlus,User,Settings,Home,FolderOpen,Star,MoreVertical, Edit2, Trash2,Undo2} from "lucide-react";
 import { colors } from "../colors";
 import SettingsSection from './SettingsSection';
 
@@ -16,11 +16,67 @@ const Sidebar = ({ setInitialTaskCount, setCurrentProject, setProjectPage, proje
   const [activeTab, setActiveTab] = useState('home');
   const [openDropdownId, setOpenDropdownId] = useState(null);
   const [dropdownOpenId, setDropdownOpenId] = useState(null);
+  // 1. Ajouter ces états au début du composant Sidebar
+  const [isMultiSelectMode, setIsMultiSelectMode] = useState(false);
+  const [selectedProjects, setSelectedProjects] = useState([]);
 
+  // 2. Fonction pour basculer le mode de sélection multiple
+  const toggleMultiSelectMode = () => {
+    setIsMultiSelectMode(!isMultiSelectMode);
+    setSelectedProjects([]); // Réinitialiser les sélections
+  };
 
-const toggleDropdown = (id) => {
-  setDropdownOpenId(prev => (prev === id ? null : id));
-};
+  // 3. Fonction pour gérer la sélection d'un projet
+  const handleProjectSelect = (projectId) => {
+    setSelectedProjects(prev => {
+      if (prev.includes(projectId)) {
+        return prev.filter(id => id !== projectId);
+      } else {
+        return [...prev, projectId];
+      }
+    });
+  };
+
+  // 3.1. Fonction pour sélectionner/désélectionner tous les projets
+  const handleSelectAll = () => {
+    if (selectedProjects.length === projects.length) {
+      // Si tous sont sélectionnés, tout désélectionner
+      setSelectedProjects([]);
+    } else {
+      // Sinon, sélectionner tous les projets
+      setSelectedProjects(projects.map(p => p.id));
+    }
+  };
+
+  // 4. Fonction pour supprimer les projets sélectionnés
+  const deleteSelectedProjects = async () => {
+    try {
+      await Promise.all(
+        selectedProjects.map(projectId =>
+          fetch(`http://localhost:3001/projects/${projectId}`, {
+            method: "DELETE",
+            credentials: "include",
+          })
+        )
+      );
+      
+      setProjects(prev => prev.filter(p => !selectedProjects.includes(p.id)));
+      
+      // Si le projet actuel est dans la sélection, retourner à l'accueil
+      if (selectedProjects.includes(currentProject?.id)) {
+        setProjectPage(false);
+      }
+      
+      setSelectedProjects([]);
+      setIsMultiSelectMode(false);
+    } catch (err) {
+      alert("Erreur lors de la suppression");
+    }
+  };
+
+  const toggleDropdown = (id) => {
+    setDropdownOpenId(prev => (prev === id ? null : id));
+  };
 
 
 
@@ -167,6 +223,7 @@ const toggleDropdown = (id) => {
     </motion.div>
   ); 
 
+  // 5. Modifier la fonction renderProjectCard pour supporter la sélection multiple
   const renderProjectCard = (project, index) => (
     <motion.div
       key={project.id}
@@ -174,14 +231,35 @@ const toggleDropdown = (id) => {
       animate={{ x: 0, opacity: 1 }}
       transition={{ delay: index * 0.1 }}
       whileHover={{ x: 4, scale: 1.02 }}
-      className={`relative flex items-center justify-between p-3 ${colors.background.card} rounded-lg cursor-pointer transition-all duration-300 ${colors.effects.glowHover} ${colors.primary.border} group`}
+      className={`relative flex items-center justify-between p-3 ${colors.background.card} rounded-lg cursor-pointer transition-all duration-300 ${colors.effects.glowHover} ${colors.primary.border} group ${
+        isMultiSelectMode && selectedProjects.includes(project.id) 
+          ? 'ring-2 ring-violet-500 bg-violet-50 dark:bg-violet-900/20' 
+          : ''
+      }`}
       style={{ zIndex: openDropdownId === project.id ? 1000 : 'auto' }}
     >
+      {/* Case à cocher pour le mode sélection multiple */}
+      {isMultiSelectMode && (
+        <div className="flex items-center mr-3">
+          <input
+            type="checkbox"
+            checked={selectedProjects.includes(project.id)}
+            onChange={() => handleProjectSelect(project.id)}
+            className="w-4 h-4 text-violet-600 bg-gray-100 border-gray-300 rounded focus:ring-violet-500 dark:focus:ring-violet-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
+      )}
+
       <div
         className="flex items-center flex-1 min-w-0"
         onClick={() => {
-          setCurrentProject(project);
-          setProjectPage(true);
+          if (isMultiSelectMode) {
+            handleProjectSelect(project.id);
+          } else {
+            setCurrentProject(project);
+            setProjectPage(true);
+          }
         }}
       >
         <div className={`w-8 h-8 ${colors.projects.colors[index % colors.projects.colors.length]} rounded-lg flex items-center justify-center mr-3 ${colors.projects.shadows[index % colors.projects.shadows.length]} group-hover:scale-110 transition-transform duration-300`}>
@@ -204,38 +282,41 @@ const toggleDropdown = (id) => {
           </p>
         </div>
       </div>
-  
-      <div className="relative dropdown-container">
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            setOpenDropdownId(openDropdownId === project.id ? null : project.id);
-          }}
-          className={`p-2 rounded-full hover:${colors.background.overlay} transition-all duration-200 ${colors.effects.glowHover} ${
-            openDropdownId === project.id ? `${colors.background.overlay} scale-110` : ''
-          }`}
-        >
-          <MoreVertical size={18} className={colors.text.muted} />
-        </button>
-  
-        <AnimatePresence>
-          {openDropdownId === project.id && (
-            <ProjectDropdown
-            onEdit={() => {
-              setSelectedProject(project);
-              setEditModalOpen(true);
-              setDropdownOpenId(null); // Ferme le dropdown après clic
+
+      {/* Menu dropdown (masqué en mode sélection multiple) */}
+      {!isMultiSelectMode && (
+        <div className="relative dropdown-container">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              setOpenDropdownId(openDropdownId === project.id ? null : project.id);
             }}
-            onDelete={() => {
-              setSelectedProject(project);
-              setDeleteModalOpen(true);
-              setDropdownOpenId(null);
-            }}
-            projectId={project.id}
-          />
-          )}
-        </AnimatePresence>
-      </div>
+            className={`p-2 rounded-full hover:${colors.background.overlay} transition-all duration-200 ${colors.effects.glowHover} ${
+              openDropdownId === project.id ? `${colors.background.overlay} scale-110` : ''
+            }`}
+          >
+            <MoreVertical size={18} className={colors.text.muted} />
+          </button>
+
+          <AnimatePresence>
+            {openDropdownId === project.id && (
+              <ProjectDropdown
+                onEdit={() => {
+                  setSelectedProject(project);
+                  setEditModalOpen(true);
+                  setDropdownOpenId(null);
+                }}
+                onDelete={() => {
+                  setSelectedProject(project);
+                  setDeleteModalOpen(true);
+                  setDropdownOpenId(null);
+                }}
+                projectId={project.id}
+              />
+            )}
+          </AnimatePresence>
+        </div>
+      )}
     </motion.div>
   );
 
@@ -307,50 +388,117 @@ const toggleDropdown = (id) => {
           </div>
         );
       
+      // 6. Modifier le header de la section projets dans renderSecondSidebarContent
       case 'projects':
         return (
-          <div className="flex-1 overflow-y-auto custom-scrollbar">
-            <div className="p-4">
-              <div className={`flex items-center justify-between mb-4 p-4 -m-4 rounded-t-2xl`}>
-                <h3 className={`text-lg font-semibold ${colors.text.gradient}`}>Mes Projets</h3>
-                <div className="flex items-center space-x-2">
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => setIsModalOpen(true)}
-                    className={`p-2 ${colors.primary.gradientButton} text-white rounded-lg ${colors.buttons.save.hover} transition-colors`}
-                  >
-                    <BadgePlus size={16} />
-                  </motion.button>
+          <div className="flex-1 flex flex-col overflow-y-auto custom-scrollbar">
+            <div className="flex-1 overflow-y-auto custom-scrollbar">
+              <div className="p-4">
+                <div className={`flex items-center justify-between mb-4 p-4 -m-4 rounded-t-2xl`}>
+                  <div className="flex flex-col">
+                    <h3 className={`text-lg font-semibold ${colors.text.gradient}`}>Mes Projets</h3>
+                    {isMultiSelectMode && projects.length > 0 && (
+                      <div className="flex items-center space-x-2 mt-3">
+                        <input
+                          type="checkbox"
+                          checked={selectedProjects.length === projects.length && projects.length > 0}
+                          onChange={handleSelectAll}
+                          className="w-4 h-4 text-violet-600 bg-gray-100 border-gray-300 rounded focus:ring-violet-500 dark:focus:ring-violet-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                        />
+                        <span className={`text-sm ${colors.text.secondary}`}>
+                          Tout sélectionner
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    {!isMultiSelectMode ? (
+                      <>
+                        <motion.button
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          onClick={toggleMultiSelectMode}
+                          className={`p-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors`}
+                          title="Sélection multiple"
+                        >
+                          <Trash2 size={16} />
+                        </motion.button>
+                      </>
+                    ) : (
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={toggleMultiSelectMode}
+                        className={`px-3 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg transition-colors text-sm`}
+                      >
+                        <Undo2 size={16} />
+                      </motion.button>
+                    )}
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  {projects.length > 0 ? (
+                    projects.map((project, index) => renderProjectCard(project, index))
+                  ) : (
+                    <motion.div 
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="text-center py-8"
+                        >
+                          <FolderOpen size={48} className={`mx-auto ${colors.text.muted} mb-4`} />
+                          <p className={`${colors.text.secondary} text-sm mb-4`}>Aucun projet</p>
+                          <motion.button
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            onClick={() => setIsModalOpen(true)}
+                            className={`px-4 py-2 ${colors.primary.gradientButton} text-white rounded-lg ${colors.buttons.save.hover} transition-colors text-sm`}
+                          >
+                            Créer un projet
+                          </motion.button>
+                        </motion.div>
+                  )}
                 </div>
               </div>
-              
-              <div className="space-y-2">
-                {projects.length > 0 ? (
-                  projects.map((project, index) => renderProjectCard(project, index))
-                ) : (
-                  <motion.div 
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="text-center py-8"
-                  >
-                    <FolderOpen size={48} className={`mx-auto ${colors.text.muted} mb-4`} />
-                    <p className={`${colors.text.secondary} text-sm mb-4`}>Aucun projet</p>
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={() => setIsModalOpen(true)}
-                      className={`px-4 py-2 ${colors.primary.gradientButton} text-white rounded-lg ${colors.buttons.save.hover} transition-colors text-sm`}
-                    >
-                      Créer un projet
-                    </motion.button>
-                  </motion.div>
-                )}
-              </div>
             </div>
+
+            {/* Barre d'actions pour la suppression multiple - en bas du sidebar */}
+            <AnimatePresence>
+              {isMultiSelectMode && selectedProjects.length > 0 && (
+                <motion.div
+                  initial={{ y: 50, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  exit={{ y: 50, opacity: 0 }}
+                  className={`${colors.background.card} ${colors.primary.border} border-t rounded-b-2xl p-4 shadow-lg backdrop-blur-sm`}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => {
+                          setSelectedProjects([]);
+                          setIsMultiSelectMode(false);
+                        }}
+                        className="px-3 py-1.5 bg-gray-500 hover:bg-gray-600 text-white rounded-lg transition-colors text-xs"
+                      >
+                        Annuler
+                      </motion.button>
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={deleteSelectedProjects}
+                        className="px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors text-xs"
+                      >
+                        Supprimer ({selectedProjects.length})
+                      </motion.button>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         );
-      
       case 'favoris':
         return (
           <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
