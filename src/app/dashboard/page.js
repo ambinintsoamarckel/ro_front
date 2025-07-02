@@ -55,7 +55,7 @@ const Dashboard = () => {
       selectedProject={selectedProject} 
       setSelectedProject={setSelectedProject}
     >
-      {projectPage || initialTaskCount ? (
+      {projectPage  ? (
         <TaskScheduler
           initialTaskCount={initialTaskCount}
           currentProject={currentProject}

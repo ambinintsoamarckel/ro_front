@@ -1039,6 +1039,7 @@ const Sidebar = ({ setInitialTaskCount, setCurrentProject, setProjectPage, proje
         onClose={() => setIsModalOpen(false)}
         onInitialize={async (count, project) => {
           setInitialTaskCount(count);
+          setProjectPage(true);
           setCurrentProject(project);
           await reload();
           setIsModalOpen(false);
