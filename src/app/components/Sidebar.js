@@ -561,7 +561,9 @@ const Sidebar = ({ setInitialTaskCount, setCurrentProject, setProjectPage, proje
                 
                 <div className="space-y-2">
                   {projects.length > 0 ? (
-                    projects.map((project, index) => renderProjectCard(project, index))
+                     projects
+                     .sort((a, b) => a.id - b.id) 
+                     .map((project, index) => renderProjectCard(project, index))
                   ) : (
                     <motion.div 
                           initial={{ opacity: 0, y: 20 }}
