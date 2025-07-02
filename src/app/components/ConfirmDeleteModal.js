@@ -77,7 +77,6 @@ const ConfirmDeleteModal = ({ isOpen = true, onClose = () => {}, onConfirm = () 
       <div
         className={`${colors.background.card} backdrop-blur-md border border-red-200/60 shadow-2xl rounded-2xl w-full max-w-md relative z-50 overflow-hidden`}
       >
-        {/* Header avec logo comme TaskInitializerModal */}
         <div className={`bg-gradient-to-r ${colors.buttons.remove.gradient} p-6 text-white relative overflow-hidden`}>
           <div className="absolute inset-0 bg-white/10 backdrop-blur-sm"></div>
           <div className="relative z-10 flex justify-between items-center">

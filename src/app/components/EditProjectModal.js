@@ -95,7 +95,6 @@ const EditProjectModal = ({ isOpen = true, onClose = () => {}, project = { id: 1
       <div
         className={`${colors.background.card} backdrop-blur-md border border-stone-200/40 shadow-2xl rounded-2xl w-full max-w-md relative z-50 overflow-hidden`}
       >
-        {/* Header avec logo comme TaskInitializerModal */}
         <div className={`bg-gradient-to-r ${colors.primary.gradient} p-6 text-white relative overflow-hidden`}>
           <div className="absolute inset-0 bg-white/10 backdrop-blur-sm"></div>
           <div className="relative z-10 flex justify-between items-center">
