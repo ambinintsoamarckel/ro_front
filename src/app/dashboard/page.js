@@ -58,7 +58,8 @@ const Dashboard = () => {
       secondSidebarContent={secondSidebarContent}
       setSecondSidebarContent={setSecondSidebarContent}
       isModalOpen={isModalOpen}
-      setIsModalOpen={setIsModalOpen} />
+      setIsModalOpen={setIsModalOpen}
+      projects={projects} />
       )}
     </Layout>
   );
