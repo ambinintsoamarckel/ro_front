@@ -17,6 +17,9 @@ const Dashboard = () => {
   const [secondSidebarOpen, setSecondSidebarOpen] = useState(false);
   const [secondSidebarContent, setSecondSidebarContent] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [selectedProject, setSelectedProject] = useState(null);
   useEffect(() => {
     const verify = async () => {
       const user = await checkAuthStatus();
@@ -34,6 +37,7 @@ const Dashboard = () => {
   return (
     <Layout
       setInitialTaskCount={setInitialTaskCount}
+      currentProject={currentProject}
       setCurrentProject={setCurrentProject}
       setProjectPage={setProjectPage}
       projects={projects}
@@ -44,12 +48,25 @@ const Dashboard = () => {
       setSecondSidebarContent={setSecondSidebarContent}
       isModalOpen={isModalOpen}
       setIsModalOpen={setIsModalOpen}
+      editModalOpen={editModalOpen}
+      setEditModalOpen={setEditModalOpen}
+      deleteModalOpen={deleteModalOpen}
+      setDeleteModalOpen={setDeleteModalOpen}
+      selectedProject={selectedProject} 
+      setSelectedProject={setSelectedProject}
     >
       {projectPage || initialTaskCount ? (
         <TaskScheduler
           initialTaskCount={initialTaskCount}
           currentProject={currentProject}
           setProjects={setProjects}
+          editModalOpen={editModalOpen}
+          setEditModalOpen={setEditModalOpen}
+          setProjectPage={setProjectPage}
+          deleteModalOpen={deleteModalOpen}
+          setDeleteModalOpen={setDeleteModalOpen}
+          selectedProject={selectedProject} 
+          setSelectedProject={setSelectedProject}
         />
       ) : (
         <DashboardHome
