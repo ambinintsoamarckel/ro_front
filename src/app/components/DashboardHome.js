@@ -158,90 +158,8 @@ const Dashboard = ({
     </div>
   );
 
-  // Générer l'activité récente basée sur les projets et tâches
-  const getRecentActivity = () => {
-    const activities = [];
-    
-    if (projects.length > 0) {
-      // Projets favoris récents
-      const recentFavorites = projects.filter(p => p.isFavorite).slice(0, 2);
-      recentFavorites.forEach(project => {
-        const taskCount = project.tasks ? project.tasks.length : 0;
-        activities.push({
-          action: "Projet favori",
-          name: `${project.name} (${taskCount} tâches)`,
-          time: "Il y a 2h",
-          icon: "⭐"
-        });
-      });
 
-      // Projets avec type d'ordonnancement
-      const successorProjects = projects.filter(p => p.isSuccessor).slice(0, 2);
-      successorProjects.forEach(project => {
-        activities.push({
-          action: "Ordonnancement successeur",
-          name: project.name,
-          time: "Il y a 3h",
-          icon: "🔄"
-        });
-      });
 
-      // Projets avec le plus de tâches
-      const projectsWithTasks = projects
-        .filter(p => p.tasks && p.tasks.length > 0)
-        .sort((a, b) => (b.tasks?.length || 0) - (a.tasks?.length || 0))
-        .slice(0, 2);
-      
-      projectsWithTasks.forEach(project => {
-        activities.push({
-          action: "Projet actif",
-          name: `${project.name} (${project.tasks.length} tâches)`,
-          time: "Hier",
-          icon: "📋"
-        });
-      });
-    }
-
-    // Activités par défaut si pas de projets
-    if (activities.length === 0) {
-      return [
-        { action: "Bienvenue", name: "Créez votre premier projet", time: "Maintenant", icon: "👋" },
-        { action: "Conseil", name: "Organisez vos tâches avec des dépendances", time: "Maintenant", icon: "💡" }
-      ];
-    }
-
-    return activities.slice(0, 4); // Limiter à 4 activités
-  };
-
-  // Calculer les objectifs basés sur les données d'ordonnancement
-  const getWeeklyGoals = () => {
-    const totalProjects = projects.length;
-    const totalTasks = animatedStats.totalTasks;
-    const projectsWithTasks = projects.filter(p => p.tasks && p.tasks.length > 0).length;
-
-    return [
-      { 
-        goal: `Créer ${Math.max(5, totalTasks + 3)} tâches`, 
-        progress: Math.min(100, (totalTasks / Math.max(5, totalTasks + 3)) * 100), 
-        color: "from-emerald-600 to-emerald-700" 
-      },
-      { 
-        goal: "Définir les dépendances", 
-        progress: animatedStats.dependencies > 0 ? Math.min(100, animatedStats.dependencies * 20) : 0, 
-        color: "from-blue-600 to-blue-700" 
-      },
-      { 
-        goal: "Organiser les projets", 
-        progress: totalProjects > 0 ? Math.min(100, (projectsWithTasks / totalProjects) * 100) : 0, 
-        color: "from-amber-600 to-amber-700" 
-      },
-      { 
-        goal: "Optimiser l'ordonnancement", 
-        progress: animatedStats.successorProjects > 0 ? Math.min(100, (animatedStats.successorProjects / Math.max(1, totalProjects)) * 100) : 0, 
-        color: "from-purple-600 to-purple-700" 
-      }
-    ];
-  };
 
   return (
     <div className={`w-full mx-auto p-8 shadow-xl rounded-2xl mt-10 transition-all duration-300 ease-in-out min-h-screen bg-gradient-to-br from-gray-50 via-slate-50 to-zinc-50 ${isSecondSidebarOpen ? 'max-w-[1400px]' : 'max-w-[1600px]'}`}>
@@ -386,21 +304,7 @@ const Dashboard = ({
               }}
               onClick={() => navigateTo('favoris')}
             />
-            <QuickActionCard
-              icon="📊"
-              title="Ordonnancement"
-              description="Visualiser le planning"
-              color={{
-                bg: 'bg-gradient-to-r from-blue-50 to-indigo-50',
-                hover: 'hover:from-blue-100 hover:to-indigo-100',
-                border: 'border-blue-300/50',
-                shadow: 'shadow-sm shadow-blue-500/10',
-                iconBg: 'bg-gradient-to-r from-blue-100 to-indigo-100',
-                iconColor: 'text-blue-700',
-                text: 'text-blue-800'
-              }}
-              onClick={() => navigateTo('ordonnancement')}
-            />
+
             <QuickActionCard
               icon="⚙️"
               title="Paramètres"
@@ -419,59 +323,7 @@ const Dashboard = ({
           </div>
         </div>
 
-        {/* Section activité récente et objectifs */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Activité récente */}
-          <div className="bg-white/98 backdrop-blur-sm border border-slate-200/50 shadow-sm shadow-slate-500/5 rounded-xl p-6">
-            <h3 className="text-lg font-medium text-slate-700 mb-4">Activité récente</h3>
-            <div className="space-y-4">
-              {getRecentActivity().map((item, index) => (
-                <div key={index} className="flex items-center space-x-4 p-3 rounded-lg hover:bg-slate-50/50 transition-colors duration-200">
-                  <div className="w-8 h-8 bg-gradient-to-r from-slate-100 to-gray-100 rounded-full flex items-center justify-center text-sm">
-                    {item.icon}
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-slate-700 font-medium text-sm">{item.action}</p>
-                    <p className="text-slate-500 text-sm truncate">{item.name}</p>
-                  </div>
-                  <span className="text-xs text-slate-400">{item.time}</span>
-                </div>
-              ))}
-            </div>
-            {projects.length === 0 && (
-              <div className="text-center py-4">
-                <p className="text-slate-500 text-sm">Aucune activité pour le moment</p>
-                <button 
-                  onClick={() => navigateTo('nouveau')}
-                  className="mt-2 text-slate-600 hover:text-slate-800 text-sm underline"
-                >
-                  Créer votre premier projet
-                </button>
-              </div>
-            )}
-          </div>
 
-          {/* Objectifs de la semaine */}
-          <div className="bg-white/98 backdrop-blur-sm border border-slate-200/50 shadow-sm shadow-slate-500/5 rounded-xl p-6">
-            <h3 className="text-lg font-medium text-slate-700 mb-4">Objectifs de la semaine</h3>
-            <div className="space-y-4">
-              {getWeeklyGoals().map((item, index) => (
-                <div key={index} className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-slate-700">{item.goal}</span>
-                    <span className="text-slate-500">{Math.round(item.progress)}%</span>
-                  </div>
-                  <div className="w-full bg-slate-100 rounded-full h-2">
-                    <div 
-                      className={`bg-gradient-to-r ${item.color} h-2 rounded-full transition-all duration-1000 ease-out`}
-                      style={{ width: `${Math.min(item.progress, 100)}%` }}
-                    ></div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
 
         {/* Résumé des projets si disponible */}
         {projects.length > 0 && (
