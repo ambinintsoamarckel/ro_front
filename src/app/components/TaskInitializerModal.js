@@ -169,29 +169,27 @@ const TaskInitializerModal = ({ isOpen, onClose, onInitialize }) => {
 
               {/* Nombre de tâches */}
               <motion.div 
-                className="space-y-2"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
+                className="space-y-2" 
+                initial={{ opacity: 0, y: 20 }} 
+                animate={{ opacity: 1, y: 0 }} 
                 transition={{ delay: 0.3 }}
               >
                 <label className={`block text-sm font-semibold ${colors.text.primary}`}>
                   Nombre initial de tâches
                 </label>
                 <div className="relative group">
-                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center justify-center pointer-events-none">
                     <FileDigit className={`w-5 h-5 ${colors.text.muted} group-focus-within:text-amber-500 transition-colors`} />
                   </div>
-                  <input
-                    type="number"
-                    value={taskCount}
-                    onChange={(e) => setTaskCount(Math.max(3, parseInt(e.target.value) || 3))}
-                    className={`block w-full pl-12 pr-4 py-3 border-2 border-stone-200/60 text-sm text-center rounded-xl focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 focus:outline-none transition-all duration-200 bg-white/80 ${colors.text.primary} font-semibold`}
-                    min="3"
-                    required
+                  <input 
+                    type="number" 
+                    value={taskCount} 
+                    onChange={(e) => setTaskCount(Math.max(3, parseInt(e.target.value) || 3))} 
+                    className={`block w-full pl-12 pr-4 py-3 border-2 border-stone-200/60 text-sm text-center rounded-xl focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 focus:outline-none transition-all duration-200 bg-white/80 ${colors.text.primary} font-semibold`} 
+                    min="3" 
+                    required 
+                    placeholder="Minimum 3 tâches"
                   />
-                  <div className={`mt-1 text-xs ${colors.text.secondary} text-center`}>
-                    Minimum 3 tâches
-                  </div>
                 </div>
               </motion.div>
 

@@ -508,7 +508,7 @@ const TaskScheduler = ({ currentProject, initialTaskCount , isSecondSidebarOpen,
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.8 }}
-              className="flex justify-center mt-10"
+              className="flex justify-end mt-10"
             >
               <motion.button
                 whileHover={{ scale: 1.05 }}
@@ -540,6 +540,13 @@ const TaskScheduler = ({ currentProject, initialTaskCount , isSecondSidebarOpen,
           onTaskDelete={handleTaskDelete}
           onTaskCreate={handleTaskCreate}
           dependencyType={dependencyType}
+          editModalOpen={editModalOpen}
+          setEditModalOpen={setEditModalOpen}
+          setProjectPage={setProjectPage}
+          deleteModalOpen={deleteModalOpen}
+          setDeleteModalOpen={setDeleteModalOpen}
+          selectedProject={selectedProject} 
+          setSelectedProject={setSelectedProject}
         />
       )}
 
