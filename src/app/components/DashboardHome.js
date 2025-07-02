@@ -1,5 +1,6 @@
 "use client";
 import React, { useEffect, useState } from 'react';
+import { colors } from '../colors';
 
 const Dashboard = ({ 
   projects = [],
@@ -115,73 +116,96 @@ const Dashboard = ({
     }, stepTime);
 
     return () => clearInterval(timer);
-  }, [projects]); // Re-calculer quand les projets changent
+  }, [projects]);
 
-  const StatCard = ({ icon, title, value, subtitle, progress, color = "from-slate-700 via-slate-600 to-slate-800" }) => (
-    <div className="bg-white/98 backdrop-blur-sm border border-slate-200/50 shadow-sm shadow-slate-500/5 rounded-xl p-6 hover:shadow-md hover:shadow-slate-500/15 transition-all duration-300 group">
+  const StatCard = ({ icon, title, value, subtitle, progress, gradientColor = "from-slate-700 via-slate-600 to-slate-800" }) => (
+    <div className={`${colors.background.card} rounded-xl p-6 ${colors.effects.glowHover} transition-all duration-300 group relative overflow-hidden`}>
+      {/* Effet de brillance subtil */}
+      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent transform -skew-x-12 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
+      
       <div className="flex items-center justify-between mb-4">
-        <div className={`w-12 h-12 bg-gradient-to-r ${color} rounded-lg flex items-center justify-center text-white text-xl shadow-md shadow-slate-500/20`}>
+        <div className={`w-12 h-12 bg-gradient-to-r ${gradientColor} rounded-lg flex items-center justify-center text-white text-xl shadow-md shadow-slate-500/20 group-hover:scale-105 transition-transform duration-300`}>
           {icon}
         </div>
         <div className="text-right">
-          <div className="text-2xl font-bold text-slate-800">{value}</div>
-          <div className="text-sm text-slate-600">{subtitle}</div>
+          <div className={`text-2xl font-bold ${colors.text.primary} group-hover:scale-105 transition-transform duration-300`}>
+            {value}
+          </div>
+          <div className={`text-sm ${colors.text.secondary}`}>{subtitle}</div>
         </div>
       </div>
-      <h3 className="text-slate-700 font-medium mb-3">{title}</h3>
+      <h3 className={`${colors.text.primary} font-medium mb-3`}>{title}</h3>
       {progress !== undefined && (
-        <div className="w-full bg-slate-100 rounded-full h-2">
+        <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
           <div 
-            className={`bg-gradient-to-r ${color} h-2 rounded-full transition-all duration-1000 ease-out`}
+            className={`bg-gradient-to-r ${gradientColor} h-2 rounded-full transition-all duration-1000 ease-out relative`}
             style={{ width: `${Math.min(progress, 100)}%` }}
-          ></div>
+          >
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-pulse"></div>
+          </div>
         </div>
       )}
     </div>
   );
 
-  const QuickActionCard = ({ icon, title, description, color, onClick, badge }) => (
-    <div 
-      onClick={onClick}
-      className={`${color.bg} ${color.hover} border ${color.border} rounded-xl p-6 cursor-pointer transition-all duration-300 ${color.shadow} hover:shadow-md ${color.hover.includes('shadow') ? color.hover : 'hover:shadow-slate-500/15'} group transform hover:scale-105 hover:-translate-y-1 relative`}
-    >
-      {badge && (
-        <div className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center">
-          {badge}
+  const QuickActionCard = ({ icon, title, description, colorKey, onClick, badge }) => {
+    const colorConfig = colors.sidebar.items[colorKey] || colors.sidebar.items.menu;
+    
+    return (
+      <div 
+        onClick={onClick}
+        className={`${colorConfig.bg} ${colorConfig.hover} border ${colors.primary.border} rounded-xl p-6 cursor-pointer transition-all duration-300 ${colorConfig.shadow} group transform hover:scale-105 hover:-translate-y-1 relative overflow-hidden`}
+      >
+        {/* Badge de notification */}
+        {badge && (
+          <div className="absolute -top-2 -right-2 bg-gradient-to-r from-red-500 to-red-600 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center shadow-md shadow-red-500/20 animate-pulse">
+            {badge}
+          </div>
+        )}
+        
+        {/* Effet de brillance */}
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent transform -skew-x-12 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
+        
+        <div className={`w-12 h-12 ${colors.primary.gradientButton} rounded-lg flex items-center justify-center text-white text-xl mb-4 group-hover:scale-105 transition-transform duration-300 shadow-md shadow-slate-500/20`}>
+          {icon}
         </div>
-      )}
-      <div className={`w-12 h-12 ${color.iconBg} rounded-lg flex items-center justify-center ${color.iconColor} text-xl mb-4 group-hover:scale-105 transition-transform duration-300`}>
-        {icon}
+        <h3 className={`${colorConfig.icon} font-semibold mb-2 group-hover:font-bold transition-all duration-200`}>
+          {title}
+        </h3>
+        <p className={`${colors.text.secondary} text-sm group-hover:${colors.text.primary} transition-colors duration-200`}>
+          {description}
+        </p>
       </div>
-      <h3 className={`${color.text} font-semibold mb-2`}>{title}</h3>
-      <p className={`${color.text} opacity-80 text-sm`}>{description}</p>
-    </div>
-  );
-
-
-
+    );
+  };
 
   return (
-    <div className={`w-full mx-auto p-8 shadow-xl rounded-2xl mt-10 transition-all duration-300 ease-in-out min-h-screen bg-gradient-to-br from-gray-50 via-slate-50 to-zinc-50 ${isSecondSidebarOpen ? 'max-w-[1400px]' : 'max-w-[1600px]'}`}>
-      {/* Header */}
-      <div className="bg-white/95 backdrop-blur-md border-b border-slate-200/40 px-6 py-8">
-        <div className="max-w-7xl mx-auto">
+    <div className={`w-full mx-auto p-8 shadow-xl rounded-2xl mt-10 transition-all duration-300 ease-in-out min-h-screen ${colors.background.main} ${isSecondSidebarOpen ? 'max-w-[1400px]' : 'max-w-[1600px]'}`}>
+      {/* Header Premium */}
+      <div className={`${colors.background.header} px-6 py-8 relative overflow-hidden`}>
+        {/* Effet de fond animé */}
+        <div className="absolute inset-0 bg-gradient-to-r from-slate-500/5 via-transparent to-slate-500/5 animate-pulse"></div>
+        
+        <div className="max-w-7xl mx-auto relative z-10">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-light bg-gradient-to-r from-slate-800 via-slate-700 to-slate-800 bg-clip-text text-transparent mb-2">
+              <h1 className={`text-3xl font-light ${colors.text.gradient} mb-2 tracking-wide`}>
                 Gestionnaire d'Ordonnancement de Tâches
               </h1>
-              <p className="text-slate-600">
-                {projects.length > 0 
-                  ? `${projects.length} projet${projects.length > 1 ? 's' : ''} • ${animatedStats.totalTasks} tâche${animatedStats.totalTasks > 1 ? 's' : ''} • ${animatedStats.dependencies} dépendance${animatedStats.dependencies > 1 ? 's' : ''}`
-                  : "Créez votre premier projet pour commencer l'ordonnancement"
-                }
+              <p className={`${colors.text.secondary} flex items-center space-x-2`}>
+                <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
+                <span>
+                  {projects.length > 0 
+                    ? `${projects.length} projet${projects.length > 1 ? 's' : ''} • ${animatedStats.totalTasks} tâche${animatedStats.totalTasks > 1 ? 's' : ''} • ${animatedStats.dependencies} dépendance${animatedStats.dependencies > 1 ? 's' : ''}`
+                    : "Créez votre premier projet pour commencer l'ordonnancement"
+                  }
+                </span>
               </p>
             </div>
             <div className="flex items-center space-x-4">
-              <div className="bg-white/90 backdrop-blur-sm border border-slate-200 rounded-lg px-4 py-2 flex items-center space-x-2">
-                <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
-                <span className="text-sm text-slate-600">Système actif</span>
+              <div className={`${colors.background.input} border ${colors.primary.border} rounded-lg px-4 py-2 flex items-center space-x-2 ${colors.effects.glow}`}>
+                <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
+                <span className={`text-sm ${colors.text.secondary}`}>Système actif</span>
               </div>
             </div>
           </div>
@@ -189,40 +213,46 @@ const Dashboard = ({
       </div>
 
       <div className="max-w-7xl mx-auto px-6 py-8">
-        {/* Statistiques principales */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <StatCard
-            icon="📋"
-            title="Total des tâches"
-            value={animatedStats.totalTasks}
-            subtitle="tâches créées"
-            progress={Math.min(100, animatedStats.totalTasks * 5)}
-            color="from-blue-600 to-blue-700"
-          />
-          <StatCard
-            icon="🎯"
-            title="Projets actifs"
-            value={animatedStats.projects}
-            subtitle={`${animatedStats.favorites} favoris`}
-            progress={Math.min(100, animatedStats.projects * 15)}
-            color="from-emerald-600 to-emerald-700"
-          />
-          <StatCard
-            icon="🔗"
-            title="Dépendances"
-            value={animatedStats.dependencies}
-            subtitle="relations définies"
-            progress={Math.min(100, animatedStats.dependencies * 10)}
-            color="from-purple-600 to-purple-700"
-          />
-          <StatCard
-            icon="⏱️"
-            title="Durée moyenne"
-            value={`${animatedStats.avgDuration}j`}
-            subtitle="par tâche"
-            progress={Math.min(100, animatedStats.avgDuration * 10)}
-            color="from-amber-600 to-amber-700"
-          />
+        {/* Statistiques principales avec design premium */}
+        <div className="mb-8">
+          <h2 className={`text-xl font-medium ${colors.text.primary} mb-6 flex items-center`}>
+            <span className="w-1 h-6 bg-gradient-to-b from-slate-600 to-slate-800 rounded-full mr-3"></span>
+            Tableau de bord analytique
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <StatCard
+              icon="📋"
+              title="Total des tâches"
+              value={animatedStats.totalTasks}
+              subtitle="tâches créées"
+              progress={Math.min(100, animatedStats.totalTasks * 5)}
+              gradientColor="from-blue-600 to-blue-700"
+            />
+            <StatCard
+              icon="🎯"
+              title="Projets actifs"
+              value={animatedStats.projects}
+              subtitle={`${animatedStats.favorites} favoris`}
+              progress={Math.min(100, animatedStats.projects * 15)}
+              gradientColor="from-emerald-600 to-emerald-700"
+            />
+            <StatCard
+              icon="🔗"
+              title="Dépendances"
+              value={animatedStats.dependencies}
+              subtitle="relations définies"
+              progress={Math.min(100, animatedStats.dependencies * 10)}
+              gradientColor="from-purple-600 to-purple-700"
+            />
+            <StatCard
+              icon="⏱️"
+              title="Durée moyenne"
+              value={`${animatedStats.avgDuration}j`}
+              subtitle="par tâche"
+              progress={Math.min(100, animatedStats.avgDuration * 10)}
+              gradientColor="from-amber-600 to-amber-700"
+            />
+          </div>
         </div>
 
         {/* Statistiques secondaires */}
@@ -233,7 +263,7 @@ const Dashboard = ({
             value={`${animatedStats.completionRate}%`}
             subtitle="projets avec tâches"
             progress={animatedStats.completionRate}
-            color="from-green-600 to-green-700"
+            gradientColor="from-green-600 to-green-700"
           />
           <StatCard
             icon="🔄"
@@ -241,7 +271,7 @@ const Dashboard = ({
             value={animatedStats.successorProjects}
             subtitle={`sur ${animatedStats.projects} projets`}
             progress={animatedStats.projects > 0 ? (animatedStats.successorProjects / animatedStats.projects) * 100 : 0}
-            color="from-indigo-600 to-indigo-700"
+            gradientColor="from-indigo-600 to-indigo-700"
           />
           <StatCard
             icon="⭐"
@@ -249,143 +279,132 @@ const Dashboard = ({
             value={animatedStats.favorites}
             subtitle="marqués importants"
             progress={animatedStats.projects > 0 ? (animatedStats.favorites / animatedStats.projects) * 100 : 0}
-            color="from-yellow-600 to-yellow-700"
+            gradientColor="from-yellow-600 to-yellow-700"
           />
         </div>
 
-        {/* Actions rapides */}
+        {/* Actions rapides avec design sophistiqué */}
         <div className="mb-8">
-          <h2 className="text-xl font-medium text-slate-700 mb-6">Actions rapides</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+          <h2 className={`text-xl font-medium ${colors.text.primary} mb-6 flex items-center`}>
+            <span className="w-1 h-6 bg-gradient-to-b from-slate-600 to-slate-800 rounded-full mr-3"></span>
+            Actions rapides
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <QuickActionCard
               icon="➕"
               title="Nouveau projet"
               description="Créer un projet d'ordonnancement"
-              color={{
-                bg: 'bg-gradient-to-r from-slate-50 to-gray-50',
-                hover: 'hover:from-slate-100 hover:to-gray-100',
-                border: 'border-slate-200/50',
-                shadow: 'shadow-sm shadow-slate-500/10',
-                iconBg: 'bg-gradient-to-r from-slate-700 via-slate-600 to-slate-800',
-                iconColor: 'text-white',
-                text: 'text-slate-700'
-              }}
+              colorKey="nouveau"
               onClick={() => navigateTo('nouveau')}
             />
             <QuickActionCard
               icon="📁"
               title="Mes projets"
               description="Gérer tous les projets"
-              badge={animatedStats.projects > 0 ? animatedStats.projects : null}
-              color={{
-                bg: 'bg-gradient-to-r from-emerald-50 to-teal-50',
-                hover: 'hover:from-emerald-100 hover:to-teal-100',
-                border: 'border-emerald-300/50',
-                shadow: 'shadow-sm shadow-emerald-500/10',
-                iconBg: 'bg-gradient-to-r from-emerald-100 to-teal-100',
-                iconColor: 'text-emerald-700',
-                text: 'text-emerald-800'
-              }}
+              colorKey="projects"
               onClick={() => navigateTo('projets')}
             />
             <QuickActionCard
               icon="⭐"
               title="Favoris"
               description="Projets prioritaires"
-              badge={animatedStats.favorites > 0 ? animatedStats.favorites : null}
-              color={{
-                bg: 'bg-gradient-to-r from-amber-50 to-yellow-50',
-                hover: 'hover:from-amber-100 hover:to-yellow-100',
-                border: 'border-amber-300/50',
-                shadow: 'shadow-sm shadow-amber-500/10',
-                iconBg: 'bg-gradient-to-r from-amber-100 to-yellow-100',
-                iconColor: 'text-amber-700',
-                text: 'text-amber-800'
-              }}
+              colorKey="favoris"
               onClick={() => navigateTo('favoris')}
             />
-
             <QuickActionCard
               icon="⚙️"
               title="Paramètres"
               description="Configuration système"
-              color={{
-                bg: 'bg-gradient-to-r from-violet-50 to-purple-50',
-                hover: 'hover:from-violet-100 hover:to-purple-100',
-                border: 'border-violet-300/50',
-                shadow: 'shadow-sm shadow-violet-500/10',
-                iconBg: 'bg-gradient-to-r from-violet-100 to-purple-100',
-                iconColor: 'text-violet-700',
-                text: 'text-violet-800'
-              }}
+              colorKey="parametres"
               onClick={() => navigateTo('parametres')}
             />
           </div>
         </div>
 
-
-
-        {/* Résumé des projets si disponible */}
+        {/* Résumé des projets avec design premium */}
         {projects.length > 0 && (
-          <div className="mt-8 bg-white/98 backdrop-blur-sm border border-slate-200/50 shadow-sm shadow-slate-500/5 rounded-xl p-6">
-            <h3 className="text-lg font-medium text-slate-700 mb-4">Aperçu de vos projets d'ordonnancement</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {projects.slice(0, 6).map((project) => {
-                const taskCount = project.tasks ? project.tasks.length : 0;
-                const totalDuration = project.tasks ? project.tasks.reduce((sum, task) => sum + (task.duration || 0), 0) : 0;
-                
-                return (
-                  <div key={project.id} className="bg-slate-50/50 rounded-lg p-4 hover:bg-slate-100/50 transition-colors duration-200">
-                    <div className="flex items-start justify-between mb-2">
-                      <h4 className="font-medium text-slate-700 truncate flex-1">{project.name}</h4>
-                      <div className="flex space-x-1 ml-2">
-                        {project.isFavorite && (
-                          <span className="text-amber-500 text-sm">⭐</span>
-                        )}
-                        {project.isSuccessor && (
-                          <span className="text-blue-500 text-sm">🔄</span>
-                        )}
+          <div className={`mt-8 ${colors.background.card} rounded-xl p-6 relative overflow-hidden`}>
+            {/* Effet de fond décoratif */}
+            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-slate-100/20 to-transparent rounded-full transform translate-x-16 -translate-y-16"></div>
+            
+            <div className="relative z-10">
+              <h3 className={`text-lg font-medium ${colors.text.primary} mb-4 flex items-center`}>
+                <span className="w-1 h-5 bg-gradient-to-b from-slate-600 to-slate-800 rounded-full mr-3"></span>
+                Aperçu de vos projets d'ordonnancement
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {projects.slice(0, 6).map((project, index) => {
+                  const taskCount = project.tasks ? project.tasks.length : 0;
+                  const totalDuration = project.tasks ? project.tasks.reduce((sum, task) => sum + (task.duration || 0), 0) : 0;
+                  const colorIndex = index % colors.projects.colors.length;
+                  
+                  return (
+                    <div 
+                      key={project.id} 
+                      className={`bg-gradient-to-br from-slate-50/80 to-slate-100/40 rounded-lg p-4 hover:from-slate-100/80 hover:to-slate-200/40 transition-all duration-300 border border-slate-200/50 hover:border-slate-300/50 ${colors.effects.glowHover} group relative overflow-hidden`}
+                    >
+                      {/* Accent coloré */}
+                      <div className={`absolute top-0 left-0 w-1 h-full ${colors.projects.colors[colorIndex]} rounded-l-lg`}></div>
+                      
+                      <div className="flex items-start justify-between mb-2 pl-3">
+                        <h4 className={`font-medium ${colors.text.primary} truncate flex-1 group-hover:font-semibold transition-all duration-200`}>
+                          {project.name}
+                        </h4>
+                        <div className="flex space-x-1 ml-2">
+                          {project.isFavorite && (
+                            <span className="text-amber-500 text-sm animate-pulse">⭐</span>
+                          )}
+                          {project.isSuccessor && (
+                            <span className="text-blue-500 text-sm">🔄</span>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                    {project.description && (
-                      <p className="text-slate-500 text-sm truncate mb-2">{project.description}</p>
-                    )}
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-xs text-slate-600">
-                        <span>{taskCount} tâche{taskCount > 1 ? 's' : ''}</span>
-                        <span>{totalDuration} jour{totalDuration > 1 ? 's' : ''}</span>
-                      </div>
-                      <div className="flex flex-wrap gap-1">
-                        {project.isFavorite && (
-                          <span className="bg-amber-100 text-amber-700 text-xs px-2 py-1 rounded">Favori</span>
-                        )}
-                        <span className={`text-xs px-2 py-1 rounded ${project.isSuccessor 
-                          ? 'bg-blue-100 text-blue-700' 
-                          : 'bg-purple-100 text-purple-700'
-                        }`}>
-                          {project.isSuccessor ? 'Successeur' : 'Antérieur'}
-                        </span>
-                        {taskCount > 0 && (
-                          <span className="bg-green-100 text-green-700 text-xs px-2 py-1 rounded">
-                            {taskCount} tâches
+                      
+                      {project.description && (
+                        <p className={`${colors.text.secondary} text-sm truncate mb-2 pl-3`}>
+                          {project.description}
+                        </p>
+                      )}
+                      
+                      <div className="space-y-2 pl-3">
+                        <div className={`flex justify-between text-xs ${colors.text.secondary}`}>
+                          <span>{taskCount} tâche{taskCount > 1 ? 's' : ''}</span>
+                          <span>{totalDuration} jour{totalDuration > 1 ? 's' : ''}</span>
+                        </div>
+                        <div className="flex flex-wrap gap-1">
+                          {project.isFavorite && (
+                            <span className="bg-gradient-to-r from-amber-100 to-yellow-100 text-amber-700 text-xs px-2 py-1 rounded-full font-medium">
+                              Favori
+                            </span>
+                          )}
+                          <span className={`text-xs px-2 py-1 rounded-full font-medium ${project.isSuccessor 
+                            ? 'bg-gradient-to-r from-blue-100 to-sky-100 text-blue-700' 
+                            : 'bg-gradient-to-r from-purple-100 to-violet-100 text-purple-700'
+                          }`}>
+                            {project.isSuccessor ? 'Successeur' : 'Antérieur'}
                           </span>
-                        )}
+                          {taskCount > 0 && (
+                            <span className="bg-gradient-to-r from-green-100 to-emerald-100 text-green-700 text-xs px-2 py-1 rounded-full font-medium">
+                              {taskCount} tâches
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                );
-              })}
-            </div>
-            {projects.length > 6 && (
-              <div className="mt-4 text-center">
-                <button 
-                  onClick={() => navigateTo('projets')}
-                  className="text-slate-600 hover:text-slate-800 text-sm underline"
-                >
-                  Voir tous les {projects.length} projets
-                </button>
+                  );
+                })}
               </div>
-            )}
+              {projects.length > 6 && (
+                <div className="mt-6 text-center">
+                  <button 
+                    onClick={() => navigateTo('projets')}
+                    className={`${colors.primary.gradientButton} ${colors.primary.gradientHover} text-white px-6 py-2 rounded-lg font-medium transition-all duration-300 shadow-md shadow-slate-500/20 hover:shadow-lg hover:shadow-slate-500/25 transform hover:scale-105`}
+                  >
+                    Voir tous les {projects.length} projets
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         )}
       </div>
