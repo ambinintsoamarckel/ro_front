@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import TaskInitializerModal from "./TaskInitializerModal";
 import EditProjectModal from "./EditProjectModal";
 import ConfirmDeleteModal from "./ConfirmDeleteModal";
-import {Menu,X,BadgePlus,User,Settings,Home,FolderOpen,Star,MoreVertical, Edit2, Trash2,Undo2} from "lucide-react";
+import {Menu,X,BadgePlus,Settings,Home,FolderOpen,Star,MoreVertical, Edit2, Trash2,Undo2,CheckSquare,Check} from "lucide-react";
 import { colors } from "../colors";
 import SettingsSection from './SettingsSection';
 
@@ -237,8 +237,8 @@ const Sidebar = ({ setInitialTaskCount, setCurrentProject, setProjectPage, proje
       whileHover={{ x: 4, scale: 1.02 }}
       className={`relative flex items-center justify-between p-3 ${colors.background.card} rounded-lg cursor-pointer transition-all duration-300 ${colors.effects.glowHover} ${colors.primary.border} group ${
         isMultiSelectMode && selectedProjects.includes(project.id) 
-          ? 'ring-2 ring-violet-500 bg-violet-50 dark:bg-violet-900/20' 
-          : ''
+          ? 'ring-2 ring-slate-700 shadow-md shadow-slate-500/20 bg-gradient-to-r from-slate-50 to-gray-50' 
+          : 'hover:bg-slate-50/50'
       }`}
       style={{ zIndex: openDropdownId === project.id ? 1000 : 'auto' }}
     >
@@ -249,7 +249,11 @@ const Sidebar = ({ setInitialTaskCount, setCurrentProject, setProjectPage, proje
             type="checkbox"
             checked={selectedProjects.includes(project.id)}
             onChange={() => handleProjectSelect(project.id)}
-            className="w-4 h-4 text-violet-600 bg-gray-100 border-gray-300 rounded focus:ring-violet-500 dark:focus:ring-violet-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+            className={`flex items-center justify-center w-5 h-5 rounded border-2 cursor-pointer transition-all duration-200 ${
+              selectedProjects
+                ? `${colors.primary.bg} border-slate-700 shadow-sm`
+                : 'bg-white border-slate-300 hover:border-slate-400'
+            }`}
             onClick={(e) => e.stopPropagation()}
           />
         </div>
@@ -367,30 +371,45 @@ const Sidebar = ({ setInitialTaskCount, setCurrentProject, setProjectPage, proje
                   <div className="flex flex-col">
                     <h3 className={`text-lg font-semibold ${colors.text.gradient}`}>Projets récents</h3>
                     {isMultiSelectMode && projects.length > 0 && (
-                      <div className="flex items-center space-x-2 mt-3">
+                    <div className="flex items-center space-x-2 mt-3">
+                      <div className="relative">
                         <input
                           type="checkbox"
                           checked={selectedProjects.length === projects.length && projects.length > 0}
                           onChange={handleSelectAll}
-                          className="w-4 h-4 text-violet-600 bg-gray-100 border-gray-300 rounded focus:ring-violet-500 dark:focus:ring-violet-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                          className="sr-only"
+                          id="select-all-checkbox"
                         />
-                        <span className={`text-sm ${colors.text.secondary}`}>
-                          Tout sélectionner
-                        </span>
+                        <label
+                          htmlFor="select-all-checkbox"
+                          className={`flex items-center justify-center w-4 h-4 rounded border-2 cursor-pointer transition-all duration-200 ${
+                            selectedProjects.length === projects.length && projects.length > 0
+                              ? `${colors.primary.bg} border-slate-700 shadow-sm`
+                              : 'bg-white border-slate-300 hover:border-slate-400'
+                          }`}
+                        >
+                          {selectedProjects.length === projects.length && projects.length > 0 && (
+                            <Check size={12} className="text-white" />
+                          )}
+                        </label>
                       </div>
-                    )}
+                      <span className={`text-sm ${colors.text.secondary} select-none`}>
+                        Tout sélectionner
+                      </span>
+                    </div>
+                  )}
                   </div>
                   <div className="flex items-center space-x-2">
-                    {!isMultiSelectMode ? (
+                  {!isMultiSelectMode ? (
                       <>
                         <motion.button
                           whileHover={{ scale: 1.05 }}
                           whileTap={{ scale: 0.95 }}
                           onClick={toggleMultiSelectMode}
-                          className={`p-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors`}
+                          className={`p-2 ${colors.buttons.edit.base} ${colors.buttons.edit.text} rounded-lg transition-all duration-200 ${colors.buttons.edit.shadow} ${colors.buttons.edit.hover} group`}
                           title="Sélection multiple"
                         >
-                          <Trash2 size={16} />
+                          <CheckSquare size={16} className="group-hover:scale-110 transition-transform" />
                         </motion.button>
                       </>
                     ) : (
@@ -398,9 +417,9 @@ const Sidebar = ({ setInitialTaskCount, setCurrentProject, setProjectPage, proje
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                         onClick={toggleMultiSelectMode}
-                        className={`px-3 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg transition-colors text-sm`}
+                        className={`px-3 py-2 ${colors.buttons.cancel.gradient} ${colors.buttons.cancel.text} rounded-lg transition-all duration-200 ${colors.buttons.cancel.shadow} ${colors.buttons.cancel.hover} text-sm`}
                       >
-                        <Undo2 size={16} />
+                        <X size={16} />
                       </motion.button>
                     )}
                   </div>
@@ -440,7 +459,12 @@ const Sidebar = ({ setInitialTaskCount, setCurrentProject, setProjectPage, proje
                   initial={{ y: 50, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
                   exit={{ y: 50, opacity: 0 }}
-                  className={`${colors.background.card} ${colors.primary.border} border-t rounded-b-2xl p-4 shadow-lg backdrop-blur-sm`}
+                  className={`${colors.background.card} border-t ${colors.primary.border} p-4 backdrop-blur-md`}
+                  style={{
+                    background: 'linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(248,250,252,0.95) 100%)',
+                    borderTop: '1px solid rgba(148,163,184,0.2)',
+                    boxShadow: '0 -4px 20px rgba(71,85,105,0.08)'
+                  }}
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">
@@ -451,7 +475,7 @@ const Sidebar = ({ setInitialTaskCount, setCurrentProject, setProjectPage, proje
                           setSelectedProjects([]);
                           setIsMultiSelectMode(false);
                         }}
-                        className="px-3 py-1.5 bg-gray-500 hover:bg-gray-600 text-white rounded-lg transition-colors text-xs"
+                        className={`px-4 py-2 ${colors.buttons.cancel.gradient} ${colors.buttons.cancel.text} rounded-lg transition-all duration-200 ${colors.buttons.cancel.shadow} ${colors.buttons.cancel.hover} text-sm font-medium`}
                       >
                         Annuler
                       </motion.button>
@@ -459,9 +483,9 @@ const Sidebar = ({ setInitialTaskCount, setCurrentProject, setProjectPage, proje
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                         onClick={deleteSelectedProjects}
-                        className="px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors text-xs"
+                        className={`px-4 py-2 ${colors.buttons.remove.gradient} ${colors.buttons.remove.text} rounded-lg transition-all duration-200 ${colors.buttons.remove.shadow} ${colors.buttons.remove.hover} text-sm font-medium`}
                       >
-                        Supprimer ({selectedProjects.length})
+                        Supprimer
                       </motion.button>
                     </div>
                   </div>
@@ -481,42 +505,57 @@ const Sidebar = ({ setInitialTaskCount, setCurrentProject, setProjectPage, proje
                   <div className="flex flex-col">
                     <h3 className={`text-lg font-semibold ${colors.text.gradient}`}>Mes Projets</h3>
                     {isMultiSelectMode && projects.length > 0 && (
-                      <div className="flex items-center space-x-2 mt-3">
+                    <div className="flex items-center space-x-2 mt-3">
+                      <div className="relative">
                         <input
                           type="checkbox"
                           checked={selectedProjects.length === projects.length && projects.length > 0}
                           onChange={handleSelectAll}
-                          className="w-4 h-4 text-violet-600 bg-gray-100 border-gray-300 rounded focus:ring-violet-500 dark:focus:ring-violet-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                          className="sr-only"
+                          id="select-all-checkbox"
                         />
-                        <span className={`text-sm ${colors.text.secondary}`}>
-                          Tout sélectionner
-                        </span>
+                        <label
+                          htmlFor="select-all-checkbox"
+                          className={`flex items-center justify-center w-4 h-4 rounded border-2 cursor-pointer transition-all duration-200 ${
+                            selectedProjects.length === projects.length && projects.length > 0
+                              ? `${colors.primary.bg} border-slate-700 shadow-sm`
+                              : 'bg-white border-slate-300 hover:border-slate-400'
+                          }`}
+                        >
+                          {selectedProjects.length === projects.length && projects.length > 0 && (
+                            <Check size={12} className="text-white" />
+                          )}
+                        </label>
                       </div>
-                    )}
+                      <span className={`text-sm ${colors.text.secondary} select-none`}>
+                        Tout sélectionner
+                      </span>
+                    </div>
+                  )}
                   </div>
                   <div className="flex items-center space-x-2">
-                    {!isMultiSelectMode ? (
-                      <>
-                        <motion.button
-                          whileHover={{ scale: 1.05 }}
-                          whileTap={{ scale: 0.95 }}
-                          onClick={toggleMultiSelectMode}
-                          className={`p-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors`}
-                          title="Sélection multiple"
-                        >
-                          <Trash2 size={16} />
-                        </motion.button>
-                      </>
-                    ) : (
+                  {!isMultiSelectMode ? (
+                    <>
                       <motion.button
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                         onClick={toggleMultiSelectMode}
-                        className={`px-3 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg transition-colors text-sm`}
+                        className={`p-2 ${colors.buttons.edit.base} ${colors.buttons.edit.text} rounded-lg transition-all duration-200 ${colors.buttons.edit.shadow} ${colors.buttons.edit.hover} group`}
+                        title="Sélection multiple"
                       >
-                        <Undo2 size={16} />
+                        <CheckSquare size={16} className="group-hover:scale-110 transition-transform" />
                       </motion.button>
-                    )}
+                    </>
+                  ) : (
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={toggleMultiSelectMode}
+                      className={`px-3 py-2 ${colors.buttons.cancel.gradient} ${colors.buttons.cancel.text} rounded-lg transition-all duration-200 ${colors.buttons.cancel.shadow} ${colors.buttons.cancel.hover} text-sm`}
+                    >
+                      <X size={16} />
+                    </motion.button>
+                  )}
                   </div>
                 </div>
                 
@@ -552,7 +591,12 @@ const Sidebar = ({ setInitialTaskCount, setCurrentProject, setProjectPage, proje
                   initial={{ y: 50, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
                   exit={{ y: 50, opacity: 0 }}
-                  className={`${colors.background.card} ${colors.primary.border} border-t rounded-b-2xl p-4 shadow-lg backdrop-blur-sm`}
+                  className={`${colors.background.card} border-t ${colors.primary.border} p-4 backdrop-blur-md`}
+                  style={{
+                    background: 'linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(248,250,252,0.95) 100%)',
+                    borderTop: '1px solid rgba(148,163,184,0.2)',
+                    boxShadow: '0 -4px 20px rgba(71,85,105,0.08)'
+                  }}
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">
@@ -563,7 +607,7 @@ const Sidebar = ({ setInitialTaskCount, setCurrentProject, setProjectPage, proje
                           setSelectedProjects([]);
                           setIsMultiSelectMode(false);
                         }}
-                        className="px-3 py-1.5 bg-gray-500 hover:bg-gray-600 text-white rounded-lg transition-colors text-xs"
+                        className={`px-4 py-2 ${colors.buttons.cancel.gradient} ${colors.buttons.cancel.text} rounded-lg transition-all duration-200 ${colors.buttons.cancel.shadow} ${colors.buttons.cancel.hover} text-sm font-medium`}
                       >
                         Annuler
                       </motion.button>
@@ -571,9 +615,9 @@ const Sidebar = ({ setInitialTaskCount, setCurrentProject, setProjectPage, proje
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                         onClick={deleteSelectedProjects}
-                        className="px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors text-xs"
+                        className={`px-4 py-2 ${colors.buttons.remove.gradient} ${colors.buttons.remove.text} rounded-lg transition-all duration-200 ${colors.buttons.remove.shadow} ${colors.buttons.remove.hover} text-sm font-medium`}
                       >
-                        Supprimer ({selectedProjects.length})
+                        Supprimer
                       </motion.button>
                     </div>
                   </div>
