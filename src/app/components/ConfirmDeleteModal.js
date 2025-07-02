@@ -50,8 +50,9 @@ const colors = {
   }
 };
 
-const ConfirmDeleteModal = ({ isOpen = true, onClose = () => {}, onConfirm = () => {}, projectName = "Mon Projet Exemple" }) => {
+const ConfirmDeleteModal = ({ isOpen = true, onClose = () => {}, onConfirm = () => {}, projectName = "Mon Projet Exemple" ,projectCount = null}) => {
   const [isDeleting, setIsDeleting] = useState(false);
+  const isMultipleDelete = projectCount !== null && projectCount > 1;
 
   const handleConfirm = async () => {
     setIsDeleting(true);
@@ -130,11 +131,17 @@ const ConfirmDeleteModal = ({ isOpen = true, onClose = () => {}, onConfirm = () 
           {/* Message d'avertissement */}
           <div className="text-center space-y-3">
             <p className={`text-lg font-semibold ${colors.text.primary}`}>
-              Êtes-vous sûr de vouloir supprimer ce projet ?
+              {isMultipleDelete 
+                ? `Êtes-vous sûr de vouloir supprimer ces ${projectCount} projets ?`
+                : "Êtes-vous sûr de vouloir supprimer ce projet ?"
+              }
             </p>
             <div className={`${colors.notifications.error.bg} ${colors.notifications.error.border} border rounded-xl p-4 ${colors.notifications.error.shadow}`}>
-              <p className={`${colors.text.secondary} text-sm mb-2`}>
-                Le projet <span className="font-bold text-red-600">{projectName}</span> sera définitivement supprimé.
+              <p className={`${colors.text.secondary} text-sm mb-2`} dangerouslySetInnerHTML={{
+                __html: isMultipleDelete 
+                  ? `Les <span class="font-bold text-red-600">${projectCount} projets sélectionnés</span> seront définitivement supprimés.`
+                  : `Le projet <span class="font-bold text-red-600">${projectName}</span> sera définitivement supprimé.`
+              }}>
               </p>
               <p className="text-red-600 text-sm font-medium">
                 ⚠️ Cette action est irréversible
