@@ -9,6 +9,7 @@ import { ReactFlowProvider } from "reactflow";
 import { colors } from "../colors";
 import NotificationSystem from "./NotificationSystem";
 
+
 const TaskScheduler = ({ currentProject, initialTaskCount , isSecondSidebarOpen, setProjects, editModalOpen,setEditModalOpen,setProjectPage,deleteModalOpen,setDeleteModalOpen,selectedProject,setSelectedProject}) => {
   const [tasks, setTasks] = useState([{ name: "", duration: "", projectId: currentProject.id }]);
   const [fetchedTasks, setFetchedTasks] = useState([]);
@@ -20,6 +21,30 @@ const TaskScheduler = ({ currentProject, initialTaskCount , isSecondSidebarOpen,
   const cpmGraphRef = useRef(null);
   const [hoveredColumnIndex, setHoveredColumnIndex] = useState(null);
   const [notification, setNotification] = useState(null);
+  const inputRefs = useRef([[], []]); // Ligne 0 = noms, ligne 1 = durées
+
+  const handleKeyDown = (e, row, col) => {
+    const maxCols = tasks.length;
+    const maxIndex = maxCols * 2;
+  
+    let flatIndex = col * 2 + row;
+  
+    if (e.key === "ArrowRight" || (e.key === "Tab" && !e.shiftKey)) {
+      e.preventDefault();
+      flatIndex = (flatIndex + 1) % maxIndex;
+    } else if (e.key === "ArrowLeft" || (e.key === "Tab" && e.shiftKey)) {
+      e.preventDefault();
+      flatIndex = (flatIndex - 1 + maxIndex) % maxIndex;
+    } else {
+      return;
+    }
+  
+    const newCol = Math.floor(flatIndex / 2);
+    const newRow = flatIndex % 2;
+  
+    inputRefs.current[newRow][newCol]?.focus();
+  };
+  
 
   const fetchProjects = async () => {
     try {
@@ -402,6 +427,8 @@ const TaskScheduler = ({ currentProject, initialTaskCount , isSecondSidebarOpen,
                             <motion.input
                               initial={{ scale: 0.95 }}
                               animate={{ scale: 1 }}
+                              ref={(el) => inputRefs.current[0][index] = el}
+                              onKeyDown={(e) => handleKeyDown(e, 0, index)}
                               type="text"
                               value={task.name}
                               onChange={(e) => handleNameChange(index, e.target.value)}
@@ -432,6 +459,8 @@ const TaskScheduler = ({ currentProject, initialTaskCount , isSecondSidebarOpen,
                               <motion.input
                                 initial={{ scale: 0.95 }}
                                 animate={{ scale: 1 }}
+                                ref={(el) => inputRefs.current[1][index] = el}
+                                onKeyDown={(e) => handleKeyDown(e, 1, index)}
                                 type="number"
                                 value={task.duration}
                                 onChange={(e) => handleDurationChange(index, e.target.value)}
