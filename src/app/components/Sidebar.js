@@ -52,29 +52,14 @@ const Sidebar = ({ setInitialTaskCount, setCurrentProject, setProjectPage, proje
   // 4. Fonction pour supprimer les projets sélectionnés
   const deleteSelectedProjects = async () => {
     try {
-      await Promise.all(
-        selectedProjects.map(projectId =>
-          fetch(`http://localhost:3001/projects/${projectId}`, {
-            method: "DELETE",
-            credentials: "include",
-          })
-        )
-      );
+
       setDeleteModalOpen(true);
       // Définir le nombre de projets à supprimer
       setProjectCount(selectedProjects.length);
           
-      setProjects(prev => prev.filter(p => !selectedProjects.includes(p.id)));
-      
-      // Si le projet actuel est dans la sélection, retourner à l'accueil
-      if (selectedProjects.includes(currentProject?.id)) {
-        setProjectPage(false);
-      }
-      
-      setSelectedProjects([]);
-      setIsMultiSelectMode(false);
+
     } catch (err) {
-      alert("Erreur lors de la suppression");
+      alert("Erreur lors de la suppression "+err);
     }
   };
 
@@ -1075,55 +1060,61 @@ const Sidebar = ({ setInitialTaskCount, setCurrentProject, setProjectPage, proje
         }}
   />
 
-          <ConfirmDeleteModal
-            isOpen={deleteModalOpen}
-            onClose={() => {
-              setDeleteModalOpen(false);
-              setProjectCount(null); // Reset du count
-            }}
-            projectName={selectedProject?.name}
-            projectCount={projectCount} // Passer le nombre de projets
-            onConfirm={async () => {
-              try {
-                if (projectCount && projectCount > 1) {
-                  // Suppression multiple
-                  await Promise.all(
-                    selectedProjects.map(projectId =>
-                      fetch(`http://localhost:3001/projects/${projectId}`, {
-                        method: "DELETE",
-                        credentials: "include",
-                      })
-                    )
-                  );
-                  
-                  setProjects(prev => prev.filter(p => !selectedProjects.includes(p.id)));
-                  
-                  if (selectedProjects.includes(currentProject?.id)) {
-                    setProjectPage(false);
-                  }
-                  
-                  setSelectedProjects([]);
-                  setIsMultiSelectMode(false);
-                } else {
-                  // Suppression simple
-                  await fetch(`http://localhost:3001/projects/${selectedProject.id}`, {
-                    method: "DELETE",
-                    credentials: "include",
-                  });
-                  setProjects(prev => prev.filter(p => p.id !== selectedProject.id));
-                  
-                  if (selectedProject.id === currentProject?.id) {
-                    setProjectPage(false);
-                  }
-                }
-                
-                setDeleteModalOpen(false);
-                setProjectCount(null);
-              } catch (err) {
-                alert("Erreur lors de la suppression");
-              }
-            }}
-          />
+<ConfirmDeleteModal
+  isOpen={deleteModalOpen}
+  onClose={() => {
+    setDeleteModalOpen(false);
+    setProjectCount(null); // Réinitialise
+  }}
+  projectName={selectedProject?.name}
+  projectCount={projectCount} // Important pour détecter suppression multiple
+  onConfirm={async () => {
+    try {
+      if (projectCount && projectCount >= 1) {
+        // ✅ Suppression multiple même si un seul projet est coché
+        await Promise.all(
+          selectedProjects.map(projectId =>
+            fetch(`http://localhost:3001/projects/${projectId}`, {
+              method: "DELETE",
+              credentials: "include",
+            })
+          )
+        );
+
+        setProjects(prev =>
+          prev.filter(p => !selectedProjects.includes(p.id))
+        );
+
+        if (selectedProjects.includes(currentProject?.id)) {
+          setProjectPage(false);
+        }
+
+        setSelectedProjects([]);
+        setIsMultiSelectMode(false);
+      } else if (selectedProject) {
+        // ✅ Suppression simple via le bouton du menu d’un seul projet
+        await fetch(`http://localhost:3001/projects/${selectedProject.id}`, {
+          method: "DELETE",
+          credentials: "include",
+        });
+
+        setProjects(prev =>
+          prev.filter(p => p.id !== selectedProject.id)
+        );
+
+        if (selectedProject.id === currentProject?.id) {
+          setProjectPage(false);
+        }
+      }
+
+      setDeleteModalOpen(false);
+      setProjectCount(null);
+    } catch (err) {
+      alert("Erreur lors de la suppression");
+    }
+  }}
+/>
+
 
       
 
