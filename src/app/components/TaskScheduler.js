@@ -604,7 +604,7 @@ const TaskScheduler = ({ currentProject, initialTaskCount , isSecondSidebarOpen,
             transition={{ delay: 1.2 }}
             className={`text-3xl font-bold ${colors.primary.gradient} bg-clip-text text-transparent mb-8`}
           >
-            Diagramme du chemin critique
+            Graphe MPM
           </motion.h2>
 
           <CPMGraph 
