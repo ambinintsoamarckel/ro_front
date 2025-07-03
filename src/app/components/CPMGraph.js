@@ -488,6 +488,14 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
           const height = Math.max(minHeight, contentHeight);
 
           setGraphSize({ width, height });
+          // Centrer le scroll vertical et horizontal
+          if (scrollContainerRef.current && containerRef.current) {
+            const container = scrollContainerRef.current;
+            const graph = containerRef.current;
+
+            container.scrollTop = (graph.scrollHeight - container.clientHeight) / 2;
+            container.scrollLeft = (graph.scrollWidth - container.clientWidth) / 2;
+          }
 
           // ZOOM FIXE À 0.8
           const applyFixedZoom = () => {
