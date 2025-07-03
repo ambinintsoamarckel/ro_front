@@ -230,9 +230,10 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
               },
               borderWidth: isCritical ? 3 : 2,
               font: {
-                color: isCritical ? THEME.critical.dark : THEME.neutral.dark,
+                color: isCritical ? THEME.critical.font  : THEME.neutral.dark,
                 size: 16, // Plus compact
                 face: "Inter, system-ui, sans-serif",
+                bold: 60 ,
                 weight: 500,
                 multi: true,
                 align: "center"
@@ -287,40 +288,53 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
         ]);
 
         const edges = new DataSet([
-          ...Array.from(startTaskIds).map(taskId => ({
-            from: "start",
-            to: taskId,
-            color: { 
-              color: "#8b5cf6", // purple-500 au lieu de #7c3aed
-              highlight: "#a855f7",
-              hover: "#a855f7"
-            },
-            width: 2.5,
-            smooth: { type: "continuous", roundness: 0.3 },
-            arrows: { 
-              to: { 
-                enabled: true, 
-                scaleFactor: 1, 
-                type: "arrow" 
-              } 
-            },
-            // Remplacer les shadow avec des valeurs plus douces
-            shadow: {
-              enabled: true,
-              color: "rgba(79, 70, 229, 0.12)", // Au lieu de 0.3
-              size: 8, // Au lieu de 10-12
-              x: 0,
-              y: 2 // Au lieu de 4
-            }
-          })),
+          ...Array.from(startTaskIds).map(taskId => {
+            const targetTask = tasks.find(t => t.id === taskId);
+            const isCritical = targetTask && targetTask.slack === 0;
+            
+            return {
+              from: "start",
+              to: taskId,
+              color: { 
+                  color: isCritical ? THEME.accent.base : THEME.primary.base,
+                  highlight: isCritical ? THEME.accent.light : THEME.primary.light,
+                  hover: isCritical ? THEME.accent.light : THEME.primary.light
+                },
+              width: isCritical ? 3.5 : 2.5,
+              smooth: { type: "continuous", roundness: 0.3 },
+              arrows: { 
+                to: { 
+                  enabled: true, 
+                  scaleFactor: 1, 
+                  type: "arrow" 
+                } 
+              },
+              font: { 
+                color: "#1e293b",
+                size: 16,
+                face: "Inter, -apple-system, BlinkMacSystemFont, sans-serif",
+                bold: true,
+                background: "rgba(255, 255, 255, 0.95)",
+                strokeWidth: 0,
+                strokeColor: "transparent"
+              },
+              shadow: {
+                enabled: true,
+                color: "rgba(79, 70, 229, 0.12)",
+                size: 8,
+                x: 0,
+                y: 2
+              }
+            };
+          }),
           ...tasks.flatMap(task =>
             task.successors.map(succ => {
               const target = tasks.find(t => t.id === succ);
               const isCritical = task.slack === 0 && target && target.slack === 0 &&
                                  task.earlyFinish === target.earlyStart;
               const getEdgeWidth = (isCritical, isStartEnd = false) => {
-              if (isStartEnd) return 2.5;
-              return isCritical ? 3.5 : 2;
+              if (isStartEnd) return isCritical ? 3.5 : 2.5; // Largeur différenciée pour start/end
+              return isCritical ? 4 : 2.5; // Largeur plus importante pour les arcs critiques
             };
 
               return {
@@ -367,23 +381,25 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
           ...endTaskIds.map(taskId => {
             const task = tasks.find(t => t.id === taskId);
             const isCritical = task.slack === 0 && task.earlyFinish === maxEarlyFinish;
-
+          
             return {
               from: taskId,
               to: "end",
               label: task.duration.toString(),
-              color: { 
-                color: isCritical ? "#dc2626" : "#7c3aed",
-                highlight: isCritical ? "#ef4444" : "#8b5cf6",
-                hover: isCritical ? "#ef4444" : "#8b5cf6"
-              },
-              width: isCritical ? 3 : 2,
-              // Partout où il y a font, utiliser :
+             color: { 
+                  color: isCritical ? THEME.accent.base : THEME.primary.base,
+                  highlight: isCritical ? THEME.accent.light : THEME.primary.light,
+                  hover: isCritical ? THEME.accent.light : THEME.primary.light
+                },
+              width: isCritical ? 3.5 : 2.5,
               font: { 
-                color: "#334155", // slate-700 au lieu de couleurs variables
-                size: 16, // Taille plus cohérente
-                face: "Inter, system-ui, -apple-system, sans-serif", // Modernisé
-                bold: true 
+                color: "#1e293b",
+                size: 16,
+                face: "Inter, -apple-system, BlinkMacSystemFont, sans-serif",
+                bold: true,
+                background: "rgba(255, 255, 255, 0.95)",
+                strokeWidth: 0,
+                strokeColor: "transparent"
               },
               smooth: { type: "continuous", roundness: 0.3 },
               arrows: { 
@@ -393,13 +409,12 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
                   type: "arrow" 
                 } 
               },
-              // Remplacer les shadow avec des valeurs plus douces
               shadow: {
                 enabled: true,
-                color: "rgba(79, 70, 229, 0.12)", // Au lieu de 0.3
-                size: 8, // Au lieu de 10-12
+                color: "rgba(79, 70, 229, 0.12)",
+                size: 8,
                 x: 0,
-                y: 2 // Au lieu de 4
+                y: 2
               },
               isCritical: isCritical
             };
@@ -414,8 +429,8 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
           layout: {
             hierarchical: {
               direction: "LR",
-              nodeSpacing: 120, // Au lieu de 180
-              levelSeparation: 160, // Au lieu de 220
+              nodeSpacing: 180, // Augmenté de 120 à 180
+              levelSeparation: 220, // Augmenté de 160 à 220
               sortMethod: "directed"
             }
           },
@@ -460,13 +475,14 @@ const CPMGraph = forwardRef(({ projectId, onDataLoaded }, ref) => {
           // Calcul du nouveau width/height du canvas
           const xs = Object.values(positions).map(p => p.x);
           const ys = Object.values(positions).map(p => p.y);
-          const padding = 200; // Au lieu de 200
+          const padding = 200; // Augmenté de 200 à 250
           const contentWidth = Math.abs(Math.max(...xs) - Math.min(...xs)) + padding * 2;
           const contentHeight = Math.abs(Math.max(...ys) - Math.min(...ys)) + padding * 2;
           
           // Tailles minimales réduites :
-          const minWidth = 1400; // Au lieu de 1400
-          const minHeight = 1000;  // Au lieu de 1000
+          // Tailles minimales augmentées pour plus d'espace
+          const minWidth = 1200; // Augmenté de 1400 à 1600
+          const minHeight = 1000; // Augmenté de 1000 à 1200
           
           const width = Math.max(minWidth, contentWidth);
           const height = Math.max(minHeight, contentHeight);

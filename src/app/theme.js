@@ -18,12 +18,13 @@ const GRAPH_THEME = {
     light: "#8b5cf6",   // violet-500
     dark: "#6d28d9"     // violet-700
   },
-  
+   
   // États critiques et de succès - Cohérents avec votre système de notifications
   critical: { 
     base: "#dc2626",    // red-600 - Cohérent avec vos boutons remove
     light: "#ef4444",   // red-500
-    dark: "#b91c1c"     // red-700
+    dark: "#b91c1c",     // red-700
+    font: "#ffffff"
   },
   
   success: { 
