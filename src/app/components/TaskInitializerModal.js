@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X, FolderPen, AlignCenter, FileDigit, Sparkles, Folder, Play ,Undo2} from 'lucide-react';
 import Image from "next/image";
 import { colors } from '../colors.js';
+import NotificationSystem from "./NotificationSystem";
 
 const TaskInitializerModal = ({ isOpen, onClose, onInitialize }) => {
   const [taskCount, setTaskCount] = useState(3);
@@ -10,6 +11,7 @@ const TaskInitializerModal = ({ isOpen, onClose, onInitialize }) => {
   const [description, setDescription] = useState("");
   const [isFavorite, setIsFavorite] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [notification, setNotification] = useState(null);
 
   const isValid = name.trim() !== "" && taskCount !== "" && parseInt(taskCount) >= 3;
 
@@ -49,7 +51,12 @@ const TaskInitializerModal = ({ isOpen, onClose, onInitialize }) => {
 
     } catch (error) {
       console.error(error.message);
-      alert("Erreur lors de la création du projet.");
+      setNotification({
+        type: "error",
+        message: "Erreur lors de la création du projet",
+        details: error
+      });
+      
     } finally {
       setLoading(false);
     }
@@ -57,6 +64,7 @@ const TaskInitializerModal = ({ isOpen, onClose, onInitialize }) => {
 
   return (
     <AnimatePresence>
+    <>
       {isOpen && (
         <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
           {/* Backdrop avec effet de flou sophistiqué */}
@@ -267,7 +275,15 @@ const TaskInitializerModal = ({ isOpen, onClose, onInitialize }) => {
           `}</style>
         </div>
       )}
+      <NotificationSystem
+        notification={notification}
+        onClose={() => setNotification(null)}
+      />
+</>
+
     </AnimatePresence>
+   
+    
   );
 };
 

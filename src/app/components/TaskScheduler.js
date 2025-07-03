@@ -7,6 +7,7 @@ import TaskListTable from "./TaskListTable";
 import CPMGraph from "./CPMGraph";
 import { ReactFlowProvider } from "reactflow";
 import { colors } from "../colors";
+import NotificationSystem from "./NotificationSystem";
 
 const TaskScheduler = ({ currentProject, initialTaskCount , isSecondSidebarOpen, setProjects, editModalOpen,setEditModalOpen,setProjectPage,deleteModalOpen,setDeleteModalOpen,selectedProject,setSelectedProject}) => {
   const [tasks, setTasks] = useState([{ name: "", duration: "", projectId: currentProject.id }]);
@@ -18,6 +19,7 @@ const TaskScheduler = ({ currentProject, initialTaskCount , isSecondSidebarOpen,
   const [tableHeight, setTableHeight] = useState(0);
   const cpmGraphRef = useRef(null);
   const [hoveredColumnIndex, setHoveredColumnIndex] = useState(null);
+  const [notification, setNotification] = useState(null);
 
   const fetchProjects = async () => {
     try {
@@ -80,7 +82,11 @@ const TaskScheduler = ({ currentProject, initialTaskCount , isSecondSidebarOpen,
       setProject(createdProject);
     } catch (error) {
       console.error(error.message);
-      alert("Erreur lors de la création du projet.");
+      setNotification({
+        type: "error",
+        message: "Erreur lors de la récuperation du projet",
+        details: error
+      });
     }
   };
 
@@ -191,10 +197,18 @@ const TaskScheduler = ({ currentProject, initialTaskCount , isSecondSidebarOpen,
         setIsInitialEntry(false);
         await fetchTasksFromBackend();
       } else {
-        alert("Erreur lors de l'enregistrement.");
+        setNotification({
+          type: "error",
+          message: "Erreur lors de la création du projet",
+          details: "Erreur"
+        });
       }
     } catch (error) {
-      console.error("Erreur API :", error);
+      setNotification({
+        type: "error",
+        message: "Erreur lors de la création du projet",
+        details: error
+      });
     }
   };
 
@@ -208,10 +222,18 @@ const TaskScheduler = ({ currentProject, initialTaskCount , isSecondSidebarOpen,
       if (response.ok) {
         await fetchTasksFromBackend();
       } else {
-        alert("Erreur lors de la mise à jour de la tâche.");
+        setNotification({
+          type: "error",
+          message: "Erreur lors de la mise à jour du projet",
+          details: "Erreur Serveur"
+        });
       }
     } catch (error) {
-      console.error("Erreur API :", error);
+      setNotification({
+        type: "error",
+        message: "Erreur lors de la mise à jour du projet",
+        details: error
+      });
     }
   };
 
@@ -223,10 +245,19 @@ const TaskScheduler = ({ currentProject, initialTaskCount , isSecondSidebarOpen,
       if (response.ok) {
         await fetchTasksFromBackend();
       } else {
-        alert("Erreur lors de la suppression de la tâche.");
+        setNotification({
+          type: "error",
+          message: "Erreur lors de la suppression du projet",
+          details: "Erreur du serveur"
+        });
       }
     } catch (error) {
       console.error("Erreur API :", error);
+      setNotification({
+        type: "error",
+        message: "Erreur lors de la suppression du projet",
+        details: error
+      });
     }
   };
 
@@ -240,10 +271,19 @@ const TaskScheduler = ({ currentProject, initialTaskCount , isSecondSidebarOpen,
       if (response.ok) {
         await fetchTasksFromBackend();
       } else {
-        alert("Erreur lors de la création de la tâche.");
+        setNotification({
+          type: "error",
+          message: "Erreur lors de la création de la tâche",
+          details: "Erreur serveur"
+        });
       }
     } catch (error) {
       console.error("Erreur API :", error);
+      setNotification({
+        type: "error",
+        message: "Erreur lors de la création de la tâche",
+        details: error
+      });
     }
   };
 
@@ -576,6 +616,10 @@ const TaskScheduler = ({ currentProject, initialTaskCount , isSecondSidebarOpen,
           />
         </motion.div>
       )}
+      <NotificationSystem
+        notification={notification}
+        onClose={() => setNotification(null)}
+      />
 
       {/* Styles pour scrollbars personnalisées */}
       <style jsx>{`

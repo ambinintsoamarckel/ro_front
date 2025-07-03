@@ -8,6 +8,8 @@ import ConfirmDeleteModal from "./ConfirmDeleteModal";
 import {Menu,X,BadgePlus,Settings,Home,FolderOpen,Star,MoreVertical, Edit2, Trash2,Undo2,CheckSquare,Check} from "lucide-react";
 import { colors } from "../colors";
 import SettingsSection from './SettingsSection';
+import NotificationSystem from "./NotificationSystem";
+
 
 
 const Sidebar = ({ setInitialTaskCount, setCurrentProject, setProjectPage, projects, setProjects, onSecondSidebarToggle, secondSidebarOpen,setSecondSidebarOpen,secondSidebarContent,setSecondSidebarContent,isModalOpen,setIsModalOpen,editModalOpen,setEditModalOpen,deleteModalOpen,setDeleteModalOpen,selectedProject,setSelectedProject,currentProject }) => {
@@ -20,6 +22,8 @@ const Sidebar = ({ setInitialTaskCount, setCurrentProject, setProjectPage, proje
   // 1. Ajouter ces états au début du composant Sidebar
   const [isMultiSelectMode, setIsMultiSelectMode] = useState(false);
   const [selectedProjects, setSelectedProjects] = useState([]);
+  const [notification, setNotification] = useState(null);
+
 
   // 2. Fonction pour basculer le mode de sélection multiple
   const toggleMultiSelectMode = () => {
@@ -59,7 +63,12 @@ const Sidebar = ({ setInitialTaskCount, setCurrentProject, setProjectPage, proje
           
 
     } catch (err) {
-      alert("Erreur lors de la suppression "+err);
+      setNotification({
+        type: "error",
+        message: "Erreur lors de la suppression",
+        details: err
+      });
+      
     }
   };
 
@@ -1055,7 +1064,12 @@ const Sidebar = ({ setInitialTaskCount, setCurrentProject, setProjectPage, proje
             
             setEditModalOpen(false); // Fermer le modal d'édition, pas de suppression
           } catch (err) {
-            alert("Erreur lors de la modification");
+            setNotification({
+              type: "error",
+              message: "Erreur lors de la modification",
+              details: err
+            });
+
           }
         }}
   />
@@ -1110,10 +1124,20 @@ const Sidebar = ({ setInitialTaskCount, setCurrentProject, setProjectPage, proje
       setDeleteModalOpen(false);
       setProjectCount(null);
     } catch (err) {
-      alert("Erreur lors de la suppression");
+      setNotification({
+        type: "error",
+        message: "Erreur lors de la suppression",
+        details: err
+      });
+
     }
   }}
 />
+<NotificationSystem
+  notification={notification}
+  onClose={() => setNotification(null)}
+/>
+
 
 
       
