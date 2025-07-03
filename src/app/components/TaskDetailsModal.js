@@ -167,10 +167,8 @@ const TaskDetailsModal = ({ isOpen, onClose, task, allTasks, dependencyType, pro
           successMessage,
           3000
         );
-  
-        setTimeout(() => {
-          onClose();
-        }, 1500);
+        onClose();
+      
       }
     } catch (err) {
       showNotification(
